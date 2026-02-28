@@ -7,6 +7,7 @@ import '../../auth/register/driver_register_page.dart';
 import '../../auth/register/syndicate_register_page.dart';
 import '../../auth/register/station_admin_register_page.dart';
 import '../onboarding_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Onboarding 4 — Une plateforme pour tous
 class OnboardingPage4 extends StatefulWidget {
@@ -143,6 +144,7 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
                               default:
                                 page = const PassengerRegisterPage();
                             }
+                            _setFirstLaunchDone();
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (context) => page),
                             );
@@ -165,10 +167,11 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // Navigation vers la page de connexion
+                            _setFirstLaunchDone();
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                  builder: (context) => const LoginPage()),
+                                  builder: (context) =>
+                                      LoginPage(initialRole: _selectedRole)),
                             );
                           },
                           style: ElevatedButton.styleFrom(
@@ -300,6 +303,11 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
         ),
       ),
     );
+  }
+
+  Future<void> _setFirstLaunchDone() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstLaunch', false);
   }
 }
 

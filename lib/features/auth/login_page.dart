@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../dashboard/passenger_dashboard.dart';
+import '../dashboard/driver_dashboard.dart';
+import '../dashboard/syndicate_dashboard.dart';
+import '../dashboard/station_admin_dashboard.dart';
+import '../onboarding/onboarding_screen.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final String? initialRole;
+  const LoginPage({super.key, this.initialRole});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -10,8 +16,15 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
+  String? _selectedRole;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = widget.initialRole;
+  }
 
   // Colors based on the provided design
   static const Color primaryColor = Color(0xFF102216);
@@ -130,25 +143,24 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 48),
 
-                // Welcome Text
-                Text(
-                  'Bon retour !',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: textSlate900,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Veuillez vous connecter pour continuer',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: textSlate500,
-                    fontSize: 14,
-                  ),
-                ),
-
                 const SizedBox(height: 32),
+
+                // Role Selection simplified for Login
+                if (_selectedRole == null) ...[
+                  Text(
+                    'Sélectionnez votre rôle pour continuer',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: textSlate900,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildRoleSelector(),
+                  const SizedBox(height: 24),
+                ],
+
+                // Email Field
 
                 // Email Field
                 _buildFieldLabel('E-mail'),
@@ -210,7 +222,38 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if (_selectedRole == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Veuillez sélectionner un rôle')),
+                        );
+                        return;
+                      }
+
+                      Widget dashboard;
+                      switch (_selectedRole) {
+                        case 'PASSAGER':
+                          dashboard = const PassengerDashboard();
+                          break;
+                        case 'CHAUFFEUR':
+                          dashboard = const DriverDashboard();
+                          break;
+                        case 'SYNDICAT':
+                          dashboard = const SyndicateDashboard();
+                          break;
+                        case 'GARE':
+                          dashboard = const StationAdminDashboard();
+                          break;
+                        default:
+                          dashboard = const PassengerDashboard();
+                      }
+
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => dashboard),
+                        (route) => false,
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
@@ -299,7 +342,13 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.maybePop(context),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const OnboardingScreen(),
+                          ),
+                        );
+                      },
                       child: Text(
                         "Créer un compte",
                         style: GoogleFonts.plusJakartaSans(
@@ -351,6 +400,39 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRoleSelector() {
+    final roles = ['PASSAGER', 'CHAUFFEUR', 'GARE', 'SYNDICAT'];
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: roles.map((role) {
+        final isSelected = _selectedRole == role;
+        return GestureDetector(
+          onTap: () => setState(() => _selectedRole = role),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected ? accentColor.withOpacity(0.1) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? accentColor : borderSlate200,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Text(
+              role,
+              style: GoogleFonts.plusJakartaSans(
+                color: isSelected ? primaryColor : textSlate500,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 

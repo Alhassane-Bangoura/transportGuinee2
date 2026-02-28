@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../dashboard/station_admin_dashboard.dart';
 
 class StationAdminRegisterPage extends StatefulWidget {
   const StationAdminRegisterPage({super.key});
@@ -162,7 +163,14 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const StationAdminDashboard()),
+                            (route) => false,
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../dashboard/syndicate_dashboard.dart';
 
 class SyndicateRegisterPage extends StatefulWidget {
   const SyndicateRegisterPage({super.key});
@@ -180,7 +181,14 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const SyndicateDashboard()),
+                            (route) => false,
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,

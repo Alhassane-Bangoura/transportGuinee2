@@ -36,8 +36,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _finish() {
-    // TODO: Naviguer vers le Login
-    // Navigator.of(context).pushReplacement(...)
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Veuillez sélectionner un rôle pour continuer'),
+        backgroundColor: AppColors.orange,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override

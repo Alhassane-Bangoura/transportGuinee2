@@ -1,7 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../dashboard/passenger_dashboard.dart';
+import '../../../core/services/auth_service.dart';
+import '../login_page.dart';
 
 class PassengerRegisterPage extends StatefulWidget {
   const PassengerRegisterPage({super.key});
@@ -12,10 +13,32 @@ class PassengerRegisterPage extends StatefulWidget {
 
 class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
   bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   bool _acceptTerms = false;
+  bool _isLoading = false;
+
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _emergencyNameController = TextEditingController();
+  final _emergencyPhoneController = TextEditingController();
 
   static const Color primaryColor = Color(0xFF0AC247);
   static const Color backgroundColor = Color(0xFFF5F8F6);
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _emergencyNameController.dispose();
+    _emergencyPhoneController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,21 +97,25 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
 
                     _buildFieldLabel('Nom complet'),
                     _buildTextField(
-                        hint: 'Ex: Mamadou Diallo', icon: Icons.person_outline),
+                        hint: 'Ex: Mamadou Diallo',
+                        icon: Icons.person_outline,
+                        controller: _nameController),
                     const SizedBox(height: 16),
 
                     _buildFieldLabel('Numéro de téléphone'),
                     _buildTextField(
                         hint: '+224 6XX XX XX XX',
                         icon: Icons.phone_iphone_outlined,
-                        keyboardType: TextInputType.phone),
+                        keyboardType: TextInputType.phone,
+                        controller: _phoneController),
                     const SizedBox(height: 16),
 
                     _buildFieldLabel('Email'),
                     _buildTextField(
                         hint: 'votre@email.com',
                         icon: Icons.mail_outline,
-                        keyboardType: TextInputType.emailAddress),
+                        keyboardType: TextInputType.emailAddress,
+                        controller: _emailController),
                     const SizedBox(height: 16),
 
                     _buildFieldLabel('Mot de passe'),
@@ -99,15 +126,21 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
                       obscureText: !_isPasswordVisible,
                       onSuffixTap: () => setState(
                           () => _isPasswordVisible = !_isPasswordVisible),
+                      controller: _passwordController,
                     ),
                     const SizedBox(height: 16),
 
                     _buildFieldLabel('Confirmer le mot de passe'),
                     _buildTextField(
-                        hint: '••••••••',
-                        icon: Icons.lock_reset_outlined,
-                        isPassword: true,
-                        obscureText: true),
+                      hint: '••••••••',
+                      icon: Icons.lock_reset_outlined,
+                      isPassword: true,
+                      obscureText: !_isConfirmPasswordVisible,
+                      onSuffixTap: () => setState(() =>
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible),
+                      controller: _confirmPasswordController,
+                    ),
 
                     const SizedBox(height: 24),
 
@@ -115,10 +148,10 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.05),
+                        color: primaryColor.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
                         border:
-                            Border.all(color: primaryColor.withOpacity(0.1)),
+                            Border.all(color: primaryColor.withValues(alpha: 0.1)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,13 +172,17 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
                           ),
                           const SizedBox(height: 16),
                           _buildFieldLabel('Nom du contact'),
-                          _buildTextField(hint: 'Nom du proche', isSmall: true),
+                          _buildTextField(
+                              hint: 'Nom du proche',
+                              isSmall: true,
+                              controller: _emergencyNameController),
                           const SizedBox(height: 12),
                           _buildFieldLabel('Numéro du contact'),
                           _buildTextField(
                               hint: '+224 6XX XX XX XX',
                               isSmall: true,
-                              keyboardType: TextInputType.phone),
+                              keyboardType: TextInputType.phone,
+                              controller: _emergencyPhoneController),
                         ],
                       ),
                     ),
@@ -195,14 +232,99 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const PassengerDashboard()),
-                            (route) => false,
-                          );
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                if (!_acceptTerms) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Veuillez accepter les conditions d\'utilisation'),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                 final email = _emailController.text.trim();
+                                final phone = _phoneController.text.trim();
+                                final name = _nameController.text.trim();
+                                final password = _passwordController.text;
+
+                                final nameError = name.isEmpty ? 'Le nom est obligatoire' : null;
+                                final emailError = AuthService.validateEmail(email);
+                                final phoneError = AuthService.validatePhone(phone);
+                                final passwordError = password.length < 6 ? 'Le mot de passe doit contenir au moins 6 caractères' : null;
+
+                                if (nameError != null || emailError != null || phoneError != null || passwordError != null) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(nameError ?? emailError ?? phoneError ?? passwordError ?? '')),
+                                  );
+                                  return;
+                                }
+
+                                setState(() => _isLoading = true);
+                                try {
+                                  await AuthService.signUp(
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text,
+                                    fullName: _nameController.text.trim(),
+                                    phone: _phoneController.text.trim(),
+                                    roleKey: 'passenger',
+                                    metadata: {
+                                      'emergency_name':
+                                          _emergencyNameController.text.trim(),
+                                      'emergency_phone':
+                                          _emergencyPhoneController.text.trim(),
+                                    },
+                                  );
+
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Compte créé avec succès ! Veuillez vous connecter.'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginPage()),
+                                    (route) => false,
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+
+                                  String errorMessage = e
+                                          .toString()
+                                          .contains('user_already_exists')
+                                      ? 'Ce compte existe déjà. Veuillez vous connecter.'
+                                      : 'Erreur : ${e.toString().replaceAll('AuthException: ', '')}';
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(errorMessage),
+                                      action: e
+                                              .toString()
+                                              .contains('user_already_exists')
+                                          ? SnackBarAction(
+                                              label: 'SE CONNECTER',
+                                              onPressed: () {
+                                                if (!context.mounted) return;
+                                                Navigator.of(context)
+                                                      .pushReplacement(
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const LoginPage()),
+                                                );
+                                              },
+                                            )
+                                          : null,
+                                    ),
+                                  );
+                                  setState(() => _isLoading = false);
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,
@@ -210,9 +332,16 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
                               borderRadius: BorderRadius.circular(16)),
                           elevation: 0,
                         ),
-                        child: const Text('S\'inscrire',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 3),
+                              )
+                            : const Text('S\'inscrire',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ),
 
@@ -269,21 +398,23 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
     VoidCallback? onSuffixTap,
     bool isSmall = false,
     TextInputType? keyboardType,
+    TextEditingController? controller,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryColor.withOpacity(0.2)),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
           prefixIcon: icon != null
-              ? Icon(icon, color: primaryColor.withOpacity(0.7))
+              ? Icon(icon, color: primaryColor.withValues(alpha: 0.7))
               : null,
           suffixIcon: isPassword
               ? IconButton(

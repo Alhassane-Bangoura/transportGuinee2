@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone       TEXT,
   avatar_url  TEXT,
   role        user_role NOT NULL DEFAULT 'passenger',
+  metadata    JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -317,22 +318,39 @@ CREATE OR REPLACE TRIGGER set_updated_at_bookings
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
+  _role_text TEXT;
   _role user_role;
 BEGIN
-  -- Extraire le rôle depuis les métadonnées d'inscription
-  _role := COALESCE(
-    (NEW.raw_user_meta_data ->> 'role_key')::user_role,
-    'passenger'::user_role
-  );
+  -- 1. Récupérer le texte du rôle
+  _role_text := NEW.raw_user_meta_data ->> 'role_key';
+  
+  -- 2. Tenter la conversion avec sécurité (fallback sur passenger en cas d'erreur)
+  BEGIN
+    IF _role_text IS NOT NULL THEN
+      _role := _role_text::user_role;
+    ELSE
+      _role := 'passenger'::user_role;
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    _role := 'passenger'::user_role;
+  END;
 
-  INSERT INTO public.profiles (id, full_name, email, phone, role)
+  -- 3. Insertion dans profiles avec gestion de conflit (UPSERT)
+  INSERT INTO public.profiles (id, full_name, email, phone, role, metadata)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data ->> 'full_name', ''),
     NEW.email,
     COALESCE(NEW.raw_user_meta_data ->> 'phone', NEW.phone, ''),
-    _role
-  );
+    _role,
+    COALESCE(NEW.raw_user_meta_data, '{}'::jsonb)
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = EXCLUDED.full_name,
+    email = EXCLUDED.email,
+    phone = EXCLUDED.phone,
+    role = EXCLUDED.role,
+    metadata = EXCLUDED.metadata;
 
   RETURN NEW;
 END;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../dashboard/station_admin_dashboard.dart';
+import '../../../core/services/auth_service.dart';
+import '../login_page.dart';
 
 class StationAdminRegisterPage extends StatefulWidget {
   const StationAdminRegisterPage({super.key});
@@ -11,9 +12,28 @@ class StationAdminRegisterPage extends StatefulWidget {
 
 class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _employeeIdController = TextEditingController();
+
+  String? _selectedStation;
+  String? _selectedFunction;
 
   static const Color primaryColor = Color(0xFF0FBD0F);
   static const Color backgroundColor = Color(0xFFF6F8F6);
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _employeeIdController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +74,7 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
+                        color: primaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.admin_panel_settings,
@@ -75,21 +95,25 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
 
                     _buildLabel('Nom complet'),
                     _buildTextField(
-                        hint: 'Ex: Mamadou Diallo', icon: Icons.person_outline),
+                        hint: 'Ex: Mamadou Diallo',
+                        icon: Icons.person_outline,
+                        controller: _nameController),
 
                     const SizedBox(height: 16),
                     _buildLabel('Téléphone'),
                     _buildTextField(
                         hint: '+224 6XX XX XX XX',
                         icon: Icons.call_outlined,
-                        keyboardType: TextInputType.phone),
+                        keyboardType: TextInputType.phone,
+                        controller: _phoneController),
 
                     const SizedBox(height: 16),
                     _buildLabel('Email professionnel'),
                     _buildTextField(
                         hint: 'admin@gare-conakry.gn',
                         icon: Icons.mail_outline,
-                        keyboardType: TextInputType.emailAddress),
+                        keyboardType: TextInputType.emailAddress,
+                        controller: _emailController),
 
                     const SizedBox(height: 16),
                     _buildLabel('Mot de passe'),
@@ -98,6 +122,7 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                       icon: Icons.lock_outline,
                       isPassword: true,
                       obscureText: !_isPasswordVisible,
+                      controller: _passwordController,
                       onToggle: () => setState(
                           () => _isPasswordVisible = !_isPasswordVisible),
                     ),
@@ -116,6 +141,7 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                     _buildLabel('Gare assignée'),
                     _buildDropdownField(
                       hint: 'Sélectionner une gare',
+                      value: _selectedStation,
                       options: [
                         'Gare Routière de Bambeto (Conakry)',
                         'Gare Routière de Madina (Conakry)',
@@ -123,6 +149,8 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                         'Gare de Kouroula (Labé)',
                         'Gare de Kankan'
                       ],
+                      onChanged: (val) =>
+                          setState(() => _selectedStation = val),
                     ),
 
                     const SizedBox(height: 16),
@@ -133,7 +161,9 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildLabel('Numéro d’employé'),
-                              _buildTextField(hint: 'EMP-2024'),
+                              _buildTextField(
+                                  hint: 'EMP-2024',
+                                  controller: _employeeIdController),
                             ],
                           ),
                         ),
@@ -144,12 +174,15 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                             children: [
                               _buildLabel('Fonction'),
                               _buildDropdownField(
+                                value: _selectedFunction,
                                 options: [
                                   'Responsable Départ',
                                   'Responsable Arrivée',
                                   'Chef Billetterie',
                                   'Gérant Principal'
                                 ],
+                                onChanged: (val) =>
+                                    setState(() => _selectedFunction = val),
                               ),
                             ],
                           ),
@@ -163,21 +196,76 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const StationAdminDashboard()),
-                            (route) => false,
-                          );
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                final email = _emailController.text.trim();
+                                final password = _passwordController.text;
+                                final fullName = _nameController.text.trim();
+                                final phone = _phoneController.text.trim();
+
+                                final emailError = AuthService.validateEmail(email);
+                                final phoneError = AuthService.validatePhone(phone);
+                                final passwordError = password.length < 6 ? 'Le mot de passe doit contenir au moins 6 caractères' : null;
+
+                                if (fullName.isEmpty || emailError != null || phoneError != null || passwordError != null) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(fullName.isEmpty 
+                                        ? 'Le nom est obligatoire' 
+                                        : (emailError ?? phoneError ?? passwordError ?? '')),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setState(() => _isLoading = true);
+                                try {
+                                  await AuthService.signUp(
+                                    email: email,
+                                    password: password,
+                                    fullName: fullName,
+                                    phone: phone,
+                                    roleKey: 'station_admin',
+                                    metadata: {
+                                      'station_name': _selectedStation,
+                                      'employee_id':
+                                          _employeeIdController.text.trim(),
+                                      'function': _selectedFunction,
+                                    },
+                                  );
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Compte admin créé ! Veuillez vous connecter.'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginPage()),
+                                    (route) => false,
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Erreur : ${e.toString().replaceAll('AuthException: ', '')}')),
+                                  );
+                                  setState(() => _isLoading = false);
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                           elevation: 10,
-                          shadowColor: primaryColor.withOpacity(0.3),
+                          shadowColor: primaryColor.withValues(alpha: 0.3),
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -222,10 +310,10 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.05),
+                        color: primaryColor.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                         border:
-                            Border.all(color: primaryColor.withOpacity(0.1)),
+                            Border.all(color: primaryColor.withValues(alpha: 0.1)),
                       ),
                       child: Row(
                         children: [
@@ -281,14 +369,16 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
     bool obscureText = false,
     VoidCallback? onToggle,
     TextInputType? keyboardType,
+    TextEditingController? controller,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: primaryColor.withOpacity(0.1)),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.1)),
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
@@ -310,16 +400,22 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
     );
   }
 
-  Widget _buildDropdownField({String? hint, required List<String> options}) {
+  Widget _buildDropdownField({
+    String? hint,
+    String? value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: primaryColor.withOpacity(0.1)),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.1)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
+          value: value,
           hint: hint != null
               ? Text(hint,
                   style: const TextStyle(color: Colors.grey, fontSize: 14))
@@ -328,7 +424,7 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
           items: options
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
-          onChanged: (v) {},
+          onChanged: onChanged,
         ),
       ),
     );

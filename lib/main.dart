@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/splash_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  debugPrint('MODE DÉMO ACTIVÉ - DISSOCIATION TOTALE');
 
   // Barre de statut transparente pour un rendu immersif
   SystemChrome.setSystemUIOverlayStyle(

@@ -190,7 +190,7 @@ class _OnboardingPage2State extends State<OnboardingPage2> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.orange.withOpacity(0.35),
+                    color: AppColors.orange.withValues(alpha: 0.35),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   )

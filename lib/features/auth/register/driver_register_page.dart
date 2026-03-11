@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../dashboard/driver_dashboard.dart';
+import '../../../core/services/auth_service.dart';
+import '../login_page.dart';
 
 class DriverRegisterPage extends StatefulWidget {
   const DriverRegisterPage({super.key});
@@ -11,9 +12,33 @@ class DriverRegisterPage extends StatefulWidget {
 
 class _DriverRegisterPageState extends State<DriverRegisterPage> {
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _licenseController = TextEditingController();
+  final _expiryController = TextEditingController();
+  final _syndicateController = TextEditingController();
+
+  String? _selectedExperience;
+  String? _selectedCity;
 
   static const Color primaryColor = Color(0xFF11D452);
   static const Color backgroundColor = Color(0xFFF6F8F6);
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _licenseController.dispose();
+    _expiryController.dispose();
+    _syndicateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +101,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
+                            color: primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
@@ -95,7 +120,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                       height: 6,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.2),
+                        color: Colors.grey.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(3),
                       ),
                       child: FractionallySizedBox(
@@ -114,7 +139,9 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
 
                     _buildLabel('Nom complet'),
                     _buildTextField(
-                        hint: 'Ex: Mamadou Diallo', icon: Icons.person_outline),
+                        hint: 'Ex: Mamadou Diallo',
+                        icon: Icons.person_outline,
+                        controller: _nameController),
 
                     const SizedBox(height: 20),
 
@@ -122,7 +149,8 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                     _buildTextField(
                         hint: '+224 6XX XX XX XX',
                         icon: Icons.call_outlined,
-                        keyboardType: TextInputType.phone),
+                        keyboardType: TextInputType.phone,
+                        controller: _phoneController),
 
                     const SizedBox(height: 20),
 
@@ -130,7 +158,8 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                     _buildTextField(
                         hint: 'chauffeur@exemple.com',
                         icon: Icons.mail_outline,
-                        keyboardType: TextInputType.emailAddress),
+                        keyboardType: TextInputType.emailAddress,
+                        controller: _emailController),
 
                     const SizedBox(height: 20),
 
@@ -140,6 +169,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                       icon: Icons.lock_outline,
                       isPassword: true,
                       obscureText: !_isPasswordVisible,
+                      controller: _passwordController,
                       onToggle: () => setState(
                           () => _isPasswordVisible = !_isPasswordVisible),
                     ),
@@ -158,7 +188,8 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                     const SizedBox(height: 16),
 
                     _buildLabel('Numéro de permis'),
-                    _buildTextField(hint: 'GNE-12345678'),
+                    _buildTextField(
+                        hint: 'GNE-12345678', controller: _licenseController),
 
                     const SizedBox(height: 16),
 
@@ -170,8 +201,37 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                             children: [
                               _buildLabel('Expiration'),
                               _buildTextField(
-                                  hint: 'JJ/MM/AAAA',
-                                  suffixIcon: Icons.calendar_today_outlined),
+                                hint: 'JJ/MM/AAAA',
+                                suffixIcon: Icons.calendar_today_outlined,
+                                controller: _expiryController,
+                                onSuffixTap: () async {
+                                  final DateTime? picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now()
+                                        .add(const Duration(days: 365)),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2100),
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: Theme.of(context).copyWith(
+                                          colorScheme: const ColorScheme.light(
+                                            primary: primaryColor,
+                                            onPrimary: Colors.white,
+                                            onSurface: Colors.black,
+                                          ),
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
+                                  );
+                                  if (picked != null) {
+                                    setState(() {
+                                      _expiryController.text =
+                                          "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+                                    });
+                                  }
+                                },
+                              ),
                             ],
                           ),
                         ),
@@ -181,12 +241,17 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildLabel('Expérience'),
-                              _buildDropdownField(options: [
-                                '1-2 ans',
-                                '3-5 ans',
-                                '5-10 ans',
-                                '10+ ans'
-                              ]),
+                              _buildDropdownField(
+                                value: _selectedExperience,
+                                options: [
+                                  '1-2 ans',
+                                  '3-5 ans',
+                                  '5-10 ans',
+                                  '10+ ans'
+                                ],
+                                onChanged: (val) =>
+                                    setState(() => _selectedExperience = val),
+                              ),
                             ],
                           ),
                         ),
@@ -196,13 +261,17 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                     const SizedBox(height: 20),
 
                     _buildLabel('Ville principale'),
-                    _buildDropdownField(options: [
-                      'Conakry',
-                      'Kindia',
-                      'Labé',
-                      'Kankan',
-                      'Nzérékoré'
-                    ]),
+                    _buildDropdownField(
+                        value: _selectedCity,
+                        options: [
+                          'Conakry',
+                          'Kindia',
+                          'Labé',
+                          'Kankan',
+                          'Nzérékoré'
+                        ],
+                        onChanged: (val) =>
+                            setState(() => _selectedCity = val)),
 
                     const SizedBox(height: 20),
 
@@ -217,7 +286,9 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                                 color: Colors.grey)),
                       ],
                     ),
-                    _buildTextField(hint: 'Nom de l\'organisation'),
+                    _buildTextField(
+                        hint: 'Nom de l\'organisation',
+                        controller: _syndicateController),
 
                     const SizedBox(height: 32),
 
@@ -225,13 +296,73 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (context) => const DriverDashboard()),
-                            (route) => false,
-                          );
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                final email = _emailController.text.trim();
+                                final password = _passwordController.text;
+                                final fullName = _nameController.text.trim();
+                                final phone = _phoneController.text.trim();
+
+                                final emailError = AuthService.validateEmail(email);
+                                final phoneError = AuthService.validatePhone(phone);
+                                final passwordError = password.length < 6 ? 'Le mot de passe doit contenir au moins 6 caractères' : null;
+
+                                if (fullName.isEmpty || emailError != null || phoneError != null || passwordError != null) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(fullName.isEmpty 
+                                        ? 'Le nom est obligatoire' 
+                                        : (emailError ?? phoneError ?? passwordError ?? '')),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setState(() => _isLoading = true);
+                                try {
+                                  await AuthService.signUp(
+                                    email: email,
+                                    password: password,
+                                    fullName: fullName,
+                                    phone: phone,
+                                    roleKey: 'driver',
+                                    metadata: {
+                                      'license_number':
+                                          _licenseController.text.trim(),
+                                      'expiry_date':
+                                          _expiryController.text.trim(),
+                                      'experience': _selectedExperience,
+                                      'city': _selectedCity,
+                                      'syndicate':
+                                          _syndicateController.text.trim(),
+                                    },
+                                  );
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Compte chauffeur créé ! Veuillez vous connecter.'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginPage()),
+                                    (route) => false,
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Erreur : ${e.toString().replaceAll('AuthException: ', '')}')),
+                                  );
+                                  setState(() => _isLoading = false);
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,
@@ -282,7 +413,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       bottomNavigationBar: Container(
         height: 70,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white.withValues(alpha: 0.9),
           border: const Border(top: BorderSide(color: Colors.black12)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -315,7 +446,9 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
     bool isPassword = false,
     bool obscureText = false,
     VoidCallback? onToggle,
+    VoidCallback? onSuffixTap,
     TextInputType? keyboardType,
+    TextEditingController? controller,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -324,12 +457,13 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
         border: Border.all(color: Colors.black12),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2))
         ],
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
@@ -345,7 +479,10 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                       color: Colors.grey),
                   onPressed: onToggle)
               : (suffixIcon != null
-                  ? Icon(suffixIcon, size: 20, color: Colors.grey)
+                  ? IconButton(
+                      icon: Icon(suffixIcon, size: 20, color: Colors.grey),
+                      onPressed: onSuffixTap,
+                    )
                   : null),
           border: InputBorder.none,
           contentPadding:
@@ -355,7 +492,11 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
     );
   }
 
-  Widget _buildDropdownField({required List<String> options}) {
+  Widget _buildDropdownField({
+    String? value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -365,13 +506,14 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
+          value: value,
           hint: const Text('Sélectionner',
               style: TextStyle(color: Colors.grey, fontSize: 14)),
           isExpanded: true,
           items: options
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
-          onChanged: (v) {},
+          onChanged: onChanged,
         ),
       ),
     );

@@ -145,6 +145,7 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
                                 page = const PassengerRegisterPage();
                             }
                             _setFirstLaunchDone();
+                            _saveSelectedRole();
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (context) => page),
                             );
@@ -168,6 +169,7 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
                         child: ElevatedButton(
                           onPressed: () {
                             _setFirstLaunchDone();
+                            _saveSelectedRole();
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                   builder: (context) =>
@@ -251,18 +253,18 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : role.bgColor,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : role.bgColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
-                : AppColors.primary.withOpacity(0.15),
+                : AppColors.primary.withValues(alpha: 0.15),
             width: isSelected ? 2.5 : 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.2),
+                    color: AppColors.primary.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   )
@@ -280,7 +282,7 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.15),
+                    color: AppColors.primary.withValues(alpha: 0.15),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -308,6 +310,13 @@ class _OnboardingPage4State extends State<OnboardingPage4> {
   Future<void> _setFirstLaunchDone() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isFirstLaunch', false);
+  }
+
+  Future<void> _saveSelectedRole() async {
+    if (_selectedRole != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userRole', _selectedRole!);
+    }
   }
 }
 

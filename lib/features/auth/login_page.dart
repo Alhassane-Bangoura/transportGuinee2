@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../dashboard/passenger_dashboard.dart';
-import '../dashboard/driver_dashboard.dart';
-import '../dashboard/syndicate_dashboard.dart';
-import '../dashboard/station_admin_dashboard.dart';
+import '../../core/services/auth_service.dart';
+import '../../core/services/navigation_service.dart';
 import '../onboarding/onboarding_screen.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,17 +14,9 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
-  String? _selectedRole;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedRole = widget.initialRole;
-  }
-
-  // Colors based on the provided design
   static const Color primaryColor = Color(0xFF102216);
   static const Color accentColor = Color(0xFF13EC5B);
   static const Color backgroundColor = Color(0xFFF6F8F6);
@@ -34,6 +24,8 @@ class _LoginPageState extends State<LoginPage> {
   static const Color textSlate500 = Color(0xFF64748B);
   static const Color textSlate400 = Color(0xFF94A3B8);
   static const Color borderSlate200 = Color(0xFFE2E8F0);
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -97,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: primaryColor.withOpacity(0.2),
+                              color: primaryColor.withValues(alpha: 0.2),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -145,20 +137,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 32),
 
-                // Role Selection simplified for Login
-                if (_selectedRole == null) ...[
-                  Text(
-                    'Sélectionnez votre rôle pour continuer',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: textSlate900,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildRoleSelector(),
-                  const SizedBox(height: 24),
-                ],
+                const SizedBox(height: 32),
 
                 // Email Field
 
@@ -182,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       'Oublié ?',
                       style: GoogleFonts.plusJakartaSans(
-                        color: accentColor.withOpacity(0.8) == accentColor
+                        color: accentColor.withValues(alpha: 0.8) == accentColor
                             ? accentColor
                             : const Color(
                                 0xFF10B981), // Fallback if accent is too light
@@ -215,60 +194,127 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withOpacity(0.2),
+                        color: primaryColor.withValues(alpha: 0.2),
                         blurRadius: 15,
                         offset: const Offset(0, 5),
                       ),
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_selectedRole == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Veuillez sélectionner un rôle')),
-                        );
-                        return;
-                      }
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            final email = _emailController.text.trim();
+                            final password = _passwordController.text;
 
-                      Widget dashboard;
-                      switch (_selectedRole) {
-                        case 'PASSAGER':
-                          dashboard = const PassengerDashboard();
-                          break;
-                        case 'CHAUFFEUR':
-                          dashboard = const DriverDashboard();
-                          break;
-                        case 'SYNDICAT':
-                          dashboard = const SyndicateDashboard();
-                          break;
-                        case 'GARE':
-                          dashboard = const StationAdminDashboard();
-                          break;
-                        default:
-                          dashboard = const PassengerDashboard();
-                      }
+                            final emailError = AuthService.validateEmail(email);
+                            if (emailError != null) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(emailError)),
+                              );
+                              return;
+                            }
 
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (context) => dashboard),
-                        (route) => false,
-                      );
-                    },
+                            if (password.length < 6) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Le mot de passe doit contenir au moins 6 caractères'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            setState(() => _isLoading = true);
+
+                            try {
+                              debugPrint('[LOGIN] Tentative de connexion : $email');
+                              final profile = await AuthService.signIn(
+                                email: email,
+                                password: password,
+                              );
+
+                              debugPrint('[LOGIN] Résultat signIn : ${profile?.appRole}');
+
+                              if (!context.mounted) return;
+
+                              if (profile == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Connexion réussie mais profil introuvable. Contactez le support.'),
+                                    backgroundColor: Colors.orange,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              debugPrint('[LOGIN] Navigation vers dashboard : ${profile.appRole}');
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      NavigationService.getDashboardForRole(
+                                    profile.appRole,
+                                    profile: profile,
+                                  ),
+                                ),
+                                (route) => false,
+                              );
+                            } on Exception catch (e) {
+                              debugPrint('[LOGIN] Exception capturée : $e');
+                              if (!context.mounted) return;
+                              String errorMsg = e.toString();
+                              if (errorMsg.contains('Invalid login credentials') ||
+                                  errorMsg.contains('invalid_credentials')) {
+                                errorMsg = 'Email ou mot de passe incorrect.';
+                              } else if (errorMsg.contains('Email not confirmed')) {
+                                errorMsg = 'Veuillez confirmer votre email avant de vous connecter.';
+                              } else if (errorMsg.contains('trop de temps') ||
+                                  errorMsg.contains('TimeoutException')) {
+                                errorMsg = 'Connexion trop lente. Vérifiez votre réseau.';
+                              } else {
+                                errorMsg = errorMsg
+                                    .replaceAll('AuthException: ', '')
+                                    .replaceAll('Exception: ', '')
+                                    .replaceAll('ClientException: ', '');
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(errorMsg),
+                                  backgroundColor: Colors.red,
+                                  duration: const Duration(seconds: 4),
+                                ),
+                              );
+                            } finally {
+                              // Toujours remettre le loading à false, même en cas d'erreur
+                              if (mounted) setState(() => _isLoading = false);
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
+                      disabledBackgroundColor: primaryColor.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 0,
                     ),
-                    child: Text(
-                      'Se connecter',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 3),
+                          )
+                        : Text(
+                            'Se connecter',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
 
@@ -375,7 +421,7 @@ class _LoginPageState extends State<LoginPage> {
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                           colors: [
-                            primaryColor.withOpacity(0.2),
+                            primaryColor.withValues(alpha: 0.2),
                             Colors.transparent,
                           ],
                         ),
@@ -400,39 +446,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildRoleSelector() {
-    final roles = ['PASSAGER', 'CHAUFFEUR', 'GARE', 'SYNDICAT'];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: roles.map((role) {
-        final isSelected = _selectedRole == role;
-        return GestureDetector(
-          onTap: () => setState(() => _selectedRole = role),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: isSelected ? accentColor.withOpacity(0.1) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isSelected ? accentColor : borderSlate200,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Text(
-              role,
-              style: GoogleFonts.plusJakartaSans(
-                color: isSelected ? primaryColor : textSlate500,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 12,
-              ),
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../dashboard/syndicate_dashboard.dart';
+import '../../../core/services/auth_service.dart';
+import '../login_page.dart';
 
 class SyndicateRegisterPage extends StatefulWidget {
   const SyndicateRegisterPage({super.key});
@@ -10,9 +11,32 @@ class SyndicateRegisterPage extends StatefulWidget {
 
 class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _registrationController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _managerNameController = TextEditingController();
+
+  String? _selectedCity;
 
   static const Color primaryColor = Color(0xFF135BEC);
   static const Color backgroundColor = Color(0xFFF6F6F8);
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _registrationController.dispose();
+    _addressController.dispose();
+    _managerNameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +48,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
             // Top Nav Bar
             Container(
               decoration: BoxDecoration(
-                color: backgroundColor.withOpacity(0.8),
+                color: backgroundColor.withValues(alpha: 0.8),
                 border: const Border(bottom: BorderSide(color: Colors.black12)),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -45,7 +69,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
+                      color: primaryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.account_balance,
@@ -64,10 +88,10 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.05),
+                        color: primaryColor.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(16),
                         border:
-                            Border.all(color: primaryColor.withOpacity(0.1)),
+                            Border.all(color: primaryColor.withValues(alpha: 0.1)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,12 +133,14 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                     _buildLabel('Nom du syndicat'),
                     _buildTextField(
                         hint: 'Ex: Syndicat des Transporteurs',
-                        icon: Icons.groups_outlined),
+                        icon: Icons.groups_outlined,
+                        controller: _nameController),
 
                     const SizedBox(height: 16),
                     _buildLabel('Ville représentée'),
                     _buildDropdownField(
                         hint: 'Sélectionner une ville',
+                        value: _selectedCity,
                         options: [
                           'Conakry',
                           'Kindia',
@@ -122,18 +148,23 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                           'Labé',
                           'Kankan',
                           'Nzérékoré'
-                        ]),
+                        ],
+                        onChanged: (val) =>
+                            setState(() => _selectedCity = val)),
 
                     const SizedBox(height: 16),
                     _buildLabel('Numéro d’enregistrement'),
                     _buildTextField(
-                        hint: 'SYND-GN-000', icon: Icons.badge_outlined),
+                        hint: 'SYND-GN-000',
+                        icon: Icons.badge_outlined,
+                        controller: _registrationController),
 
                     const SizedBox(height: 16),
                     _buildLabel('Adresse du bureau'),
                     _buildTextField(
                         hint: 'Ex: Boulbinet, Kaloum',
-                        icon: Icons.home_work_outlined),
+                        icon: Icons.home_work_outlined,
+                        controller: _addressController),
 
                     const SizedBox(height: 24),
                     const Divider(height: 32, thickness: 1),
@@ -142,14 +173,25 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                     _buildSectionHeader('Détails du Responsable'),
                     _buildLabel('Nom complet du responsable'),
                     _buildTextField(
-                        hint: 'Ex: Mamadou Diallo', icon: Icons.person_outline),
+                        hint: 'Ex: Mamadou Diallo',
+                        icon: Icons.person_outline,
+                        controller: _managerNameController),
 
                     const SizedBox(height: 16),
                     _buildLabel('Téléphone personnel'),
                     _buildTextField(
                         hint: '+224 6XX XX XX XX',
                         icon: Icons.phone_iphone_outlined,
-                        keyboardType: TextInputType.phone),
+                        keyboardType: TextInputType.phone,
+                        controller: _phoneController),
+
+                    const SizedBox(height: 16),
+                    _buildLabel('Email professionnel'),
+                    _buildTextField(
+                        hint: 'contact@syndicat.gn',
+                        icon: Icons.email_outlined,
+                        keyboardType: TextInputType.emailAddress,
+                        controller: _emailController),
 
                     const SizedBox(height: 24),
                     const Divider(height: 32, thickness: 1),
@@ -162,6 +204,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                       icon: Icons.lock_outline,
                       isPassword: true,
                       obscureText: !_isPasswordVisible,
+                      controller: _passwordController,
                       onToggle: () => setState(
                           () => _isPasswordVisible = !_isPasswordVisible),
                     ),
@@ -181,21 +224,79 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const SyndicateDashboard()),
-                            (route) => false,
-                          );
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                final email = _emailController.text.trim();
+                                final password = _passwordController.text;
+                                final fullName = _nameController.text.trim();
+                                final phone = _phoneController.text.trim();
+
+                                final emailError = AuthService.validateEmail(email);
+                                final phoneError = AuthService.validatePhone(phone);
+                                final passwordError = password.length < 6 ? 'Le mot de passe doit contenir au moins 6 caractères' : null;
+
+                                if (fullName.isEmpty || emailError != null || phoneError != null || passwordError != null) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(fullName.isEmpty 
+                                        ? 'Le nom est obligatoire' 
+                                        : (emailError ?? phoneError ?? passwordError ?? '')),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                setState(() => _isLoading = true);
+                                try {
+                                  await AuthService.signUp(
+                                    email: email,
+                                    password: password,
+                                    fullName: fullName,
+                                    phone: phone,
+                                    roleKey: 'syndicate',
+                                    metadata: {
+                                      'represented_city': _selectedCity,
+                                      'registration_number':
+                                          _registrationController.text.trim(),
+                                      'office_address':
+                                          _addressController.text.trim(),
+                                      'manager_name':
+                                          _managerNameController.text.trim(),
+                                    },
+                                  );
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Compte syndicat créé ! Veuillez vous connecter.'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  if (!context.mounted) return;
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginPage()),
+                                    (route) => false,
+                                  );
+                                } catch (e) {
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Erreur : ${e.toString().replaceAll('AuthException: ', '')}')),
+                                  );
+                                  setState(() => _isLoading = false);
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                           elevation: 8,
-                          shadowColor: primaryColor.withOpacity(0.4),
+                          shadowColor: primaryColor.withValues(alpha: 0.4),
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -276,6 +377,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
     bool obscureText = false,
     VoidCallback? onToggle,
     TextInputType? keyboardType,
+    TextEditingController? controller,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -284,6 +386,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
         border: Border.all(color: Colors.black12),
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
@@ -306,8 +409,12 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
     );
   }
 
-  Widget _buildDropdownField(
-      {required String hint, required List<String> options}) {
+  Widget _buildDropdownField({
+    required String hint,
+    String? value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -317,6 +424,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
+          value: value,
           hint: Text(hint,
               style: const TextStyle(color: Colors.grey, fontSize: 14)),
           isExpanded: true,
@@ -324,7 +432,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
           items: options
               .map((e) => DropdownMenuItem(value: e, child: Text(e)))
               .toList(),
-          onChanged: (v) {},
+          onChanged: onChanged,
         ),
       ),
     );

@@ -66,23 +66,30 @@ class _SplashScreenState extends State<SplashScreen>
     final bool isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
 
     await Future.delayed(const Duration(seconds: 3));
-
     if (!mounted) return;
 
     Widget nextScreen;
+
     if (isFirstLaunch) {
+      // Premier lancement → onboarding
       nextScreen = const OnboardingScreen();
     } else {
+      // Toujours aller à la page de connexion par défaut
+      // même si une session existe, pour satisfaire l'exigence utilisateur
       nextScreen = const LoginPage();
     }
 
+    if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         pageBuilder: (_, animation, __) => nextScreen,
         transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(opacity: animation, child: child);
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
         },
-        transitionDuration: const Duration(milliseconds: 500),
+        transitionDuration: const Duration(milliseconds: 800),
       ),
     );
   }
@@ -136,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen>
             // Indicateur de chargement stylisé
             FadeTransition(
               opacity: _textOpacity,
-              child: _buildDotsLoader(),
+              child: const DotsLoader(),
             ),
             const SizedBox(height: 48),
           ],
@@ -154,7 +161,7 @@ class _SplashScreenState extends State<SplashScreen>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
+            color: AppColors.primary.withValues(alpha: 0.2),
             blurRadius: 24,
             spreadRadius: 4,
             offset: const Offset(0, 8),
@@ -198,27 +205,72 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildDotsLoader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _dot(AppColors.primary, 10),
-        const SizedBox(width: 6),
-        _dot(AppColors.orange, 8),
-        const SizedBox(width: 6),
-        _dot(AppColors.primaryLight, 8),
-      ],
-    );
+}
+
+class DotsLoader extends StatefulWidget {
+  const DotsLoader({super.key});
+
+  @override
+  State<DotsLoader> createState() => _DotsLoaderState();
+}
+
+class _DotsLoaderState extends State<DotsLoader> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
   }
 
-  Widget _dot(Color color, double size) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(3, (index) {
+            final double delay = index * 0.2;
+            final double value = (_controller.value + delay) % 1.0;
+            final double scale = 1.0 + (0.5 * (1.0 - (value - 0.5).abs() * 2));
+            final Color color = index == 0 
+                ? AppColors.primary 
+                : (index == 1 ? AppColors.orange : AppColors.primaryLight);
+            
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Transform.scale(
+                scale: scale,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }

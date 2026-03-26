@@ -107,53 +107,86 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 60),
               
               // Logo/Icon placeholder (Spotify style)
-              const Center(
-                child: Icon(
-                  Icons.directions_bus_filled_rounded,
-                  color: AppColors.success,
-                  size: 60,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.translate(
+                      offset: Offset(0, 20 * (1 - value)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: const Center(
+                  child: Icon(
+                    Icons.directions_bus_filled_rounded,
+                    color: AppColors.success,
+                    size: 60,
+                  ),
                 ),
               ),
               const SizedBox(height: 40),
 
-              Text(
-                'Se connecter',
-                style: AppTextStyles.headingLarge.copyWith(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Si vous avez besoin d\'aide, Cliquez ici',
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.success,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 1000),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: child,
+                  );
+                },
+                child: Column(
+                  children: [
+                    Text(
+                      'Se connecter',
+                      style: AppTextStyles.headingLarge.copyWith(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Si vous avez besoin d\'aide, Cliquez ici',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.success,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 48),
 
               // Form
-              _buildInputField(
-                label: 'Email ou nom d\'utilisateur',
-                controller: _emailController,
-                hint: 'Entrez votre email',
-                icon: Icons.person_outline_rounded,
+              _animateWidget(
+                delay: 200,
+                child: _buildInputField(
+                  label: 'Email ou nom d\'utilisateur',
+                  controller: _emailController,
+                  hint: 'Entrez votre email',
+                  icon: Icons.person_outline_rounded,
+                ),
               ),
               
               const SizedBox(height: 16),
 
-              _buildInputField(
-                label: 'Mot de passe',
-                controller: _passwordController,
-                hint: 'Mot de passe',
-                icon: Icons.lock_outline_rounded,
-                isPassword: true,
-                obscureText: !_isPasswordVisible,
-                onToggleVisibility: () {
-                  setState(() => _isPasswordVisible = !_isPasswordVisible);
-                },
+              _animateWidget(
+                delay: 400,
+                child: _buildInputField(
+                  label: 'Mot de passe',
+                  controller: _passwordController,
+                  hint: 'Mot de passe',
+                  icon: Icons.lock_outline_rounded,
+                  isPassword: true,
+                  obscureText: !_isPasswordVisible,
+                  onToggleVisibility: () {
+                    setState(() => _isPasswordVisible = !_isPasswordVisible);
+                  },
+                ),
               ),
 
               Align(
@@ -173,87 +206,116 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 24),
 
               // Login Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
+              _animateWidget(
+                delay: 600,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : Text(
-                          'Se connecter',
-                          style: AppTextStyles.buttonText.copyWith(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
+                          )
+                        : Text(
+                            'Se connecter',
+                            style: AppTextStyles.buttonText.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
+                  ),
                 ),
               ),
 
               const SizedBox(height: 24),
               
-              const Text(
-                'Ou',
-                style: TextStyle(color: AppColors.premiumGrey, fontSize: 14),
-              ),
-              
-              const SizedBox(height: 24),
-
-              // Social Logins
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _socialButton(icon: Icons.g_mobiledata_rounded, color: Colors.red),
-                  const SizedBox(width: 40),
-                  _socialButton(icon: Icons.apple_rounded, color: Colors.white),
-                ],
+              _animateWidget(
+                delay: 800,
+                child: Column(
+                  children: [
+                    const Text(
+                      'Ou',
+                      style: TextStyle(color: AppColors.premiumGrey, fontSize: 14),
+                    ),
+                    const SizedBox(height: 24),
+                    // Social Logins
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _socialButton(icon: Icons.g_mobiledata_rounded, color: Colors.red),
+                        const SizedBox(width: 40),
+                        _socialButton(icon: Icons.apple_rounded, color: Colors.white),
+                      ],
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 48),
 
               // Register Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Pas encore de compte ? ',
-                    style: TextStyle(color: AppColors.premiumGrey),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
-                      );
-                    },
-                    child: const Text(
-                      'S\'inscrire ici',
-                      style: TextStyle(
-                        color: AppColors.info,
-                        fontWeight: FontWeight.bold,
+              _animateWidget(
+                delay: 1000,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Pas encore de compte ? ',
+                      style: TextStyle(color: AppColors.premiumGrey),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
+                        );
+                      },
+                      child: const Text(
+                        'S\'inscrire ici',
+                        style: TextStyle(
+                          color: AppColors.info,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 40),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _animateWidget({required Widget child, int delay = 0}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 

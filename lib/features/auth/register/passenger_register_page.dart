@@ -57,71 +57,93 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
               ),
               const SizedBox(height: 24),
 
-              Text(
-                'Créer un compte',
-                style: AppTextStyles.headingLarge.copyWith(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Si vous avez besoin d\'aide, Cliquez ici',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.success,
+              _animateWidget(
+                delay: 0,
+                child: Column(
+                  children: [
+                    Text(
+                      'Créer un compte',
+                      style: AppTextStyles.headingLarge.copyWith(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Si vous avez besoin d\'aide, Cliquez ici',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.success,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 32),
 
               // Basic Info
-              _buildInputField(
-                label: 'Nom complet',
-                controller: _nameController,
-                hint: 'Ex: Mamadou Diallo',
-                icon: Icons.person_outline_rounded,
+              _animateWidget(
+                delay: 100,
+                child: _buildInputField(
+                  label: 'Nom complet',
+                  controller: _nameController,
+                  hint: 'Ex: Mamadou Diallo',
+                  icon: Icons.person_outline_rounded,
+                ),
               ),
               const SizedBox(height: 16),
 
-              _buildInputField(
-                label: 'Téléphone',
-                controller: _phoneController,
-                hint: '+224 6XX XX XX XX',
-                icon: Icons.phone_android_rounded,
-                keyboardType: TextInputType.phone,
+              _animateWidget(
+                delay: 200,
+                child: _buildInputField(
+                  label: 'Téléphone',
+                  controller: _phoneController,
+                  hint: '+224 6XX XX XX XX',
+                  icon: Icons.phone_android_rounded,
+                  keyboardType: TextInputType.phone,
+                ),
               ),
               const SizedBox(height: 16),
 
-              _buildInputField(
-                label: 'Email',
-                controller: _emailController,
-                hint: 'votre@email.com',
-                icon: Icons.alternate_email_rounded,
-                keyboardType: TextInputType.emailAddress,
+              _animateWidget(
+                delay: 300,
+                child: _buildInputField(
+                  label: 'Email',
+                  controller: _emailController,
+                  hint: 'votre@email.com',
+                  icon: Icons.alternate_email_rounded,
+                  keyboardType: TextInputType.emailAddress,
+                ),
               ),
               const SizedBox(height: 16),
 
-              _buildInputField(
-                label: 'Mot de passe',
-                controller: _passwordController,
-                hint: '••••••••',
-                icon: Icons.lock_outline_rounded,
-                isPassword: true,
-                obscureText: !_isPasswordVisible,
-                onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+              _animateWidget(
+                delay: 400,
+                child: _buildInputField(
+                  label: 'Mot de passe',
+                  controller: _passwordController,
+                  hint: '••••••••',
+                  icon: Icons.lock_outline_rounded,
+                  isPassword: true,
+                  obscureText: !_isPasswordVisible,
+                  onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                ),
               ),
               const SizedBox(height: 16),
 
-              _buildInputField(
-                label: 'Confirmer',
-                controller: _confirmPasswordController,
-                hint: '••••••••',
-                icon: Icons.lock_reset_rounded,
-                isPassword: true,
-                obscureText: !_isConfirmPasswordVisible,
-                onToggleVisibility: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+              _animateWidget(
+                delay: 500,
+                child: _buildInputField(
+                  label: 'Confirmer',
+                  controller: _confirmPasswordController,
+                  hint: '••••••••',
+                  icon: Icons.lock_reset_rounded,
+                  isPassword: true,
+                  obscureText: !_isConfirmPasswordVisible,
+                  onToggleVisibility: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                ),
               ),
 
               const SizedBox(height: 24),
@@ -231,30 +253,51 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
               const SizedBox(height: 32),
 
               // Login Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Déjà inscrit ? ',
-                    style: TextStyle(color: AppColors.premiumGrey),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Text(
-                      'Se connecter',
-                      style: TextStyle(
-                        color: AppColors.info,
-                        fontWeight: FontWeight.bold,
+              _animateWidget(
+                delay: 1000,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Déjà inscrit ? ',
+                      style: TextStyle(color: AppColors.premiumGrey),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'Se connecter',
+                        style: TextStyle(
+                          color: AppColors.info,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 40),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _animateWidget({required Widget child, int delay = 0}) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: Duration(milliseconds: 600 + delay),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 30 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: child,
     );
   }
 

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>GuineeTransport - Gestion de Station</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a3d75",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13181f",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+    <header class="bg-background-light dark:bg-background-dark border-b border-primary/10 sticky top-0 z-50">
+        <div class="px-4 pt-6 pb-4">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary p-2 rounded-lg text-white">
+                        <span class="material-symbols-outlined block text-2xl">directions_bus</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-primary leading-none uppercase">GUINEE
+                            TRANSPORT</h1>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Suivi de la flotte en gare</p>
+                    </div>
+                </div>
+                <button
+                    class="relative p-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-2xl">notifications</span>
+                    <span
+                        class="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-red-500 border-2 border-background-light"></span>
+                </button>
+            </div>
+        </div>
+        <div class="px-4 pb-4">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span
+                        class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+                </div>
+                <input
+                    class="block w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none text-sm placeholder:text-slate-400"
+                    placeholder="Rechercher par numéro de plaque..." type="text" />
+            </div>
+        </div>
+        <div class="flex gap-3 px-4 pb-4 overflow-x-auto no-scrollbar">
+            <button class="flex-none px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold shadow-md">
+                Tous
+            </button>
+            <button
+                class="flex-none px-4 py-2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                En attente
+            </button>
+            <button
+                class="flex-none px-4 py-2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                Remplissage
+            </button>
+            <button
+                class="flex-none px-4 py-2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-primary/10 hover:text-primary transition-colors">
+                Prêt
+            </button>
+        </div>
+    </header>
+    <main class="flex-1 px-4 py-4 space-y-4 mb-20 overflow-y-auto">
+        <div
+            class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span
+                            class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mb-1 inline-block">RC-4452-B</span>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Vers Labé</h3>
+                    </div>
+                    <span
+                        class="px-3 py-1 text-[10px] font-bold rounded-full bg-orange-100 text-orange-700 border border-orange-200 uppercase tracking-wider">
+                        Remplissage
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div class="flex items-center gap-2 text-slate-500">
+                        <span class="material-symbols-outlined text-lg">person</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">Amadou Diallo</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-slate-500 justify-end">
+                        <span class="material-symbols-outlined text-lg">event_seat</span>
+                        <span class="font-bold text-primary">12 / 15</span>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div class="bg-orange-500 h-full w-[80%] rounded-full"></div>
+                </div>
+            </div>
+            <div
+                class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                <span class="text-xs text-slate-400">Arrivée: 08:30</span>
+                <button class="text-primary font-bold text-sm flex items-center gap-1">
+                    Gérer <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </button>
+            </div>
+        </div>
+        <div
+            class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span
+                            class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mb-1 inline-block">RC-8812-A</span>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Vers Kankan</h3>
+                    </div>
+                    <span
+                        class="px-3 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-700 border border-green-200 uppercase tracking-wider">
+                        Prêt
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div class="flex items-center gap-2 text-slate-500">
+                        <span class="material-symbols-outlined text-lg">person</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">Moussa Camara</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-slate-500 justify-end">
+                        <span class="material-symbols-outlined text-lg">event_seat</span>
+                        <span class="font-bold text-green-600">15 / 15</span>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div class="bg-green-500 h-full w-full rounded-full"></div>
+                </div>
+            </div>
+            <div
+                class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                <span class="text-xs text-slate-400">Départ imminent</span>
+                <button class="bg-primary text-white px-4 py-1.5 rounded-lg font-bold text-sm">
+                    Confirmer Départ
+                </button>
+            </div>
+        </div>
+        <div
+            class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden opacity-75">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span
+                            class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mb-1 inline-block">RC-2233-C</span>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Vers Nzérékoré</h3>
+                    </div>
+                    <span
+                        class="px-3 py-1 text-[10px] font-bold rounded-full bg-slate-100 text-slate-500 border border-slate-200 uppercase tracking-wider">
+                        En attente
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div class="flex items-center gap-2 text-slate-500">
+                        <span class="material-symbols-outlined text-lg">person</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">Ibrahima Barry</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-slate-500 justify-end">
+                        <span class="material-symbols-outlined text-lg">event_seat</span>
+                        <span class="font-bold text-slate-400">0 / 22</span>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div class="bg-slate-300 h-full w-[0%] rounded-full"></div>
+                </div>
+            </div>
+            <div
+                class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                <span class="text-xs text-slate-400">Position 4 dans la file</span>
+                <button class="text-slate-400 font-bold text-sm flex items-center gap-1">
+                    Gérer <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </button>
+            </div>
+        </div>
+        <div
+            class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+            <div class="p-4">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <span
+                            class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded mb-1 inline-block">RC-5561-X</span>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Vers Mamou</h3>
+                    </div>
+                    <span
+                        class="px-3 py-1 text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-200 uppercase tracking-wider">
+                        Parti
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div class="flex items-center gap-2 text-slate-500">
+                        <span class="material-symbols-outlined text-lg">person</span>
+                        <span class="font-medium text-slate-700 dark:text-slate-300">Souleymane Sylla</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-slate-500 justify-end">
+                        <span class="material-symbols-outlined text-lg">location_on</span>
+                        <span class="font-bold text-blue-600">En route</span>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full w-full rounded-full"></div>
+                </div>
+            </div>
+            <div
+                class="px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                <span class="text-xs text-slate-400">Départ: 07:15</span>
+                <button class="text-blue-600 font-bold text-sm flex items-center gap-1">
+                    Suivre <span class="material-symbols-outlined text-sm">map</span>
+                </button>
+            </div>
+        </div>
+    </main>
+    <nav
+        class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-2 pb-6 pt-2 flex justify-around items-center z-50">
+        <a class="flex flex-col items-center gap-1 text-primary" href="#">
+            <span class="material-symbols-outlined text-2xl font-variation-fill-1">warehouse</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide">Gare</span>
+        </a>
+        <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+            <span class="material-symbols-outlined text-2xl">directions_bus</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide">Flotte</span>
+        </a>
+        <div class="relative -top-8">
+            <button
+                class="bg-primary text-white h-14 w-14 rounded-full shadow-lg shadow-primary/40 flex items-center justify-center border-4 border-background-light dark:border-background-dark">
+                <span class="material-symbols-outlined text-3xl">add</span>
+            </button>
+        </div>
+        <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+            <span class="material-symbols-outlined text-2xl">calendar_today</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide">Planning</span>
+        </a>
+        <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+            <span class="material-symbols-outlined text-2xl">account_circle</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide">Profil</span>
+        </a>
+    </nav>
+    <style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .font-variation-fill-1 {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</body>
+
+</html>

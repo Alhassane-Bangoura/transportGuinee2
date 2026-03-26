@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS routes (
   arrival_city_id       UUID NOT NULL REFERENCES cities(id) ON DELETE RESTRICT,
   departure_station_id  UUID NOT NULL REFERENCES stations(id) ON DELETE RESTRICT,
   arrival_station_id    UUID NOT NULL REFERENCES stations(id) ON DELETE RESTRICT,
+  syndicate_id          UUID REFERENCES profiles(id) ON DELETE SET NULL,
   base_price            NUMERIC(10, 2) NOT NULL CHECK (base_price >= 0),
   distance              DOUBLE PRECISION,         -- en kilomètres
   estimated_duration    INTEGER,                   -- en minutes
@@ -178,6 +179,7 @@ CREATE TABLE IF NOT EXISTS trips (
   price           NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
   status          TEXT NOT NULL DEFAULT 'scheduled',
   occupied_seats  JSONB DEFAULT '[]'::jsonb,  -- Liste des sièges occupés [1,3,5,...]
+  quay_number     TEXT,                       -- Quai de départ (ex: "Quai 1")
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );

@@ -4,7 +4,7 @@ import '../../core/theme/app_text_styles.dart';
 import 'pages/onboarding_page1.dart';
 import 'pages/onboarding_page2.dart';
 import 'pages/onboarding_page3.dart';
-import 'pages/onboarding_page4.dart';
+import '../auth/role_selection_page.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -16,32 +16,27 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentPage = 0;
-  final int _totalPages = 4;
+  final int _totalPages = 3;
 
   void _nextPage() {
     if (_currentPage < _totalPages - 1) {
       _controller.nextPage(
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOutCubic,
       );
+    } else {
+      _finish();
     }
   }
 
   void _skip() {
-    _controller.animateToPage(
-      _totalPages - 1,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOutCubic,
-    );
+    _finish();
   }
 
   void _finish() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Veuillez sélectionner un rôle pour continuer'),
-        backgroundColor: AppColors.orange,
-        behavior: SnackBarBehavior.floating,
-      ),
+    // Naviguer vers le choix du rôle (à créer)
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
     );
   }
 
@@ -80,13 +75,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 currentPage: _currentPage,
                 totalPages: _totalPages,
               ),
-              OnboardingPage4(
-                onFinish: _finish,
-                currentPage: _currentPage,
-                totalPages: _totalPages,
-              ),
             ],
           ),
+          
+          // Pagination Dots & Button are handled inside each page for better layout control
+          // as per the new premium design screenshots
         ],
       ),
     );

@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/location_service.dart';
+import '../../../core/models/city.dart';
+import '../../../core/models/station.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../login_page.dart';
 
 class StationAdminRegisterPage extends StatefulWidget {
   const StationAdminRegisterPage({super.key});
 
   @override
-  State<StationAdminRegisterPage> createState() =>
-      _StationAdminRegisterPageState();
+  State<StationAdminRegisterPage> createState() => _StationAdminRegisterPageState();
 }
 
 class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
   bool _isPasswordVisible = false;
+  bool _acceptTerms = false;
   bool _isLoading = false;
 
   final _nameController = TextEditingController();
@@ -20,16 +25,48 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
   final _passwordController = TextEditingController();
   final _employeeIdController = TextEditingController();
 
-  String? _selectedStation;
+  List<City> _cities = [];
+  List<Station> _stations = [];
+  City? _selectedCity;
+  Station? _selectedStation;
   String? _selectedFunction;
 
-  static const Color primaryColor = Color(0xFF0FBD0F);
-  static const Color backgroundColor = Color(0xFFF6F8F6);
+  @override
+  void initState() {
+    super.initState();
+    _loadCities();
+  }
+
+  Future<void> _loadCities() async {
+    try {
+      final cities = await LocationService.getCities();
+      setState(() => _cities = cities);
+    } catch (e) {
+      debugPrint('Error loading cities: $e');
+    }
+  }
+
+  Future<void> _onCityChanged(City? city) async {
+    setState(() {
+      _selectedCity = city;
+      _selectedStation = null;
+      _stations = [];
+    });
+    if (city != null) {
+      try {
+        final stations = await LocationService.getStationsByCity(city.id);
+        setState(() => _stations = stations);
+      } catch (e) {
+        debugPrint('Error loading stations: $e');
+      }
+    }
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _employeeIdController.dispose();
     super.dispose();
@@ -38,395 +75,477 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
+          onPressed: () => Navigator.maybePop(context),
+        ),
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              
+              // Header
+              Text(
+                'Gérez votre\nGare Routière',
+                style: AppTextStyles.headingLarge.copyWith(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Prenez le contrôle des flux, des véhicules et des départs en un clic.',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Progress Indicator
+              Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.maybePop(context),
-                    icon: const Icon(Icons.arrow_back_ios, size: 20),
-                  ),
-                  const Expanded(
-                    child: Text(
-                      'Inscription Admin Gare',
-                      textAlign: TextAlign.center,
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                   Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 48),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+              const SizedBox(height: 32),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: primaryColor.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.admin_panel_settings,
-                          color: primaryColor, size: 40),
+              // Admin Section
+              _buildSectionHeader('INFORMATIONS ADMINISTRATEUR'),
+              _buildInputField(
+                label: 'NOM COMPLET',
+                controller: _nameController,
+                hint: 'Ex: Mamadou Diallo',
+                icon: Icons.person_rounded,
+              ),
+              const SizedBox(height: 24),
+
+              _buildInputField(
+                label: 'TÉLÉPHONE',
+                controller: _phoneController,
+                hint: '+224 6XX XX XX XX',
+                icon: Icons.phone_android_rounded,
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 24),
+
+              _buildInputField(
+                label: 'EMAIL PROFESSIONNEL',
+                controller: _emailController,
+                hint: 'admin@gare.gn',
+                icon: Icons.alternate_email_rounded,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 32),
+
+              // Professional Assignment Section
+              _buildSectionHeader('AFFECTATION PROFESSIONNELLE'),
+              _buildCityDropdown(),
+              const SizedBox(height: 24),
+              _buildStationDropdown(),
+              const SizedBox(height: 24),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInputField(
+                      label: 'N° EMPLOYÉ',
+                      controller: _employeeIdController,
+                      hint: 'EMP-2024',
+                      icon: Icons.badge_rounded,
                     ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Informations Administrateur',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const Text(
-                      'Créez votre compte de gestionnaire de gare pour GuineeTransport.',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    _buildLabel('Nom complet'),
-                    _buildTextField(
-                        hint: 'Ex: Mamadou Diallo',
-                        icon: Icons.person_outline,
-                        controller: _nameController),
-
-                    const SizedBox(height: 16),
-                    _buildLabel('Téléphone'),
-                    _buildTextField(
-                        hint: '+224 6XX XX XX XX',
-                        icon: Icons.call_outlined,
-                        keyboardType: TextInputType.phone,
-                        controller: _phoneController),
-
-                    const SizedBox(height: 16),
-                    _buildLabel('Email professionnel'),
-                    _buildTextField(
-                        hint: 'admin@gare-conakry.gn',
-                        icon: Icons.mail_outline,
-                        keyboardType: TextInputType.emailAddress,
-                        controller: _emailController),
-
-                    const SizedBox(height: 16),
-                    _buildLabel('Mot de passe'),
-                    _buildTextField(
-                      hint: '••••••••',
-                      icon: Icons.lock_outline,
-                      isPassword: true,
-                      obscureText: !_isPasswordVisible,
-                      controller: _passwordController,
-                      onToggle: () => setState(
-                          () => _isPasswordVisible = !_isPasswordVisible),
-                    ),
-
-                    const SizedBox(height: 24),
-                    const Divider(),
-                    const SizedBox(height: 24),
-
-                    const Text(
-                      'Affectation Professionnelle',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildLabel('Gare assignée'),
-                    _buildDropdownField(
-                      hint: 'Sélectionner une gare',
-                      value: _selectedStation,
-                      options: [
-                        'Gare Routière de Bambeto (Conakry)',
-                        'Gare Routière de Madina (Conakry)',
-                        'Gare Centrale de Kindia',
-                        'Gare de Kouroula (Labé)',
-                        'Gare de Kankan'
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildDropdownRow<String>(
+                      label: 'FONCTION',
+                      value: _selectedFunction,
+                      items: [
+                        'Responsable Départ',
+                        'Responsable Arrivée',
+                        'Chef Billetterie',
+                        'Gérant Principal'
                       ],
-                      onChanged: (val) =>
-                          setState(() => _selectedStation = val),
+                      itemLabel: (s) => s,
+                      onChanged: (v) => setState(() => _selectedFunction = v),
                     ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
 
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel('Numéro d’employé'),
-                              _buildTextField(
-                                  hint: 'EMP-2024',
-                                  controller: _employeeIdController),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLabel('Fonction'),
-                              _buildDropdownField(
-                                value: _selectedFunction,
-                                options: [
-                                  'Responsable Départ',
-                                  'Responsable Arrivée',
-                                  'Chef Billetterie',
-                                  'Gérant Principal'
-                                ],
-                                onChanged: (val) =>
-                                    setState(() => _selectedFunction = val),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+              // Security Section
+              _buildSectionHeader('SÉCURITÉ DU COMPTE'),
+              _buildInputField(
+                label: 'MOT DE PASSE',
+                controller: _passwordController,
+                hint: '••••••••',
+                icon: Icons.lock_outline_rounded,
+                isPassword: true,
+                obscureText: !_isPasswordVisible,
+                onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+              ),
+              const SizedBox(height: 32),
+
+              // Terms and Conditions
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Checkbox(
+                      value: _acceptTerms,
+                      onChanged: (v) => setState(() => _acceptTerms = v ?? false),
+                      activeColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                     ),
-
-                    const SizedBox(height: 48),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () async {
-                                final email = _emailController.text.trim();
-                                final password = _passwordController.text;
-                                final fullName = _nameController.text.trim();
-                                final phone = _phoneController.text.trim();
-
-                                final emailError = AuthService.validateEmail(email);
-                                final phoneError = AuthService.validatePhone(phone);
-                                final passwordError = password.length < 6 ? 'Le mot de passe doit contenir au moins 6 caractères' : null;
-
-                                if (fullName.isEmpty || emailError != null || phoneError != null || passwordError != null) {
-                                  if (!mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(fullName.isEmpty 
-                                        ? 'Le nom est obligatoire' 
-                                        : (emailError ?? phoneError ?? passwordError ?? '')),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                setState(() => _isLoading = true);
-                                try {
-                                  await AuthService.signUp(
-                                    email: email,
-                                    password: password,
-                                    fullName: fullName,
-                                    phone: phone,
-                                    roleKey: 'station_admin',
-                                    metadata: {
-                                      'station_name': _selectedStation,
-                                      'employee_id':
-                                          _employeeIdController.text.trim(),
-                                      'function': _selectedFunction,
-                                    },
-                                  );
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Compte admin créé ! Veuillez vous connecter.'),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                  if (!context.mounted) return;
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LoginPage()),
-                                    (route) => false,
-                                  );
-                                } catch (e) {
-                                  if (!context.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            'Erreur : ${e.toString().replaceAll('AuthException: ', '')}')),
-                                  );
-                                  setState(() => _isLoading = false);
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          elevation: 10,
-                          shadowColor: primaryColor.withValues(alpha: 0.3),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Créer mon compte admin',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold)),
-                            SizedBox(width: 8),
-                            Icon(Icons.how_to_reg, size: 20),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 16),
-                        child: Text.rich(
-                          textAlign: TextAlign.center,
-                          TextSpan(
-                            text:
-                                'En cliquant sur "Créer mon compte", vous acceptez les ',
-                            style: TextStyle(fontSize: 11, color: Colors.grey),
-                            children: [
-                              TextSpan(
-                                  text: 'conditions d\'utilisation',
-                                  style: TextStyle(
-                                      color: primaryColor,
-                                      decoration: TextDecoration.underline)),
-                              TextSpan(
-                                  text:
-                                      ' professionnelles de GuineeTransport.'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-
-                    // Footer Promo
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: primaryColor.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border:
-                            Border.all(color: primaryColor.withValues(alpha: 0.1)),
-                      ),
-                      child: Row(
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        text: "En créant ce compte, j'accepte les ",
+                        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
                         children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: const BoxDecoration(
-                                color: primaryColor, shape: BoxShape.circle),
-                            child: const Icon(Icons.map,
-                                color: Colors.white, size: 20),
+                          TextSpan(
+                            text: "conditions d'utilisation professionnelles",
+                            style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Digitalisation locale',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13)),
-                                Text(
-                                    'Aidez-nous à moderniser les gares de Guinée.',
-                                    style: TextStyle(
-                                        fontSize: 11, color: Colors.grey)),
-                              ],
-                            ),
-                          ),
+                          const TextSpan(text: " de GuineeTransport."),
                         ],
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 32),
+
+              // Create Account Button
+              SizedBox(
+                width: double.infinity,
+                height: 64,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleRegister,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    elevation: 0,
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Créer mon compte admin',
+                              style: AppTextStyles.buttonText.copyWith(fontSize: 16, fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(width: 12),
+                            const Icon(Icons.admin_panel_settings_rounded),
+                          ],
+                        ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 32),
+
+              // Login Link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Compte déjà existant ? ',
+                    style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                    ),
+                    child: Text(
+                      'Se connecter',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildLabel(String label) {
+  Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6, left: 4),
-      child: Text(label,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 16,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: AppTextStyles.label.copyWith(
+              color: AppColors.primary,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
     required String hint,
-    IconData? icon,
+    required IconData icon,
     bool isPassword = false,
     bool obscureText = false,
-    VoidCallback? onToggle,
+    VoidCallback? onToggleVisibility,
     TextInputType? keyboardType,
-    TextEditingController? controller,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: primaryColor.withValues(alpha: 0.1)),
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon:
-              icon != null ? Icon(icon, color: Colors.grey, size: 20) : null,
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(
-                      obscureText ? Icons.visibility : Icons.visibility_off,
-                      size: 18),
-                  onPressed: onToggle)
-              : null,
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.label.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+          ),
         ),
-      ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTextStyles.bodyLarge.copyWith(
+                color: AppColors.textHint,
+                fontWeight: FontWeight.w400,
+              ),
+              prefixIcon: Icon(icon, color: AppColors.primary, size: 22),
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: AppColors.textSecondary,
+                        size: 20,
+                      ),
+                      onPressed: onToggleVisibility,
+                    )
+                  : null,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildDropdownField({
-    String? hint,
-    String? value,
-    required List<String> options,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: primaryColor.withValues(alpha: 0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          hint: hint != null
-              ? Text(hint,
-                  style: const TextStyle(color: Colors.grey, fontSize: 14))
-              : null,
-          isExpanded: true,
-          items: options
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ),
+  Widget _buildCityDropdown() {
+    return _buildDropdownRow<City>(
+      label: 'VILLE REPRÉSENTÉE',
+      value: _selectedCity,
+      items: _cities,
+      itemLabel: (city) => city.name,
+      onChanged: _onCityChanged,
     );
+  }
+
+  Widget _buildStationDropdown() {
+    return _buildDropdownRow<Station>(
+      label: 'GARE ASSIGNÉE',
+      value: _selectedStation,
+      items: _stations,
+      itemLabel: (station) => station.name,
+      onChanged: (v) => setState(() => _selectedStation = v),
+      enabled: _selectedCity != null,
+    );
+  }
+
+  Widget _buildDropdownRow<T>({
+    required String label,
+    required T? value,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required ValueChanged<T?> onChanged,
+    bool enabled = true,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.label.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: enabled ? AppColors.white : AppColors.border.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border, width: 1.5),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<T>(
+              value: value,
+              hint: Text('Choisir', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textHint)),
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
+              items: items
+                  .map((e) => DropdownMenuItem<T>(
+                        value: e,
+                        child: Text(itemLabel(e), style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600, fontSize: 13)),
+                      ))
+                  .toList(),
+              onChanged: enabled ? onChanged : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handleRegister() async {
+    if (!_acceptTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez accepter les conditions')));
+      return;
+    }
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final fullName = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
+
+    if (fullName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Votre nom est obligatoire')));
+      return;
+    }
+
+    final emailError = AuthService.validateEmail(email);
+    if (emailError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(emailError)));
+      return;
+    }
+
+    final phoneError = AuthService.validatePhone(phone);
+    if (phoneError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(phoneError)));
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mot de passe trop court')));
+      return;
+    }
+
+    if (_selectedStation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner une gare')));
+      return;
+    }
+
+    if (_selectedStation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner une gare')));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await AuthService.signUp(
+        email: email,
+        password: password,
+        fullName: fullName,
+        phone: phone,
+        roleKey: 'station_admin',
+        stationId: _selectedStation!.id,
+        metadata: {
+          'employee_id': _employeeIdController.text.trim(),
+          'function': _selectedFunction,
+        },
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compte créé ! Connectez-vous.'), backgroundColor: Colors.green));
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString().replaceAll('AuthException: ', '')}')));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 }

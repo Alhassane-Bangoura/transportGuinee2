@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Azimuth Admin - Gestion des Chauffeurs</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-variant": "#f1f5f9",
+                        "error-container": "#fee2e2",
+                        "outline-variant": "#e2e8f0",
+                        "surface-container-highest": "#cbd5e1",
+                        "background": "#f6f7f8",
+                        "inverse-primary": "#93c5fd",
+                        "on-primary-container": "#dbeafe",
+                        "inverse-surface": "#1e293b",
+                        "surface-container-low": "#f8fafc",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "on-surface": "#0f172a",
+                        "error": "#ef4444",
+                        "on-secondary-fixed-variant": "#334155",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#475569",
+                        "surface-container": "#f1f5f9",
+                        "tertiary-fixed": "#cbd5e1",
+                        "tertiary-container": "#334155",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "secondary-container": "#f1f5f9",
+                        "on-tertiary-fixed": "#0f172a",
+                        "surface-container-high": "#e2e8f0",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "secondary-fixed": "#f1f5f9",
+                        "on-background": "#0f172a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f8fafc",
+                        "tertiary": "#0f172a",
+                        "primary-fixed": "#dbeafe",
+                        "on-secondary-container": "#1e293b",
+                        "secondary": "#475569",
+                        "surface": "#ffffff",
+                        "on-error-container": "#991b1b",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-bright": "#ffffff",
+                        "on-secondary-fixed": "#0f172a",
+                        "outline": "#cbd5e1",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#f6f7f8",
+                        "primary": "#1a3d75",
+                        "on-primary-fixed": "#1e3a8a",
+                        "surface-tint": "#1a3d75",
+                        "primary-container": "#1a3d75"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .active-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .tonal-shift {
+            background-image: linear-gradient(to bottom, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.5));
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-surface-dim font-body text-on-background antialiased pb-24 md:pb-0 md:pt-16">
+    <!-- TopAppBar -->
+    <header
+        class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-b border-slate-100 dark:border-slate-800 shadow-sm fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 w-full">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-slate-200 overflow-hidden border-2 border-primary/10">
+                <img alt="Admin Profile Photo" class="w-full h-full object-cover"
+                    data-alt="Professional headshot of a smiling business executive in a modern office setting with soft natural lighting"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7mh3H6GlpOf1_y9jffIOBxd6TFKTEFMQYh2cmZ16t3KPTACc_fJWbb51jFHrh8q6X1pbtvGZCTwtTLNt8v9RkVtsVhnBTstuVzW_rcZ1pREGaZLkm52dNCjPzP1-PDfjex7bklIHS1rHn1cmgyaJIykBKWJ_a_HIW7RcCQ_mMGbpYZkpJXelaon88r_G9ozSmo71xvZdhZ22KVRGagP52iPNmfuIiyWsvALanBruOrA8IqP9ok1E12ocbMK2cmXmaW5dhLUtbYN_w" />
+            </div>
+            <div class="flex flex-col">
+                <span
+                    class="text-xl font-black text-[#1a3d75] dark:text-blue-400 font-['Plus_Jakarta_Sans'] tracking-tight">Azimuth
+                    Admin</span>
+                <span class="text-[10px] font-bold uppercase text-slate-500 tracking-widest">GuineeTransport - Gestion
+                    des partenaires</span>
+            </div>
+        </div>
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8">
+            <a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 py-2 rounded-xl text-sm font-semibold"
+                href="#">Dashboard</a>
+            <a class="text-[#1a3d75] dark:text-blue-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 py-2 rounded-xl text-sm"
+                href="#">Fleet</a>
+            <a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 py-2 rounded-xl text-sm font-semibold"
+                href="#">Trips</a>
+            <a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 py-2 rounded-xl text-sm font-semibold"
+                href="#">Profile</a>
+        </nav>
+        <div class="flex items-center gap-2">
+            <button
+                class="p-2 rounded-full text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 duration-200">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+        </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Header Section -->
+        <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+                <h1
+                    class="text-[30px] font-['Plus_Jakarta_Sans'] font-extrabold text-on-surface tracking-tight leading-none mb-2">
+                    Gestion des Chauffeurs</h1>
+                <p class="text-on-surface-variant text-base">Supervisez votre équipe de conducteurs et gérez les
+                    affectations de flotte en temps réel.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="relative group">
+                    <input
+                        class="bg-surface-container-lowest border border-outline px-4 py-2.5 pl-11 rounded-xl w-full md:w-64 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        placeholder="Rechercher un chauffeur..." type="text" />
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary">search</span>
+                </div>
+            </div>
+        </div>
+        <!-- Stats Bento Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined">group</span>
+                </div>
+                <div>
+                    <div class="text-2xl font-extrabold text-on-surface">42</div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Chauffeurs</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-green-50 text-emerald-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <div>
+                    <div class="text-2xl font-extrabold text-on-surface">31</div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Actif</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined">event_busy</span>
+                </div>
+                <div>
+                    <div class="text-2xl font-extrabold text-on-surface">09</div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Repos</div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                    <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div>
+                    <div class="text-2xl font-extrabold text-on-surface">02</div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Suspendu</div>
+                </div>
+            </div>
+        </div>
+        <!-- Driver Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Driver Card 1 -->
+            <div
+                class="bg-surface-container-lowest rounded-[1.5rem] shadow-sm hover:shadow-[0_10px_15px_-3px_rgb(26,61,117,0.1)] transition-all duration-300 border border-slate-100 group overflow-hidden">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <img alt="Moussa Diallo"
+                                    class="w-16 h-16 rounded-2xl object-cover ring-4 ring-slate-50 group-hover:ring-primary/10 transition-all"
+                                    data-alt="Portrait of a friendly middle-aged man with short hair wearing a casual blue shirt, clear focused background"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP0rDp0R3mZikQxmxBOp5UDJ6W4hl_rIkm-oNWh3_b1zabnymlkfGkrmoWI609p-Bx_exC_X-7UiILImGbq642RbGX8liQ9qcLZNuXYqdn4bgDj8Y3JBe-hhfGyETyUf5u2oR6HovCctUqtiJNeYYU7xq2pZK9Pt-t4vOEuZhJVT19fsy5gHvT2zCKpgNZQLEaIg1kxsyVNlWjiBJfoO6EcVjmd1O_YXVMIS6OjFsRfYZzoy2gYhj57SS8xwLxdRf3QDRw9MO0ifpL" />
+                                <div
+                                    class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full">
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface leading-tight">Moussa Diallo</h3>
+                                <p class="text-sm text-slate-500">+224 620 45 88 12</p>
+                            </div>
+                        </div>
+                        <span
+                            class="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-extrabold uppercase tracking-widest rounded-full">Actif</span>
+                    </div>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-400 text-sm">local_shipping</span>
+                                <span class="text-sm font-semibold text-slate-700">Renault Kerax 440</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-400">RC-7782-A</span>
+                        </div>
+                        <div class="flex items-center gap-3 px-3">
+                            <span class="material-symbols-outlined text-primary text-sm">route</span>
+                            <span class="text-sm text-slate-600">Conakry → Mamou</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-4 border-t border-slate-50">
+                        <button
+                            class="flex-1 bg-primary text-white py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                            Modifier
+                        </button>
+                        <button
+                            class="px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-red-50 hover:text-red-600 transition-colors">
+                            <span class="material-symbols-outlined text-sm">block</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Driver Card 2 -->
+            <div
+                class="bg-surface-container-lowest rounded-[1.5rem] shadow-sm hover:shadow-[0_10px_15px_-3px_rgb(26,61,117,0.1)] transition-all duration-300 border border-slate-100 group overflow-hidden">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <img alt="Abdoulaye Sow"
+                                    class="w-16 h-16 rounded-2xl object-cover ring-4 ring-slate-50 group-hover:ring-primary/10 transition-all"
+                                    data-alt="Close up portrait of a young professional male driver looking confident, outdoor lighting with soft bokeh"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVgq9NadZRK-yFcdjoQVOYTmMUzEN96KcbN29w7TbCMJnlPtSddqy5Fmq931XfEutWbYXOW5rpAtl1xt5bxCRvH0C7xdQp7zmlbSOtDWaIGvNCjV51OB_NQwzi5v0Rq7pW3EQmh0tAVRFOpgB46L2YK7goP8qtoHU9jbtsRBSqWm_ul0REtAO9V3n6UOubKdmUzZTJ1VePmexUyOhIuqSK6Waj0l0jiH7K9OUqD32fT3qPCvWFh4it2cvMEh4Bzyc0hQvc2ceMxNWe" />
+                                <div
+                                    class="absolute -bottom-1 -right-1 w-5 h-5 bg-amber-500 border-4 border-white rounded-full">
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface leading-tight">Abdoulaye Sow</h3>
+                                <p class="text-sm text-slate-500">+224 621 12 33 00</p>
+                            </div>
+                        </div>
+                        <span
+                            class="px-3 py-1 bg-amber-50 text-amber-700 text-[10px] font-extrabold uppercase tracking-widest rounded-full">Repos</span>
+                    </div>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-400 text-sm">local_shipping</span>
+                                <span class="text-sm font-semibold text-slate-700">Mercedes Actros</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-400">RC-0912-B</span>
+                        </div>
+                        <div class="flex items-center gap-3 px-3">
+                            <span class="material-symbols-outlined text-slate-300 text-sm">history</span>
+                            <span class="text-sm text-slate-400 italic">Dernier trajet: Labé (2j)</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-4 border-t border-slate-50">
+                        <button
+                            class="flex-1 bg-primary text-white py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                            Modifier
+                        </button>
+                        <button
+                            class="px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-red-50 hover:text-red-600 transition-colors">
+                            <span class="material-symbols-outlined text-sm">block</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Driver Card 3 -->
+            <div
+                class="bg-surface-container-lowest rounded-[1.5rem] shadow-sm hover:shadow-[0_10px_15px_-3px_rgb(26,61,117,0.1)] transition-all duration-300 border border-slate-100 group overflow-hidden">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <img alt="Mariama Camara"
+                                    class="w-16 h-16 rounded-2xl object-cover ring-4 ring-slate-50 group-hover:ring-primary/10 transition-all"
+                                    data-alt="Portrait of a professional female logistical manager with a bright smile, natural daylight, professional attire"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCio8Yn3wYtyx58BMDugN3VbPq-IuAnbIv87P1YbOOX5bZjAOt35WOkBGzH_4FSxGQnx_0QeVbV9gKLJpHRyIyiKAzsBNpeKMW9m6dZ3Gw2DvFhyP95pOWf4fTt4QbUzUAqSl-p-csICHRvn7zbIM8LMzvFi7qeTO-M9zmg_Mj5sowL72G1n8BEK5rgwjvNtHTuKYOcUA99NHezENhLqGdmS4ES1YoMaACSnD7TzH2tPukp-OljsWAx2M73sHfdPL9RFD8NQ77Ml48w" />
+                                <div
+                                    class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full">
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-on-surface leading-tight">Mariama Camara</h3>
+                                <p class="text-sm text-slate-500">+224 669 88 11 22</p>
+                            </div>
+                        </div>
+                        <span
+                            class="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-extrabold uppercase tracking-widest rounded-full">Actif</span>
+                    </div>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-slate-400 text-sm">directions_bus</span>
+                                <span class="text-sm font-semibold text-slate-700">Toyota Coaster</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-400">RC-4456-C</span>
+                        </div>
+                        <div class="flex items-center gap-3 px-3">
+                            <span class="material-symbols-outlined text-primary text-sm">route</span>
+                            <span class="text-sm text-slate-600">Conakry → Kindia</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-4 border-t border-slate-50">
+                        <button
+                            class="flex-1 bg-primary text-white py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-transform">
+                            Modifier
+                        </button>
+                        <button
+                            class="px-3 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-red-50 hover:text-red-600 transition-colors">
+                            <span class="material-symbols-outlined text-sm">block</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Floating Action Button -->
+    <button
+        class="fixed bottom-24 right-6 md:bottom-8 md:right-8 w-16 h-16 bg-primary text-white rounded-2xl shadow-[0_10px_15px_-3px_rgb(26,61,117,0.3)] flex items-center justify-center group active:scale-90 transition-all duration-200 z-[60]">
+        <span
+            class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform duration-300">add</span>
+    </button>
+    <!-- BottomNavBar -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg tonal-shift bg-slate-50/50 dark:bg-slate-800/50 shadow-[0_-4px_10px_rgba(26,61,117,0.08)] rounded-t-2xl z-50">
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#1a3d75] dark:hover:text-blue-300 active:scale-90 transition-transform duration-150"
+            href="#">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span
+                class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Dashboard</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-[#1a3d75] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-xl px-3 py-1 active:scale-90 transition-transform duration-150"
+            href="#">
+            <span class="material-symbols-outlined active-icon">local_shipping</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Fleet</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#1a3d75] dark:hover:text-blue-300 active:scale-90 transition-transform duration-150"
+            href="#">
+            <span class="material-symbols-outlined">route</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Trips</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#1a3d75] dark:hover:text-blue-300 active:scale-90 transition-transform duration-150"
+            href="#">
+            <span class="material-symbols-outlined">person</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Profile</span>
+        </a>
+    </nav>
+</body>
+
+</html>

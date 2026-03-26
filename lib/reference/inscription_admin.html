@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a3d75",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13181f",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <title>Inscription Admin - GUINEE TRANSPORT</title>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+    <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+        <header
+            class="flex items-center bg-white dark:bg-background-dark p-4 justify-between border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
+            <div
+                class="text-primary flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-primary/10 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </div>
+            <h2 class="text-primary text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">GUINEE
+                TRANSPORT</h2>
+        </header>
+        <main class="flex-1 flex flex-col items-center px-4 py-8 max-w-lg mx-auto w-full">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full mb-4">
+                    <span class="material-symbols-outlined text-primary text-4xl">directions_bus</span>
+                </div>
+                <h1 class="text-slate-900 dark:text-white text-3xl font-extrabold leading-tight mb-2">Inscription Admin
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400 text-base font-medium">Administrez efficacement votre gare
+                </p>
+            </div>
+            <div
+                class="w-full bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 space-y-5">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Nom complet</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">person</span>
+                        <input
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                            placeholder="Ex: Mamadou Diallo" type="text" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Nom de la gare</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">door_front</span>
+                        <input
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                            placeholder="Ex: Gare de Bambeto" type="text" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Ville de la
+                        gare</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">location_on</span>
+                        <input
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                            placeholder="Ex: Conakry" type="text" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Numéro de
+                        téléphone</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">call</span>
+                        <input
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                            placeholder="+224 6XX XX XX XX" type="tel" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Email</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
+                        <input
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                            placeholder="contact@gare.gn" type="email" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Mot de passe</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+                        <input
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                            placeholder="••••••••" type="password" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-slate-700 dark:text-slate-300 text-sm font-semibold px-1">Confirmation mot de
+                        passe</label>
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock_reset</span>
+                        <input
+                            class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
+                            placeholder="••••••••" type="password" />
+                    </div>
+                </div>
+                <div class="pt-4">
+                    <button
+                        class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                        <span>Créer mon compte</span>
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <p class="text-slate-500 dark:text-slate-400">Vous avez déjà un compte ? <a
+                        class="text-primary font-bold hover:underline" href="#">Se connecter</a></p>
+            </div>
+        </main>
+        <footer class="py-6 px-4 text-center">
+            <p class="text-xs text-slate-400 uppercase tracking-widest font-bold">© 2024 GuineeTransport</p>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a3d75",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13181f",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <title>Profil Chauffeur - GuineeTransport</title>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+    <!-- Top Navigation / Header -->
+    <header
+        class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-2xl">menu</span>
+            <div>
+                <h1 class="text-lg font-bold leading-tight tracking-tight text-primary uppercase">GUINEE TRANSPORT</h1>
+                <p class="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Votre espace chauffeur</p>
+            </div>
+        </div>
+        <div class="relative">
+            <button class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+                <span class="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-red-500"></span>
+            </button>
+        </div>
+    </header>
+    <main class="max-w-md mx-auto pb-24">
+        <!-- Hero Profile Section -->
+        <section class="p-6 flex flex-col items-center">
+            <div class="relative group">
+                <div class="size-32 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden bg-slate-200"
+                    data-alt="Portrait of a smiling professional male driver"
+                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAsIrE2r0xrBC59Uyo6nwN0KTGcLtNk0QSE3aXEW4a9w86NOIqILu5O69E4hvnIlO_f0U7dmyhoKfm8PEbq0r4nMVkzVi7g_8wQl5eufKHVCAbWW3xf2tzvSPzBdq2OIJjJC9k7csnkseroEItJNRVcqBi779mfgqEeYg39OYucrtqEvZvNvUXbIR1LrDW3HD2jUXuBmJBtFDk5JdCLTjxWQoOP2sidEE98YcB4H949vkWtxAvX9GyCF8RSUkfEZEyJ-Gh1IqW--JIL'); background-size: cover; background-position: center;">
+                </div>
+                <button
+                    class="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white dark:border-slate-800">
+                    <span class="material-symbols-outlined text-sm">photo_camera</span>
+                </button>
+            </div>
+            <div class="mt-4 text-center">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Moussa Camara</h2>
+                <div class="flex items-center justify-center gap-2 mt-1">
+                    <span
+                        class="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
+                        Chauffeur Vérifié
+                    </span>
+                    <div class="flex items-center text-amber-500">
+                        <span class="material-symbols-outlined text-sm fill-amber-500">star</span>
+                        <span class="text-sm font-semibold ml-1">4.9</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Driver Info Cards -->
+        <section class="px-4 space-y-4">
+            <div
+                class="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Informations personnelles
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <span class="material-symbols-outlined">phone</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-slate-500">Numéro de téléphone</p>
+                            <p class="font-medium">+224 620 00 00 00</p>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 text-sm">edit</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <span class="material-symbols-outlined">location_on</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-slate-500">Ville de résidence</p>
+                            <p class="font-medium">Conakry, Guinée</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="size-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <span class="material-symbols-outlined">badge</span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs text-slate-500">Numéro de permis</p>
+                            <p class="font-medium uppercase">GUI-1298374-C</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Historique des trajets -->
+            <div
+                class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">history</span>
+                        Historique des trajets
+                    </h3>
+                    <a class="text-xs font-semibold text-primary" href="#">Voir tout</a>
+                </div>
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-sm">Conakry → Kindia</p>
+                            <p class="text-xs text-slate-500">12 Oct 2023 • 08:30</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-primary">150 000 GNF</p>
+                            <p class="text-[10px] text-green-600 font-medium">Terminé</p>
+                        </div>
+                    </div>
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-sm">Kindia → Conakry</p>
+                            <p class="text-xs text-slate-500">11 Oct 2023 • 14:15</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-primary">150 000 GNF</p>
+                            <p class="text-[10px] text-green-600 font-medium">Terminé</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Paramètres du compte -->
+            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="p-4 border-b border-slate-100 dark:border-slate-800">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Paramètres du compte</h3>
+                </div>
+                <div class="p-2 space-y-1">
+                    <button
+                        class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-slate-500">settings</span>
+                            <span class="text-sm font-medium">Réglages de l'application</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+                    </button>
+                    <button
+                        class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-slate-500">security</span>
+                            <span class="text-sm font-medium">Sécurité et Confidentialité</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+                    </button>
+                    <button
+                        class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-slate-500">help_outline</span>
+                            <span class="text-sm font-medium">Support technique</span>
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Logout Button -->
+            <div class="pt-4 pb-8">
+                <button
+                    class="w-full py-4 px-6 rounded-xl border-2 border-red-500/20 text-red-500 font-bold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors">
+                    <span class="material-symbols-outlined">logout</span>
+                    Se déconnecter
+                </button>
+                <p class="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-[0.2em]">GuineeTransport v2.4.0
+                </p>
+            </div>
+        </section>
+    </main>
+    <!-- Bottom Navigation Bar -->
+    <nav
+        class="fixed bottom-0 left-0 right-0 bg-white dark:bg-background-dark border-t border-slate-200 dark:border-slate-800 px-6 pb-6 pt-3 z-50">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-[10px] font-bold uppercase tracking-tight">Accueil</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+                <span class="material-symbols-outlined">directions_car</span>
+                <span class="text-[10px] font-bold uppercase tracking-tight">Trajets</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+                <span class="material-symbols-outlined">group</span>
+                <span class="text-[10px] font-bold uppercase tracking-tight">Communauté</span>
+            </a>
+            <a class="flex flex-col items-center gap-1 text-primary" href="#">
+                <span class="material-symbols-outlined fill-1">person</span>
+                <span class="text-[10px] font-bold uppercase tracking-tight">Profil</span>
+            </a>
+        </div>
+    </nav>
+    <style>
+        .material-symbols-outlined.fill-1 {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</body>
+
+</html>

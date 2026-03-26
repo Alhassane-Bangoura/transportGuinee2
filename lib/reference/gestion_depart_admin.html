@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a3d75",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#13181f",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+    <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+        <!-- Top Navigation / Header -->
+        <header
+            class="sticky top-0 z-10 border-b border-primary/10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4">
+            <div class="flex items-center justify-between max-w-5xl mx-auto w-full">
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary p-2 rounded-lg text-white">
+                        <span class="material-symbols-outlined text-2xl">directions_bus</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-primary">GUINEE TRANSPORT</h1>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Supervision des départs
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <span class="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-red-500"></span>
+                    </button>
+                    <button class="p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 w-full max-w-5xl mx-auto p-4 pb-24">
+            <!-- Filters & Stats Section -->
+            <div class="mb-6">
+                <div class="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    <button
+                        class="flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 text-white shadow-sm transition-all hover:bg-primary/90">
+                        <span class="text-sm font-semibold">Tous les départs</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs">12</span>
+                    </button>
+                    <button
+                        class="flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-5 text-slate-700 dark:text-slate-200 hover:bg-slate-50">
+                        <span class="text-sm font-medium">Prêts</span>
+                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">5</span>
+                    </button>
+                    <button
+                        class="flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-5 text-slate-700 dark:text-slate-200 hover:bg-slate-50">
+                        <span class="text-sm font-medium">En attente</span>
+                        <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs">4</span>
+                    </button>
+                    <button
+                        class="flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-5 text-slate-700 dark:text-slate-200 hover:bg-slate-50">
+                        <span class="text-sm font-medium">En retard</span>
+                        <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">3</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Departures List -->
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
+                <!-- Card 1 -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-4">
+                    <div class="relative h-24 w-full sm:w-40 shrink-0 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700"
+                        data-alt="White Toyota Hiace van for transport"
+                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCFwoGfIh6yUJEThIb_mqeHRjKNuT3V_EQNH8hKY3hhgcsuXhPIMlY7ILJvjOgoYixNBVZmy8ghhqlSrJj32chpIdeO9vl5xUjje_xaJHbR_zEgvSSp65fcwAHHiyDUrH9N4ASCAcnagmrqx2Zf38bUNKNST8sV0pE4kQ22VK6f9NDTA9th2hK4hZc-VVQ5jpk4jabHJbp86pDC4neAHGaRaFWCaekdrYy28zGCbPKfoZy9TvJMXsPW7PifpLIyXvv2PrpJLIvd0glX"); background-size: cover; background-position: center;'>
+                        <div
+                            class="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">
+                            Prêt à partir
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary text-sm">person</span>
+                                    </div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">Mamadou
+                                        Diallo</h3>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                                    <span class="flex items-center gap-1"><span
+                                            class="material-symbols-outlined text-xs">directions_car</span> Toyota
+                                        Hiace</span>
+                                    <span class="flex items-center gap-1 text-primary font-medium"><span
+                                            class="material-symbols-outlined text-xs">location_on</span> Mamou</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest">Passagers</p>
+                                <p class="text-lg font-bold text-primary">15 / 18</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex flex-wrap gap-2 items-center justify-between mt-auto pt-3 border-t border-slate-50 dark:border-slate-700/50">
+                            <div class="flex -space-x-2 overflow-hidden">
+                                <div class="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-slate-200"
+                                    data-alt="Passenger profile photo"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAnwF3jjJzr6ldRIILCGwMaUcr-_UxZnMucP62atNrbCoL-XI2bDK0Hs5xQ3htQk16UKfMg6kGssTwANIWB8PoryFemKTuI_0dUNMJCXjDvz5SB7VAXUjRj0fQ1CE5LFZz6JOS0Myqy_VIcVB9TWJudBkCcnu6HJzfI2AVhwkL4a6aZG22bc8sTcP4jXeHHWgfI6_LwZ5bl6Uo2wJnkvxbt9m6GKhLH_kkr5ADP8zrhA21389VFhPnQQJjAYDm5FepBU15gY9GRYrbq'); background-size: cover;">
+                                </div>
+                                <div class="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-slate-200"
+                                    data-alt="Passenger profile photo"
+                                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD8v08Fm4JHAt1832tb5J0EbQb4jJ4KrrOwm1mEYZNDDRe5DsCOgxJJmMTCiSSQ7XopBrDAVwLEi4jLqeQRNLNOxb-7ucexaDjSGt0N4m6X8FifXzkHgSXkPlGKCI67huAs0iV35Dv5azo9ZCGCIlxp-cozUOmEji9BfZ6vS3tkkcnc-grlE6bARmdISwfR2HCyixrRo09MzvEYweOrTDKV6FyPAO3rS9KI0A4THkw7ZOnF4bblKcNf-YOa4huJ6R_-qCrxcxxOV26W'); background-size: cover;">
+                                </div>
+                                <div
+                                    class="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500 bg-slate-100">
+                                    +13</div>
+                            </div>
+                            <button
+                                class="flex-1 sm:flex-none flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 transition-all">
+                                <span class="material-symbols-outlined text-sm">check_circle</span>
+                                Confirmer le départ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-4 opacity-95">
+                    <div class="relative h-24 w-full sm:w-40 shrink-0 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700"
+                        data-alt="Modern blue bus waiting at terminal"
+                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAu9x4OQSr1l_WbErTCFGpLNUAeljGxr63L_aS8ZoukY8xYcTrXrscYD-W6AqZe_k4ukB5HYK8DT33DnO89rqpBV1uoiFsWR6qzMAa1b6drl4cdvcx6zu0UPhZpL8ECc1YOnwLONYXJV25ASUzBgi-R7dKi5K8pv78_StyYonAjIT-c5wImLTNuPLy_arwIacJwRi0TEFdZQeDgPiG-8v1dVdxoTOkvRXqKjOnKOct_YM4jECsbbFdq2fhlcUrvO_dtDrwAmB1aQ8fS"); background-size: cover; background-position: center;'>
+                        <div
+                            class="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">
+                            Remplissage
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary text-sm">person</span>
+                                    </div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                                        Ibrahima Bah</h3>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                                    <span class="flex items-center gap-1"><span
+                                            class="material-symbols-outlined text-xs">directions_bus</span>
+                                        Coaster</span>
+                                    <span class="flex items-center gap-1 text-primary font-medium"><span
+                                            class="material-symbols-outlined text-xs">location_on</span> Labé</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest">Passagers</p>
+                                <p class="text-lg font-bold text-slate-700 dark:text-slate-200">22 / 30</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex flex-wrap gap-2 items-center justify-between mt-auto pt-3 border-t border-slate-50 dark:border-slate-700/50">
+                            <div
+                                class="w-full sm:w-32 bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden mb-2 sm:mb-0">
+                                <div class="bg-amber-500 h-full w-[73%]"></div>
+                            </div>
+                            <button
+                                class="flex-1 sm:flex-none flex h-9 items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-700 px-6 text-sm font-semibold text-slate-500 cursor-not-allowed">
+                                <span class="material-symbols-outlined text-sm">hourglass_empty</span>
+                                En attente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-4">
+                    <div class="relative h-24 w-full sm:w-40 shrink-0 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700"
+                        data-alt="Transport vehicle with passengers boarding"
+                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCk_HrsFZ0wWyVfkO1hfV69yiLcTsZxkXLNskvxqIJXqWbF5Oq6e7yJ1n27hy1TqyIlRYQz6hSgUkTj9YkP84euK6YMmAXriYTvGTtgLRhE3_P0KG6-k24VTz0iKuuBXSf8buNlO22kiM6pGogs7U5GInMsrfNFgU_61LDFITKI4SRf61tvvrm0FlqOL5K2M_Pny-fUmxk84ATepwauh9_w_rKvKGxnfpVAEqFKJKCm7fJydFOh1T20TEBSKkIxv_g19el1o5FijPGq"); background-size: cover; background-position: center; filter: grayscale(0.5);'>
+                        <div
+                            class="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm">
+                            Prêt à partir
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-primary text-sm">person</span>
+                                    </div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                                        Abdoulaye Soumah</h3>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                                    <span class="flex items-center gap-1"><span
+                                            class="material-symbols-outlined text-xs">directions_car</span> Toyota
+                                        Hiace</span>
+                                    <span class="flex items-center gap-1 text-primary font-medium"><span
+                                            class="material-symbols-outlined text-xs">location_on</span> Kindia</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-medium text-slate-400 uppercase tracking-widest">Passagers</p>
+                                <p class="text-lg font-bold text-primary">18 / 18</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex flex-wrap gap-2 items-center justify-between mt-auto pt-3 border-t border-slate-50 dark:border-slate-700/50">
+                            <div class="flex items-center gap-1 text-green-600 text-xs font-bold uppercase">
+                                <span class="material-symbols-outlined text-sm">verified</span>
+                                Complet
+                            </div>
+                            <button
+                                class="flex-1 sm:flex-none flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-6 text-sm font-semibold text-white shadow-md shadow-primary/20 hover:bg-primary/90 transition-all">
+                                <span class="material-symbols-outlined text-sm">check_circle</span>
+                                Confirmer le départ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Bottom Navigation Bar -->
+        <nav
+            class="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark px-4 pb-6 pt-2">
+            <div class="flex justify-around items-center max-w-lg mx-auto">
+                <a class="flex flex-col items-center gap-1 text-primary" href="#">
+                    <span class="material-symbols-outlined font-variation-settings-'FILL'-1">local_shipping</span>
+                    <p class="text-xs font-bold leading-normal tracking-tight">Départs</p>
+                </a>
+                <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+                    href="#">
+                    <span class="material-symbols-outlined">directions_car</span>
+                    <p class="text-xs font-medium leading-normal tracking-tight">Véhicules</p>
+                </a>
+                <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+                    href="#">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <p class="text-xs font-medium leading-normal tracking-tight">Rapports</p>
+                </a>
+                <a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors"
+                    href="#">
+                    <span class="material-symbols-outlined">account_circle</span>
+                    <p class="text-xs font-medium leading-normal tracking-tight">Profil</p>
+                </a>
+            </div>
+        </nav>
+        <!-- Floating Action Button (Optional for Admin) -->
+        <button
+            class="fixed bottom-24 right-6 h-14 w-14 flex items-center justify-center rounded-full bg-primary text-white shadow-xl hover:scale-105 active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-3xl">add</span>
+        </button>
+    </div>
+</body>
+
+</html>

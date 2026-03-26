@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/models/user_profile.dart';
-import '../../features/dashboard/passenger_dashboard.dart';
-import '../../features/dashboard/driver_dashboard.dart';
-import '../../features/dashboard/syndicate_dashboard.dart';
-import '../../features/dashboard/station_admin_dashboard.dart';
+import '../../features/passenger/screens/passenger_dashboard.dart';
+import '../../features/driver/screens/driver_dashboard.dart';
+import '../../features/syndicate/screens/syndicate_dashboard.dart';
+import '../../features/station_admin/screens/station_admin_dashboard.dart';
 
 class NavigationService {
   static Widget getDashboardForRole(String role, {UserProfile? profile}) {

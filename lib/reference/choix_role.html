@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Azimuth - Choix du Rôle</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#f1f5f9",
+                        "inverse-surface": "#1e293b",
+                        "on-tertiary-fixed": "#0f172a",
+                        "on-secondary-container": "#1e293b",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "surface-bright": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#1a3d75",
+                        "surface-container": "#f1f5f9",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "on-background": "#0f172a",
+                        "tertiary-container": "#334155",
+                        "on-surface-variant": "#475569",
+                        "error-container": "#fee2e2",
+                        "secondary-fixed": "#f1f5f9",
+                        "surface-tint": "#1a3d75",
+                        "on-secondary-fixed-variant": "#334155",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-surface": "#0f172a",
+                        "error": "#ef4444",
+                        "outline-variant": "#e2e8f0",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-container-low": "#f8fafc",
+                        "on-primary-container": "#dbeafe",
+                        "surface-variant": "#f1f5f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e8f0",
+                        "on-error": "#ffffff",
+                        "surface": "#ffffff",
+                        "primary-fixed": "#dbeafe",
+                        "inverse-primary": "#93c5fd",
+                        "tertiary": "#0f172a",
+                        "surface-container-highest": "#cbd5e1",
+                        "primary-container": "#1a3d75",
+                        "on-primary-fixed": "#1e3a8a",
+                        "on-error-container": "#991b1b",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-dim": "#f6f7f8",
+                        "on-secondary": "#ffffff",
+                        "background": "#f6f7f8",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "secondary": "#475569",
+                        "on-tertiary-container": "#f8fafc",
+                        "outline": "#cbd5e1",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0f172a"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background font-body text-on-background min-h-screen">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 backdrop-blur-lg bg-slate-50/90 dark:bg-slate-950/90 shadow-sm dark:shadow-none">
+        <div class="flex items-center justify-between px-6 py-4 w-full max-w-7xl mx-auto">
+            <div class="flex items-center gap-4">
+                <button
+                    class="text-blue-900 dark:text-blue-400 scale-95 active:scale-90 transition-transform duration-200">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h1 class="font-headline text-xl font-extrabold tracking-tight text-blue-900 dark:text-blue-400">Azimuth
+                </h1>
+            </div>
+            <div class="hidden md:flex gap-8">
+                <span
+                    class="text-blue-900 dark:text-blue-400 font-bold font-headline text-sm tracking-widest uppercase">Home</span>
+                <span
+                    class="text-slate-500 dark:text-slate-400 font-headline text-sm tracking-widest uppercase">Trips</span>
+                <span
+                    class="text-slate-500 dark:text-slate-400 font-headline text-sm tracking-widest uppercase">Wallet</span>
+                <span
+                    class="text-slate-500 dark:text-slate-400 font-headline text-sm tracking-widest uppercase">Profile</span>
+            </div>
+        </div>
+    </header>
+    <main class="pt-24 pb-32 px-6 max-w-5xl mx-auto">
+        <!-- Hero Branding -->
+        <div class="mb-12 text-center md:text-left">
+            <div class="inline-flex items-center px-3 py-1 bg-primary/10 rounded-full mb-4">
+                <span class="text-primary font-headline text-[10px] font-bold uppercase tracking-widest">Guinée
+                    Transport</span>
+            </div>
+            <h2 class="font-headline text-3xl md:text-4xl font-extrabold tracking-tight text-on-background mb-4">
+                Choisissez votre rôle dans le transport
+            </h2>
+            <p class="text-on-surface-variant max-w-2xl leading-relaxed">
+                Rejoignez l'écosystème de transport le plus moderne de Guinée. Sélectionnez le profil qui correspond à
+                votre activité pour commencer.
+            </p>
+        </div>
+        <!-- Role Selection Bento Grid -->
+        <div class="bento-grid">
+            <!-- Role: Passager (Lage Hero Style) -->
+            <div
+                class="group relative overflow-hidden bg-surface rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 md:col-span-1 p-8 flex flex-col justify-between border border-transparent hover:border-primary/20 cursor-pointer">
+                <div class="relative z-10">
+                    <div
+                        class="w-14 h-14 bg-primary rounded-xl flex items-center justify-center text-white mb-6 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
+                        <span class="material-symbols-outlined text-3xl" data-icon="person">person</span>
+                    </div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface mb-2">Passager</h3>
+                    <p class="text-on-surface-variant text-sm leading-relaxed mb-6">
+                        Réservez vos trajets en un clic, suivez vos chauffeurs en temps réel et voyagez en toute
+                        sécurité à travers le pays.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 flex items-center text-primary font-bold text-sm tracking-tight group-hover:translate-x-2 transition-transform duration-300">
+                    Continuer en tant que passager
+                    <span class="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
+                </div>
+                <!-- Decorative element -->
+                <div
+                    class="absolute -right-12 -bottom-12 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-300">
+                    <span class="material-symbols-outlined text-[160px]"
+                        data-icon="directions_bus">directions_bus</span>
+                </div>
+            </div>
+            <!-- Role: Chauffeur -->
+            <div
+                class="group relative overflow-hidden bg-surface rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-8 flex flex-col justify-between border border-transparent hover:border-primary/20 cursor-pointer">
+                <div class="relative z-10">
+                    <div
+                        class="w-14 h-14 bg-primary-fixed text-primary rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                        <span class="material-symbols-outlined text-3xl"
+                            data-icon="directions_car">directions_car</span>
+                    </div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface mb-2">Chauffeur</h3>
+                    <p class="text-on-surface-variant text-sm leading-relaxed mb-6">
+                        Optimisez vos revenus, gérez vos trajets et rejoignez une communauté de professionnels
+                        certifiés.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 flex items-center text-primary font-bold text-sm tracking-tight group-hover:translate-x-2 transition-transform duration-300">
+                    S'inscrire comme chauffeur
+                    <span class="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
+                </div>
+                <div
+                    class="absolute -right-8 -bottom-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-300">
+                    <span class="material-symbols-outlined text-[140px]" data-icon="route">route</span>
+                </div>
+            </div>
+            <!-- Role: Syndicat -->
+            <div
+                class="group relative overflow-hidden bg-surface rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-8 flex flex-col justify-between border border-transparent hover:border-primary/20 cursor-pointer">
+                <div class="relative z-10">
+                    <div
+                        class="w-14 h-14 bg-secondary-container text-on-secondary-container rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                        <span class="material-symbols-outlined text-3xl" data-icon="groups">groups</span>
+                    </div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface mb-2">Syndicat</h3>
+                    <p class="text-on-surface-variant text-sm leading-relaxed mb-6">
+                        Supervisez les activités, gérez les adhésions et accédez à des rapports détaillés sur la flotte
+                        régionale.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 flex items-center text-primary font-bold text-sm tracking-tight group-hover:translate-x-2 transition-transform duration-300">
+                    Espace Syndical
+                    <span class="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
+                </div>
+                <div
+                    class="absolute -right-8 -bottom-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-300">
+                    <span class="material-symbols-outlined text-[140px]" data-icon="verified_user">verified_user</span>
+                </div>
+            </div>
+            <!-- Role: Admin de Gare -->
+            <div
+                class="group relative overflow-hidden bg-surface rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-8 flex flex-col justify-between border border-transparent hover:border-primary/20 cursor-pointer">
+                <div class="relative z-10">
+                    <div
+                        class="w-14 h-14 bg-primary-container text-on-primary-container rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                        <span class="material-symbols-outlined text-3xl" data-icon="apartment">apartment</span>
+                    </div>
+                    <h3 class="font-headline text-xl font-bold text-on-surface mb-2">Admin de gare</h3>
+                    <p class="text-on-surface-variant text-sm leading-relaxed mb-6">
+                        Pilotez les flux de passagers, gérez les départs et les arrivées, et coordonnez les
+                        installations de la gare.
+                    </p>
+                </div>
+                <div
+                    class="relative z-10 flex items-center text-primary font-bold text-sm tracking-tight group-hover:translate-x-2 transition-transform duration-300">
+                    Gérer ma gare
+                    <span class="material-symbols-outlined ml-2 text-sm">arrow_forward</span>
+                </div>
+                <div
+                    class="absolute -right-8 -bottom-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-300">
+                    <span class="material-symbols-outlined text-[140px]" data-icon="dashboard">dashboard</span>
+                </div>
+            </div>
+        </div>
+        <!-- Secondary Info Card -->
+        <div
+            class="mt-12 bg-primary text-white p-8 rounded-2xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-2xl shadow-primary/30">
+            <div class="md:w-1/2 relative z-10">
+                <h4 class="font-headline text-2xl font-bold mb-3 tracking-tight">Une technologie au service de la
+                    mobilité.</h4>
+                <p class="text-white/80 text-sm leading-relaxed mb-6">
+                    Qu'importe votre rôle, nous transformons le transport guinéen pour le rendre plus fluide, plus sûr
+                    et plus transparent pour tous.
+                </p>
+                <div class="flex gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-300"
+                            style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        <span class="text-xs font-medium">Sécurité certifiée</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-300"
+                            style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        <span class="text-xs font-medium">Support 24/7</span>
+                    </div>
+                </div>
+            </div>
+            <div class="md:w-1/2 relative z-10 h-48 w-full md:h-auto overflow-hidden rounded-xl border border-white/20">
+                <img alt="Transport modern Guinee" class="w-full h-full object-cover"
+                    data-alt="modern bus parked at a sleek transport terminal with golden hour sunlight and professional aesthetic"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuALt_MJ0vhZXqmi8jJZhuwLRnNgbH13qcdWpQ6w6RcWjIkXJTzmJBuoLwxZLwqmVMyT1z0vmooXkrSLpC4kDRcWmiyYLAlHwX7b_wd67GYdh5V__Kvomp2rqGAfYOWOwf7BgmtftuwxLEUgh-PtKBfbkxLOPT2SZQNxgznCQdrJC_p9LkJzu36EUGfUV37HPB-meAo2zmWbpD2dwJKfv0MXVdiELDNZYCTAknU3wgvO9H-7CPuudUDda9itbB9hP22yeI2YJLUwNuRW" />
+            </div>
+            <!-- Background pattern -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2">
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/90 dark:bg-slate-900/90 z-50 backdrop-blur-lg rounded-t-2xl shadow-[0_-4px_6px_-1px_rgba(26,61,117,0.05)] border-t border-slate-100 dark:border-slate-800">
+        <a class="flex flex-col items-center justify-center text-blue-800 dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/20 rounded-xl px-3 py-1 translate-y-[-2px] transition-transform duration-300"
+            href="#">
+            <span class="material-symbols-outlined text-2xl" data-icon="directions_car">directions_car</span>
+            <span class="font-headline text-[10px] font-bold uppercase tracking-widest mt-1">Home</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
+            href="#">
+            <span class="material-symbols-outlined text-2xl" data-icon="route">route</span>
+            <span class="font-headline text-[10px] font-bold uppercase tracking-widest mt-1">Trips</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
+            href="#">
+            <span class="material-symbols-outlined text-2xl"
+                data-icon="account_balance_wallet">account_balance_wallet</span>
+            <span class="font-headline text-[10px] font-bold uppercase tracking-widest mt-1">Wallet</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-blue-700 dark:hover:text-blue-200 transition-colors"
+            href="#">
+            <span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+            <span class="font-headline text-[10px] font-bold uppercase tracking-widest mt-1">Profile</span>
+        </a>
+    </nav>
+</body>
+
+</html>

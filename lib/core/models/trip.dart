@@ -23,6 +23,7 @@ class Trip {
   final String? licensePlate;
   final double? distance;
   final int? estimatedDuration;
+  final String? quayNumber;
 
   const Trip({
     required this.id,
@@ -43,6 +44,7 @@ class Trip {
     this.licensePlate,
     this.distance,
     this.estimatedDuration,
+    this.quayNumber,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class Trip {
       licensePlate: json['license_plate'] as String?,
       distance: (json['distance'] as num?)?.toDouble(),
       estimatedDuration: (json['estimated_duration'] as num?)?.toInt(),
+      quayNumber: json['quay_number'] as String?,
     );
   }
 

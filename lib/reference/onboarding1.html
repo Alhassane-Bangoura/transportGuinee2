@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#f1f5f9",
+                        "inverse-surface": "#1e293b",
+                        "on-tertiary-fixed": "#0f172a",
+                        "on-secondary-container": "#1e293b",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "surface-bright": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#1a3d75",
+                        "surface-container": "#f1f5f9",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "on-background": "#0f172a",
+                        "tertiary-container": "#334155",
+                        "on-surface-variant": "#475569",
+                        "error-container": "#fee2e2",
+                        "secondary-fixed": "#f1f5f9",
+                        "surface-tint": "#1a3d75",
+                        "on-secondary-fixed-variant": "#334155",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-surface": "#0f172a",
+                        "error": "#ef4444",
+                        "outline-variant": "#e2e8f0",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-container-low": "#f8fafc",
+                        "on-primary-container": "#dbeafe",
+                        "surface-variant": "#f1f5f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e8f0",
+                        "on-error": "#ffffff",
+                        "surface": "#ffffff",
+                        "primary-fixed": "#dbeafe",
+                        "inverse-primary": "#93c5fd",
+                        "tertiary": "#0f172a",
+                        "surface-container-highest": "#cbd5e1",
+                        "primary-container": "#1a3d75",
+                        "on-primary-fixed": "#1e3a8a",
+                        "on-error-container": "#991b1b",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-dim": "#f6f7f8",
+                        "on-secondary": "#ffffff",
+                        "background": "#f6f7f8",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "secondary": "#475569",
+                        "on-tertiary-container": "#f8fafc",
+                        "outline": "#cbd5e1",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0f172a"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .bg-mesh {
+            background-color: #f6f7f8;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(26, 61, 117, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(26, 61, 117, 0.05) 0px, transparent 50%);
+        }
+
+        .ticket-cutout {
+            mask-image: radial-gradient(circle at 0% 70%, transparent 12px, black 13px),
+                radial-gradient(circle at 100% 70%, transparent 12px, black 13px);
+            mask-composite: intersect;
+            -webkit-mask-image: radial-gradient(circle at 0% 70%, transparent 12px, black 13px),
+                radial-gradient(circle at 100% 70%, transparent 12px, black 13px);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background font-body text-on-background min-h-screen flex flex-col">
+    <!-- Top Navigation Anchor (Manual Suppression logic: Onboarding page = No Shell) -->
+    <header class="fixed top-0 w-full z-50 px-6 py-8 flex flex-col items-center justify-center text-center">
+        <h1 class="font-headline text-primary text-2xl font-extrabold tracking-tighter uppercase">GUINEE TRANSPORT</h1>
+        <p class="text-secondary text-sm font-medium mt-1">Réservez votre place sans stress</p>
+    </header>
+    <main class="flex-1 flex flex-col items-center justify-center px-6 pt-24 pb-32 max-w-md mx-auto w-full bg-mesh">
+        <!-- Illustration Container: Elegant Digital Ticket -->
+        <div class="relative w-full aspect-[4/5] flex items-center justify-center mb-12">
+            <!-- Decorative background elements -->
+            <div class="absolute inset-0 bg-primary/5 rounded-[3rem] blur-3xl"></div>
+            <!-- Digital Ticket Mockup -->
+            <div
+                class="relative w-72 h-96 bg-surface rounded-2xl shadow-2xl shadow-primary/10 flex flex-col overflow-hidden ticket-cutout border border-outline-variant/50">
+                <!-- Ticket Header -->
+                <div class="bg-primary p-6 text-on-primary">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="material-symbols-outlined text-3xl">directions_bus</span>
+                        <div class="text-right">
+                            <p class="text-[10px] font-label uppercase tracking-widest opacity-80">Classe</p>
+                            <p class="font-headline font-bold text-sm">PREMIUM</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] font-label uppercase tracking-widest opacity-80">Siège</p>
+                            <p class="font-headline font-extrabold text-2xl">A-12</p>
+                        </div>
+                        <span class="material-symbols-outlined text-4xl"
+                            style="font-variation-settings: 'FILL' 1;">airline_seat_recline_extra</span>
+                    </div>
+                </div>
+                <!-- Ticket Body -->
+                <div class="flex-1 p-6 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-2 h-2 rounded-full bg-primary"></div>
+                                <div class="w-0.5 h-8 border-l border-dashed border-outline"></div>
+                                <div class="w-2 h-2 rounded-full border-2 border-primary"></div>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <div>
+                                    <p class="text-[10px] font-label uppercase text-secondary">Départ</p>
+                                    <p class="font-bold text-sm">Conakry</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-label uppercase text-secondary">Arrivée</p>
+                                    <p class="font-bold text-sm">Labé</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- QR Code Placeholder area -->
+                    <div class="mt-auto pt-6 border-t border-dashed border-outline-variant flex justify-center">
+                        <div
+                            class="w-24 h-24 bg-slate-50 border border-outline-variant rounded-lg p-2 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-5xl text-slate-300">qr_code_2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Floating Micro-UI element: Seat Selection -->
+            <div
+                class="absolute -bottom-4 -right-4 bg-white p-4 rounded-xl shadow-xl border border-outline-variant/30 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+                    <span class="material-symbols-outlined">event_seat</span>
+                </div>
+                <div>
+                    <p class="text-xs font-bold">Choix direct</p>
+                    <p class="text-[10px] text-secondary">Plan de salle interactif</p>
+                </div>
+            </div>
+        </div>
+        <!-- Copy Text -->
+        <div class="text-center space-y-4">
+            <h2 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight leading-tight">
+                Choisissez votre <span class="text-primary">confort</span>
+            </h2>
+            <p class="text-on-surface-variant leading-relaxed px-4">
+                Ne laissez plus le hasard décider. Sélectionnez précisément votre siège préféré dès la réservation et
+                voyagez en toute sérénité.
+            </p>
+        </div>
+    </main>
+    <!-- Footer Controls -->
+    <footer class="fixed bottom-0 left-0 w-full p-8 bg-gradient-to-t from-background via-background to-transparent">
+        <div class="max-w-md mx-auto space-y-8">
+            <!-- Progress Indicator (3/3) -->
+            <div class="flex justify-center items-center gap-2">
+                <div class="h-1.5 w-6 rounded-full bg-primary/20"></div>
+                <div class="h-1.5 w-6 rounded-full bg-primary/20"></div>
+                <div class="h-1.5 w-10 rounded-full bg-primary"></div>
+            </div>
+            <!-- CTA Button -->
+            <button
+                class="w-full bg-primary text-white py-5 rounded-xl font-headline font-bold text-lg shadow-lg shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 transition-all duration-200">
+                Commencer
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+    </footer>
+</body>
+
+</html>

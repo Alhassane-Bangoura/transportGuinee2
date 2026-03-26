@@ -5,26 +5,27 @@ import 'app_colors.dart';
 class AppTextStyles {
   AppTextStyles._();
 
-  static TextStyle get displayMedium => GoogleFonts.inter(
-        fontSize: 26,
-        fontWeight: FontWeight.w700,
+  static TextStyle get displayMedium => GoogleFonts.plusJakartaSans(
+        fontSize: 28,
+        fontWeight: FontWeight.w800,
         color: AppColors.textPrimary,
-        height: 1.3,
-        letterSpacing: -0.3,
+        height: 1.2,
+        letterSpacing: -0.5,
       );
 
-  static TextStyle get headingLarge => GoogleFonts.inter(
+  static TextStyle get headingLarge => GoogleFonts.plusJakartaSans(
         fontSize: 22,
         fontWeight: FontWeight.w700,
         color: AppColors.textPrimary,
         height: 1.3,
+        letterSpacing: -0.2,
       );
 
   static TextStyle get bodyLarge => GoogleFonts.inter(
-        fontSize: 15,
-        fontWeight: FontWeight.w400,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
         color: AppColors.textSecondary,
-        height: 1.6,
+        height: 1.5,
       );
 
   static TextStyle get bodyMedium => GoogleFonts.inter(
@@ -34,17 +35,24 @@ class AppTextStyles {
         height: 1.5,
       );
 
-  static TextStyle get label => GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
+  static TextStyle get bodySmall => GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
         color: AppColors.textSecondary,
-        letterSpacing: 0.8,
+        height: 1.4,
       );
 
-  static TextStyle get buttonText => GoogleFonts.inter(
+  static TextStyle get label => GoogleFonts.plusJakartaSans(
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textSecondary,
+        letterSpacing: 1.2,
+      );
+
+  static TextStyle get buttonText => GoogleFonts.plusJakartaSans(
         fontSize: 16,
         fontWeight: FontWeight.w700,
         color: AppColors.white,
-        letterSpacing: 0.3,
+        letterSpacing: 0.5,
       );
 }

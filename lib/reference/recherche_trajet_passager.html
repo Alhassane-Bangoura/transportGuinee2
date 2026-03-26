@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>GuineeTransport - Recherche de Trajet</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#334155",
+                        "secondary": "#475569",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#1a3d75",
+                        "on-secondary-container": "#1e293b",
+                        "background": "#f6f7f8",
+                        "surface": "#ffffff",
+                        "inverse-surface": "#1e293b",
+                        "tertiary": "#0f172a",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed": "#0f172a",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#f6f7f8",
+                        "error-container": "#fee2e2",
+                        "surface-container-low": "#f8fafc",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "primary-fixed": "#dbeafe",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "inverse-primary": "#93c5fd",
+                        "surface-container-highest": "#cbd5e1",
+                        "outline-variant": "#e2e8f0",
+                        "surface-container": "#f1f5f9",
+                        "outline": "#cbd5e1",
+                        "primary": "#1a3d75",
+                        "on-surface": "#0f172a",
+                        "secondary-container": "#f1f5f9",
+                        "surface-bright": "#ffffff",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-tint": "#1a3d75",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "error": "#ef4444",
+                        "on-error-container": "#991b1b",
+                        "on-secondary-fixed": "#0f172a",
+                        "on-secondary-fixed-variant": "#334155",
+                        "on-primary-container": "#dbeafe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f8fafc",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#1e3a8a",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-variant": "#f1f5f9",
+                        "secondary-fixed": "#f1f5f9",
+                        "on-surface-variant": "#475569"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .font-plus-jakarta-sans {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .tap-highlight-transparent {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background font-body text-on-background min-h-screen pb-24">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-slate-50/90 backdrop-blur-lg shadow-sm flex justify-between items-center px-6 h-16 w-full max-w-none">
+        <div class="flex items-center gap-4">
+            <button class="text-[#1a3d75] active:scale-95 duration-200">
+                <span class="material-symbols-outlined" data-icon="menu">menu</span>
+            </button>
+            <h1 class="text-xl font-black text-[#1a3d75] uppercase tracking-tighter">GuineeTransport</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="hidden md:flex gap-6 items-center">
+                <a class="text-[#1a3d75] font-bold font-plus-jakarta-sans tracking-tight text-lg" href="#">Home</a>
+                <a class="text-slate-500 hover:bg-slate-200/50 transition-colors px-3 py-1 rounded-lg"
+                    href="#">Trips</a>
+                <a class="text-slate-500 hover:bg-slate-200/50 transition-colors px-3 py-1 rounded-lg"
+                    href="#">Tickets</a>
+            </div>
+            <img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary/10"
+                data-alt="Close-up portrait of a professional African man with a friendly smile, soft studio lighting, clean background"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw-23wnQVGr75WnlTAalLtiV_zNgVcSfg2maUaJwDTQpMEwwoYai5498pLmEygf75eOP-XMKlyR1OKpm0GxKZ6z0sKeFJm2FqCxB-SGv3oW1ezmKa9Jrkcb7uZNPAyLqigsGawREDGc4hBkRdvUXyrCy2L8Tkeks2lC0X1ElUgjbK7iTr8gKZsFOuNwa7rE9tIGUuQ3lPk-uDzCpmTryju-SVbUVitSEnsIOL0NfXiu_QgLpk7PkpBLx2EDVo2HL0WYnnLdcvS8VxB" />
+        </div>
+    </header>
+    <main class="pt-24 px-6 max-w-4xl mx-auto">
+        <!-- Hero Section -->
+        <section class="mb-10">
+            <h2 class="text-3xl font-extrabold font-headline tracking-tight text-primary mb-2">Recherche de Trajet</h2>
+            <p class="text-on-surface-variant font-medium">Planifiez votre prochain voyage à travers la Guinée avec
+                simplicité.</p>
+        </section>
+        <!-- Search Bento Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <!-- Search Inputs Module -->
+            <div class="md:col-span-8 bg-surface rounded-3xl p-8 shadow-sm">
+                <div class="space-y-6">
+                    <div class="relative group">
+                        <label
+                            class="block text-xs font-bold text-primary uppercase tracking-widest mb-2 ml-1">Départ</label>
+                        <div
+                            class="flex items-center bg-slate-50 border border-outline rounded-2xl px-4 py-4 focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent transition-all">
+                            <span class="material-symbols-outlined text-primary mr-3"
+                                data-icon="location_on">location_on</span>
+                            <input
+                                class="bg-transparent border-none focus:ring-0 w-full text-on-surface font-medium placeholder:text-slate-400"
+                                placeholder="D'où partez-vous ?" type="text" />
+                        </div>
+                        <!-- Interchange button -->
+                        <button
+                            class="absolute -bottom-4 right-8 z-10 bg-primary text-white p-2 rounded-full shadow-lg active:scale-90 transition-transform">
+                            <span class="material-symbols-outlined" data-icon="swap_vert">swap_vert</span>
+                        </button>
+                    </div>
+                    <div class="group">
+                        <label
+                            class="block text-xs font-bold text-primary uppercase tracking-widest mb-2 ml-1">Destination</label>
+                        <div
+                            class="flex items-center bg-slate-50 border border-outline rounded-2xl px-4 py-4 focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent transition-all">
+                            <span class="material-symbols-outlined text-primary mr-3" data-icon="flag">flag</span>
+                            <input
+                                class="bg-transparent border-none focus:ring-0 w-full text-on-surface font-medium placeholder:text-slate-400"
+                                placeholder="Où allez-vous ?" type="text" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-primary uppercase tracking-widest mb-2 ml-1">Date
+                                de départ</label>
+                            <div
+                                class="flex items-center bg-slate-50 border border-outline rounded-2xl px-4 py-4 focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent transition-all">
+                                <span class="material-symbols-outlined text-primary mr-3"
+                                    data-icon="calendar_today">calendar_today</span>
+                                <input
+                                    class="bg-transparent border-none focus:ring-0 w-full text-on-surface font-medium"
+                                    type="text" value="12 Oct, 2023" />
+                            </div>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-xs font-bold text-primary uppercase tracking-widest mb-2 ml-1">Voyageurs</label>
+                            <div
+                                class="flex items-center bg-slate-50 border border-outline rounded-2xl px-4 py-4 focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent transition-all">
+                                <span class="material-symbols-outlined text-primary mr-3"
+                                    data-icon="person">person</span>
+                                <select
+                                    class="bg-transparent border-none focus:ring-0 w-full text-on-surface font-medium appearance-none">
+                                    <option>1 Adulte</option>
+                                    <option>2 Adultes</option>
+                                    <option>Famille (4+)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        class="w-full bg-primary text-white py-5 rounded-2xl font-bold font-headline text-lg shadow-[0_10px_15px_-3px_rgb(26_61_117/0.2)] active:scale-[0.98] transition-all flex justify-center items-center gap-2 mt-4">
+                        Rechercher les trajets
+                        <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            <!-- AI Tips & Insights Module -->
+            <div class="md:col-span-4 space-y-6">
+                <div
+                    class="bg-primary-container text-on-primary-container p-6 rounded-3xl shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="material-symbols-outlined text-blue-200" data-icon="smart_toy">smart_toy</span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-blue-100">AI Tips</span>
+                        </div>
+                        <h3 class="text-lg font-bold font-headline mb-3 leading-tight">Meilleur moment pour voyager ?
+                        </h3>
+                        <p class="text-sm text-blue-100/80 mb-4">Le trajet Conakry → Labé est 20% moins fréquenté le
+                            mardi matin. Réservez maintenant pour plus de confort.</p>
+                        <div class="flex gap-2">
+                            <span class="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold">#EcoTravel</span>
+                            <span class="bg-white/10 px-3 py-1 rounded-full text-[10px] font-bold">#FastRoute</span>
+                        </div>
+                    </div>
+                    <!-- Decorative background element -->
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-400/10 rounded-full blur-2xl"></div>
+                </div>
+                <div class="bg-surface p-6 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 class="text-sm font-bold text-primary uppercase tracking-widest mb-4">Itinéraires Populaires
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between group cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined text-sm"
+                                        data-icon="trending_up">trending_up</span>
+                                </div>
+                                <span class="text-sm font-semibold">Conakry - Mamou</span>
+                            </div>
+                            <span class="text-xs text-slate-400">4h 30m</span>
+                        </div>
+                        <div class="flex items-center justify-between group cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                    <span class="material-symbols-outlined text-sm"
+                                        data-icon="trending_up">trending_up</span>
+                                </div>
+                                <span class="text-sm font-semibold">Kindia - Conakry</span>
+                            </div>
+                            <span class="text-xs text-slate-400">2h 15m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Featured Map Visualization (Minimalist) -->
+        <section class="mt-8">
+            <div class="relative w-full h-48 rounded-3xl overflow-hidden bg-slate-200 shadow-inner">
+                <img alt="Route Map"
+                    class="w-full h-full object-cover opacity-60 grayscale hover:grayscale-0 transition-all duration-700"
+                    data-alt="Minimalist abstract map of West Africa with glowing blue connecting lines between major cities, clean cartography style"
+                    data-location="Conakry"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbyYwriCzgOR-92_OCB2s3sWa8U16DepjiS8b984nUp-Y7yq0efRgNhPVEcemaU2N0y_qGr8Ex54nJhGrC3riah4uqrL4O2q3ykSUr1EZj-uTjArRUvm6l4eCZez6dTEOGMFfv3R-76JRG63yWuIObKcL-X-iD5WjnIHMhN66ebnPgH8NlKeDBNQgLgaktLB4kQe8gwd22O76O6nhkI5ONs8Scc9RxCQ8B0Pzsu1STifid1-cOvbBC2hgpRj9B_oR-b4wBLgoKBTSK" />
+                <div class="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
+                <div class="absolute bottom-4 left-6 flex items-center gap-2">
+                    <span class="w-3 h-3 bg-primary rounded-full animate-pulse"></span>
+                    <span class="text-xs font-bold text-primary uppercase tracking-widest">Couverture en direct : 98%
+                        des axes</span>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- AI Assistant FAB -->
+    <button
+        class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center active:scale-90 transition-transform z-40">
+        <span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+    </button>
+    <!-- BottomNavBar -->
+    <nav
+        class="fixed bottom-0 left-0 w-full h-20 bg-white/90 backdrop-blur-lg flex justify-around items-center px-4 pb-safe z-50 border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] rounded-t-2xl">
+        <a class="flex flex-col items-center justify-center text-slate-400 opacity-70 hover:opacity-100 transition-opacity"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="home">home</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Home</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-[#1a3d75] scale-110 transition-transform" href="#">
+            <span class="material-symbols-outlined" data-icon="route"
+                style="font-variation-settings: 'FILL' 1;">route</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Trips</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 opacity-70 hover:opacity-100 transition-opacity"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Tickets</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 opacity-70 hover:opacity-100 transition-opacity"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="person">person</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Profile</span>
+        </a>
+    </nav>
+</body>
+
+</html>

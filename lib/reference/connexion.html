@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#f1f5f9",
+                        "inverse-surface": "#1e293b",
+                        "on-tertiary-fixed": "#0f172a",
+                        "on-secondary-container": "#1e293b",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "surface-bright": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#1a3d75",
+                        "surface-container": "#f1f5f9",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "on-background": "#0f172a",
+                        "tertiary-container": "#334155",
+                        "on-surface-variant": "#475569",
+                        "error-container": "#fee2e2",
+                        "secondary-fixed": "#f1f5f9",
+                        "surface-tint": "#1a3d75",
+                        "on-secondary-fixed-variant": "#334155",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-surface": "#0f172a",
+                        "error": "#ef4444",
+                        "outline-variant": "#e2e8f0",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-container-low": "#f8fafc",
+                        "on-primary-container": "#dbeafe",
+                        "surface-variant": "#f1f5f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e8f0",
+                        "on-error": "#ffffff",
+                        "surface": "#ffffff",
+                        "primary-fixed": "#dbeafe",
+                        "inverse-primary": "#93c5fd",
+                        "tertiary": "#0f172a",
+                        "surface-container-highest": "#cbd5e1",
+                        "primary-container": "#1a3d75",
+                        "on-primary-fixed": "#1e3a8a",
+                        "on-error-container": "#991b1b",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-dim": "#f6f7f8",
+                        "on-secondary": "#ffffff",
+                        "background": "#f6f7f8",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "secondary": "#475569",
+                        "on-tertiary-container": "#f8fafc",
+                        "outline": "#cbd5e1",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0f172a"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .bg-mesh {
+            background-color: #f6f7f8;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(26, 61, 117, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(26, 61, 117, 0.08) 0px, transparent 50%);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-mesh font-body text-on-surface min-h-screen flex flex-col">
+    <!-- Top Navigation Suppressed for Login Focus - Simple Brand Anchor Only -->
+    <header class="fixed top-0 w-full z-50 px-6 py-8 flex justify-center pointer-events-none">
+        <div class="flex flex-col items-center">
+            <span class="font-headline text-2xl font-extrabold tracking-tighter text-primary">GUINEE TRANSPORT</span>
+            <span
+                class="font-headline text-xs font-bold uppercase tracking-[0.2em] text-secondary mt-1 opacity-70">Accédez
+                à votre espace de voyage</span>
+        </div>
+    </header>
+    <main class="flex-grow flex items-center justify-center px-4 pt-24 pb-12">
+        <div class="w-full max-w-md relative">
+            <!-- Decorative Accent -->
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
+            <!-- Login Card -->
+            <div
+                class="relative bg-surface rounded-3xl shadow-[0_10px_15px_-3px_rgb(26,61,117,0.1)] border border-outline-variant/50 p-8 md:p-10 backdrop-blur-sm">
+                <div class="mb-10 text-center">
+                    <h1 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-2">Bienvenue</h1>
+                    <p class="text-secondary text-sm">Connectez-vous pour gérer vos réservations et itinéraires.</p>
+                </div>
+                <form class="space-y-6">
+                    <!-- Email Field -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold uppercase tracking-widest text-secondary ml-1"
+                            for="email">Adresse Email</label>
+                        <div class="relative group">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[20px]" data-icon="mail">mail</span>
+                            </div>
+                            <input
+                                class="block w-full pl-11 pr-4 py-4 bg-slate-50 border-outline border focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-200 outline-none text-on-surface placeholder:text-slate-400"
+                                id="email" name="email" placeholder="nom@exemple.com" type="email" />
+                        </div>
+                    </div>
+                    <!-- Password Field -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center ml-1">
+                            <label class="block text-xs font-bold uppercase tracking-widest text-secondary"
+                                for="password">Mot de passe</label>
+                            <a class="text-[11px] font-bold text-primary hover:underline transition-all" href="#">Oublié
+                                ?</a>
+                        </div>
+                        <div class="relative group">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
+                            </div>
+                            <input
+                                class="block w-full pl-11 pr-12 py-4 bg-slate-50 border-outline border focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl transition-all duration-200 outline-none text-on-surface placeholder:text-slate-400"
+                                id="password" name="password" placeholder="••••••••" type="password" />
+                            <button
+                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-primary transition-colors"
+                                type="button">
+                                <span class="material-symbols-outlined text-[20px]"
+                                    data-icon="visibility">visibility</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Remember Me -->
+                    <div class="flex items-center px-1">
+                        <input class="w-4 h-4 text-primary border-outline rounded focus:ring-primary" id="remember"
+                            type="checkbox" />
+                        <label class="ml-2 text-sm text-secondary font-medium" for="remember">Se souvenir de moi</label>
+                    </div>
+                    <!-- Submit Button -->
+                    <button
+                        class="w-full bg-primary text-white font-headline font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 group"
+                        type="submit">
+                        <span>Se connecter</span>
+                        <span
+                            class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform"
+                            data-icon="arrow_forward">arrow_forward</span>
+                    </button>
+                </form>
+                <!-- Alternative Methods -->
+                <div class="mt-8 text-center">
+                    <div class="relative flex py-4 items-center">
+                        <div class="flex-grow border-t border-outline-variant"></div>
+                        <span class="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Ou
+                            continuer avec</span>
+                        <div class="flex-grow border-t border-outline-variant"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <button
+                            class="flex items-center justify-center gap-2 py-3 border border-outline-variant rounded-xl hover:bg-slate-50 transition-colors">
+                            <img alt="Google Logo" class="w-4 h-4 opacity-70"
+                                data-alt="Google colorful brand icon logo minimal"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuA87qNLX8qFdh8dzrFVL945UfMnbQ-aRB4-_0MU8S43IQPdQpdz48JD148PeLd2k9oEiGXNUXlHO1G9n5Z0k1iRYnWZVajx6ELUFnamfYwED9WJ9XWOBSRfca3zQmweIhCXf_js_NWpm2xygI5wzRaeOBT67a4ifCIYGjVjmx6IBUFgHzDjyJ7I3hmI5XzJCeydtlJaxjVVA2GKZGKjHqOKVG-wtoV6kX97-fsS5LH0gRDvyOwFg6E2uoWvzN4asuVeLZap6kV31LZ3" />
+                            <span class="text-sm font-semibold text-slate-700">Google</span>
+                        </button>
+                        <button
+                            class="flex items-center justify-center gap-2 py-3 border border-outline-variant rounded-xl hover:bg-slate-50 transition-colors">
+                            <span class="material-symbols-outlined text-[18px] text-[#1877F2]" data-icon="facebook"
+                                style="font-variation-settings: 'FILL' 1;">social_leaderboard</span>
+                            <span class="text-sm font-semibold text-slate-700">Facebook</span>
+                        </button>
+                    </div>
+                    <div class="mt-10">
+                        <p class="text-sm text-slate-500">
+                            Pas encore de compte ?
+                            <a class="text-primary font-bold hover:underline" href="#">Créer un compte</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer Links -->
+            <div class="mt-8 flex justify-center gap-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                <a class="hover:text-primary transition-colors" href="#">Confidentialité</a>
+                <a class="hover:text-primary transition-colors" href="#">Conditions</a>
+                <a class="hover:text-primary transition-colors" href="#">Support</a>
+            </div>
+        </div>
+    </main>
+    <!-- Visual Background Element -->
+    <div class="fixed bottom-0 right-0 w-1/3 h-1/2 opacity-20 pointer-events-none">
+        <div class="w-full h-full"
+            style="background: radial-gradient(circle at bottom right, #1a3d75 0%, transparent 70%);"></div>
+    </div>
+</body>
+
+</html>

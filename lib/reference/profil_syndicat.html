@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Profil Syndicat - Azimuth Admin</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-variant": "#f1f5f9",
+                        "error-container": "#fee2e2",
+                        "outline-variant": "#e2e8f0",
+                        "surface-container-highest": "#cbd5e1",
+                        "background": "#f6f7f8",
+                        "inverse-primary": "#93c5fd",
+                        "on-primary-container": "#dbeafe",
+                        "inverse-surface": "#1e293b",
+                        "surface-container-low": "#f8fafc",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "on-surface": "#0f172a",
+                        "error": "#ef4444",
+                        "on-secondary-fixed-variant": "#334155",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#475569",
+                        "surface-container": "#f1f5f9",
+                        "tertiary-fixed": "#cbd5e1",
+                        "tertiary-container": "#334155",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "secondary-container": "#f1f5f9",
+                        "on-tertiary-fixed": "#0f172a",
+                        "surface-container-high": "#e2e8f0",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "secondary-fixed": "#f1f5f9",
+                        "on-background": "#0f172a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f8fafc",
+                        "tertiary": "#0f172a",
+                        "primary-fixed": "#dbeafe",
+                        "on-secondary-container": "#1e293b",
+                        "secondary": "#475569",
+                        "surface": "#ffffff",
+                        "on-error-container": "#991b1b",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-bright": "#ffffff",
+                        "on-secondary-fixed": "#0f172a",
+                        "outline": "#cbd5e1",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#f6f7f8",
+                        "primary": "#1a3d75",
+                        "on-primary-fixed": "#1e3a8a",
+                        "surface-tint": "#1a3d75",
+                        "primary-container": "#1a3d75"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .font-plus {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-inter {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background font-inter text-on-background min-h-screen pb-24 md:pb-0 md:pt-16">
+    <!-- TopAppBar -->
+    <header
+        class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-b border-slate-100 dark:border-slate-800 shadow-sm fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 w-full">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
+                <img alt="Admin Profile Photo" class="w-full h-full object-cover"
+                    data-alt="corporate logo design for a transport union with blue geometric elements and professional emblem aesthetic"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhA7cKadw9w6BRZPgYEjjFISsKa9S3f-6Otj_rOR9Jo4jTEnj_evZ_KtU1aae0KKCXkqe1Df_bNcJhYPlwnZNtbHdtNYHUz2BKnht24qkJVCZ6ZI46wAzTiFUylVWrnSVKtrUzHURhg3k8TVD9kCJ8PTJkVHACUQ6H8VuOfMo3PawONLqEUliogvifAEPCgK0uC0NrncIk5m6B-X1BltW6DS9AuuV-NIk16JtcujUj2F09Sb7E82PGWZ-3Oq7r04sQfpAFCMK_sJQP" />
+            </div>
+            <h1 class="text-xl font-black text-[#1a3d75] dark:text-blue-400 font-['Plus_Jakarta_Sans'] tracking-tight">
+                Azimuth Admin</h1>
+        </div>
+        <nav class="hidden md:flex items-center gap-8">
+            <a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 py-2 rounded-lg font-medium"
+                href="#">Dashboard</a>
+            <a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 py-2 rounded-lg font-medium"
+                href="#">Fleet</a>
+            <a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors px-3 py-2 rounded-lg font-medium"
+                href="#">Trips</a>
+            <a class="text-[#1a3d75] dark:text-blue-400 font-bold px-3 py-2 rounded-lg" href="#">Profile</a>
+        </nav>
+        <button
+            class="material-symbols-outlined text-slate-500 hover:bg-slate-50 p-2 rounded-full transition-colors active:scale-95 duration-200">
+            notifications
+        </button>
+    </header>
+    <main class="max-w-5xl mx-auto px-4 pt-8 md:pt-12 pb-12">
+        <!-- Profile Header Section -->
+        <section class="relative mb-12">
+            <div class="h-48 rounded-3xl overflow-hidden bg-gradient-to-r from-primary to-blue-900 shadow-lg">
+                <img alt="Header Background" class="w-full h-full object-cover opacity-40 mix-blend-overlay"
+                    data-alt="long exposure of highway traffic at dusk with blue and orange light trails creating a sense of movement"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDldn65BomRbpgSP2jQGsHYSqeS8KYk91ds-XPrSeNRO9ByXBrhpDp6Yb-RSUtLGJ4CgyggM-koFOVtncyoy2uwGUYVK_MwDWgT2RbUjtwLwybte6PrwdoKJMhGm1V0XR3YPO2nLWuv_WgLZ_YFPv2fQTzpf8P9KroNUF_IY8k9SO0Uy-YjnbgpNdO-F9lo5RwCGCijPfcDDpX9p-_uXp-Gfr6szBAAQonbwDxg91iqx9AC4lTiLkFRaaXvRslIwXtlexutGhSqUbcM" />
+            </div>
+            <div class="absolute -bottom-10 left-8 flex flex-col md:flex-row md:items-end gap-6 w-[calc(100%-4rem)]">
+                <div class="relative">
+                    <div class="w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-white p-2 shadow-xl">
+                        <div
+                            class="w-full h-full rounded-2xl bg-slate-50 flex items-center justify-center overflow-hidden border border-slate-100">
+                            <img alt="Syndicat Logo" class="w-full h-full object-cover"
+                                data-alt="Modern minimalist crest logo for a Guinean transport syndicate featuring blue tones and geometric symbols"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNh3o1GZnaP0VXh_i5RaZlhcA_mFLhUvkl67bSpVGKifD8Dp7pc8QeMqijsUSi4f3bBgkFo23XC80YOjzS2Ivh3l0UerEriyhPK1zZTdHmlBnoZMlykNse-_u3xaYXpnDukm_j1GW6_XWpCzeR1sxkZP85dX3r-vPs3iyKfsa9l8yivN1qwJr7BY4Dd5uQAT2qh4_hfFZL0ZfbXpx83S1Qv5RhbfuQfjhjhkxa2GSnPafDQ_xYa4-H3Z8pP_wlf9qYqzQ3zR2qpy1Z" />
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 pb-2">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span
+                            class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-widest rounded-md">Union
+                            Officielle</span>
+                    </div>
+                    <h2
+                        class="text-3xl md:text-4xl font-extrabold font-headline tracking-tight text-slate-900 leading-tight">
+                        Syndicat Conakry-Labé</h2>
+                    <p class="text-slate-500 font-medium flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">location_on</span>
+                        GuineeTransport - Votre compte syndical
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- Stats Grid (Bento Layout) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 mt-16 md:mt-24">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div>
+                    <span class="material-symbols-outlined text-primary mb-4 block text-3xl">groups</span>
+                    <h3 class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Total Drivers</h3>
+                </div>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-4xl font-black text-slate-900 tracking-tight">1,284</span>
+                    <span class="text-emerald-600 text-xs font-bold">+12%</span>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div>
+                    <span class="material-symbols-outlined text-primary mb-4 block text-3xl">local_shipping</span>
+                    <h3 class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Active Vehicles</h3>
+                </div>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span class="text-4xl font-black text-slate-900 tracking-tight">856</span>
+                    <span class="text-slate-400 text-xs font-medium">/ 920 total</span>
+                </div>
+            </div>
+            <div
+                class="bg-primary text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="material-symbols-outlined text-blue-300 mb-4 block text-3xl">analytics</span>
+                    <h3 class="text-blue-100/70 text-sm font-semibold uppercase tracking-wider">Departures this month
+                    </h3>
+                </div>
+                <div class="relative z-10 flex items-baseline gap-2 mt-2">
+                    <span class="text-4xl font-black tracking-tight">4,120</span>
+                </div>
+                <!-- Decorative element -->
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+            </div>
+        </div>
+        <!-- Details and Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Information Card -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                    <h3 class="text-xl font-bold font-headline mb-6 text-slate-900 border-l-4 border-primary pl-4">
+                        Informations Détailées</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100/50">
+                            <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                                <span class="material-symbols-outlined text-primary">route</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Trajet géré
+                                </p>
+                                <p class="text-lg font-bold text-slate-900">Conakry <span
+                                        class="text-primary mx-2">↔</span> Labé</p>
+                                <p class="text-sm text-slate-500 mt-1">Ligne nationale principale via Mamou et Dalaba.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100/50">
+                            <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                                <span class="material-symbols-outlined text-primary">warehouse</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Gare de
+                                    rattachement</p>
+                                <p class="text-lg font-bold text-slate-900">Gare Routière de Bambéto</p>
+                                <p class="text-sm text-slate-500 mt-1">Terminal de départ principal - Secteur Conakry.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100/50">
+                            <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                                <span class="material-symbols-outlined text-primary">badge</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Responsable
+                                </p>
+                                <p class="text-lg font-bold text-slate-900">M. Mamadou Diallo</p>
+                                <p class="text-sm text-slate-500 mt-1">Secrétaire Général de la Coordination Syndicale.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Recent Activity/Route Preview -->
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold font-headline text-slate-900">Carte du Réseau</h3>
+                        <span
+                            class="text-xs font-bold text-primary flex items-center gap-1 cursor-pointer hover:underline">
+                            VOIR TOUS LES ARRÊTS <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </span>
+                    </div>
+                    <div class="h-48 rounded-2xl bg-slate-100 overflow-hidden relative border border-slate-200">
+                        <img alt="Route Map" class="w-full h-full object-cover grayscale opacity-50"
+                            data-alt="Abstract geographical map highlighting transport routes between cities with professional cartography style"
+                            data-location="Guinea"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjhJgCNdSkpKerXFcuPsY79fH1e0vuTud46yC2hk89sE1_l164zT38VuDYJ1HC2D-4K4Y9p1mDL-RWQ7JJVaSddn9Ji_jIpUnz9yf7IZm3Re3n-wOGbdUYC6PzqOXQVjPCk-mrwYTNrvTl4AzxR9BzV-XeS8gdLDoOfkq_bNC2ykLZ8FsTzTJSf4sfwvNJQmY8rZgtoT3zrJrONwy9Iaqub-k4yaQKc5OvNSmQi2dz6JSOhR_3TtRoNUkEGGvF555Xb_JZ6Pgddpuf" />
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div
+                                class="bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="text-xs font-bold text-slate-700">Flux de trafic optimal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Action Sidebar -->
+            <div class="space-y-4">
+                <button
+                    class="w-full bg-primary text-white p-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all duration-200">
+                    <span class="material-symbols-outlined">edit</span>
+                    Modifier le profil
+                </button>
+                <button
+                    class="w-full bg-white text-slate-900 p-5 rounded-2xl font-bold flex items-center justify-center gap-3 border border-slate-200 shadow-sm hover:bg-slate-50 active:scale-95 transition-all duration-200">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Voir stats détaillées
+                </button>
+                <div class="h-px bg-slate-200 my-4"></div>
+                <button
+                    class="w-full bg-red-50 text-red-600 p-5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-red-100 active:scale-95 transition-all duration-200">
+                    <span class="material-symbols-outlined">logout</span>
+                    Se déconnecter
+                </button>
+                <div class="mt-8 p-6 rounded-2xl bg-blue-50/50 border border-blue-100">
+                    <h4 class="text-xs font-black text-blue-900 uppercase tracking-widest mb-3">Support Syndical</h4>
+                    <p class="text-sm text-blue-700 mb-4 leading-relaxed">Besoin d'aide pour gérer vos véhicules ou vos
+                        trajets ? Contactez notre centre d'assistance.</p>
+                    <a class="inline-flex items-center gap-2 text-primary font-bold hover:underline" href="tel:000">
+                        <span class="material-symbols-outlined text-sm">support_agent</span>
+                        Contacter le support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-safe bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg shadow-[0_-4px_10px_rgba(26,61,117,0.08)] rounded-t-2xl z-50">
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#1a3d75] dark:hover:text-blue-300 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span
+                class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Dashboard</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#1a3d75] dark:hover:text-blue-300 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined">local_shipping</span>
+            <span
+                class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Chauffeurs</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#1a3d75] dark:hover:text-blue-300 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined">route</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Trajets</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-[#1a3d75] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-xl px-3 py-1 transition-transform duration-150 active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined">person</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider font-['Plus_Jakarta_Sans'] mt-1">Profil</span>
+        </a>
+    </nav>
+</body>
+
+</html>

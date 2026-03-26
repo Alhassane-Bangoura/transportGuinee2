@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#334155",
+                        "secondary": "#475569",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#1a3d75",
+                        "on-secondary-container": "#1e293b",
+                        "background": "#f6f7f8",
+                        "surface": "#ffffff",
+                        "inverse-surface": "#1e293b",
+                        "tertiary": "#0f172a",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed": "#0f172a",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#f6f7f8",
+                        "error-container": "#fee2e2",
+                        "surface-container-low": "#f8fafc",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "primary-fixed": "#dbeafe",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "inverse-primary": "#93c5fd",
+                        "surface-container-highest": "#cbd5e1",
+                        "outline-variant": "#e2e8f0",
+                        "surface-container": "#f1f5f9",
+                        "outline": "#cbd5e1",
+                        "primary": "#1a3d75",
+                        "on-surface": "#0f172a",
+                        "secondary-container": "#f1f5f9",
+                        "surface-bright": "#ffffff",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-tint": "#1a3d75",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "error": "#ef4444",
+                        "on-error-container": "#991b1b",
+                        "on-secondary-fixed": "#0f172a",
+                        "on-secondary-fixed-variant": "#334155",
+                        "on-primary-container": "#dbeafe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f8fafc",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#1e3a8a",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-variant": "#f1f5f9",
+                        "secondary-fixed": "#f1f5f9",
+                        "on-surface-variant": "#475569"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-surface-container-low font-body text-on-surface antialiased">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-lg shadow-sm dark:shadow-none flex justify-between items-center px-6 h-16 w-full max-w-none">
+        <div class="flex items-center gap-4">
+            <button class="material-symbols-outlined text-primary active:scale-95 duration-200">arrow_back</button>
+            <h1 class="font-headline tracking-tight font-extrabold text-lg text-primary uppercase tracking-tighter">
+                GuineeTransport</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden">
+                <img class="w-full h-full object-cover"
+                    data-alt="portrait of a professional West African man in a business casual outfit, smiling warmly against a soft studio background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvwrrXKsIBtCpzPO-k7fujo2fzW4Fb8WVD4aQw3P3lwgZ72_4IoSngLyz_JHTAQ3TqneKo-zhsUBUMjz7xqCmSAuZczyhNN4pdVRTcWW6CFbI6XyGOzYCrtFzM85bObDBFDpK2MwBXwZvv8eY36PKNdqrNX3ZDiIlGsFPZqaPYNkyj18RpnB8Z_yEYHFukpppRBoPgxXvemngDI7PuVfJlnj-jXxsw0ftLAHT01E3RDVhaGYXFGUBzSyg250SHKigz1pbdek4oU8qC" />
+            </div>
+        </div>
+    </header>
+    <main class="pt-16 pb-32 max-w-2xl mx-auto">
+        <!-- Map View Section -->
+        <section class="relative w-full h-64 md:h-80 overflow-hidden bg-slate-200">
+            <img class="w-full h-full object-cover"
+                data-alt="stylized professional map view showing a blue route line connecting two points in a West African coastal city, minimalist aesthetic"
+                data-location="Conakry, Guinea"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFysjp4GkoyLP4pVOFVJLvtWe77RyGxNV5f6lw2f-YVj9-qdJimIXoY-SjivaBLG1BzcRX9Uls6tXN3Pgu39FxWWHDS_kR9sD9NwPFJcWhbt7ZUWVn9Q2scIgWzjpC5Xkpx2SX9WX2YL3bDBvBZazyej2pu-ziWP3Q8L3fKs2tuVx85xjjVMnxRJJjrV1TE4waVoR4IV8k2zOXoNF5YmXbtN8wHf7u-u6VXyEFypj7DeC1iPaGUE0cCUISh8xVrBPb9MRp1KTJxVBL" />
+            <!-- Route Overlay Cards -->
+            <div
+                class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/20">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-start gap-4">
+                        <div class="flex flex-col items-center">
+                            <span class="w-3 h-3 rounded-full bg-primary ring-4 ring-primary-fixed"></span>
+                            <div class="w-0.5 h-6 bg-slate-200 my-1"></div>
+                            <span class="w-3 h-3 rounded-full border-2 border-primary bg-white"></span>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                                    Départ</p>
+                                <p class="font-headline font-bold text-sm">Gare de Madina, Conakry</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                                    Arrivée</p>
+                                <p class="font-headline font-bold text-sm">Centre-Ville, Kankan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Temps estimé</p>
+                        <p class="font-headline font-extrabold text-primary text-lg italic">8h 45m</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- AI Assistant Floating Hint -->
+        <div class="px-6 -mt-3 relative z-10">
+            <div
+                class="bg-primary-container text-on-primary-container p-3 rounded-xl shadow-lg flex items-center gap-3 animate-pulse border border-primary/20">
+                <span class="material-symbols-outlined text-blue-300" data-icon="smart_toy">smart_toy</span>
+                <p class="text-xs font-medium">This driver has a 4.9 rating! You're in safe hands, Alpha.</p>
+            </div>
+        </div>
+        <!-- Trip Details Content -->
+        <div class="px-6 mt-8 space-y-8">
+            <!-- Bus & Operator Info -->
+            <div class="bg-surface p-6 rounded-2xl shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Transporteur</h2>
+                        <h3 class="font-headline text-xl font-bold text-primary">Soguitrans Express</h3>
+                    </div>
+                    <div class="bg-surface-container px-3 py-1 rounded-full flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs text-yellow-500"
+                            style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span class="text-xs font-bold">4.9</span>
+                    </div>
+                </div>
+                <!-- Bus Image Card (Bento style) -->
+                <div class="grid grid-cols-2 gap-3 h-40">
+                    <div class="rounded-xl overflow-hidden shadow-inner">
+                        <img class="w-full h-full object-cover"
+                            data-alt="luxury modern long-distance bus with sleek blue and white design parked in a clean terminal"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBI-NjlQGAvVRT4JJreZMlKh85rtd1KD_Jt9L5Ak9I9A31b3o6RytCruNs3fnNufY04ZB-yJgCit-MXR4g_z-7jYr_Zxq4KDTGnMZfxJxGv45XoVUQzYvRzlWFsZxHz7vjUF_3eLS9YwwrYIFgphV6v00VBzimZ6hxKO-4tTF_idbGQYoHsHcAZeiVO7b_UsW2EY6ggdPXERL8SvSUofGL9zTemmb3XgfEICTiGEF8bOxNZfwjhZuy_TIIFzdqucLrc7ULgdhA2AWj9" />
+                    </div>
+                    <div class="rounded-xl overflow-hidden shadow-inner">
+                        <img class="w-full h-full object-cover"
+                            data-alt="interior of a luxury bus featuring comfortable navy leather seats, ample legroom and ambient lighting"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsgLPJSIW8CVFtk6AqIouWdqY3Mz7Ta0rMDEtirqH06Hm0GygqRm2V_YSGN3wr0Obbt5Xx3SOb1_ZWY9aw-bCkUDz1HDqw4XIJXp0FXtYXPikFZWP0LR4_omXjcdB0TXV00xhpQsY2LlJOboCZoehMlatbBXf4xB2ecrozPcj5uWZTo-VoSN9et097_PaunFDpk9kZg0B2Fp2CatXda8X4tsRm816j5wN4lhNVQg9qpsxsqCT-cFe80v7aT9xsoh4XMRvMjeY7jLU0" />
+                    </div>
+                </div>
+                <!-- Comfort Amenities -->
+                <div class="flex items-center gap-6 py-4 border-y border-slate-50">
+                    <div class="flex flex-col items-center gap-1 group">
+                        <div
+                            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                            <span class="material-symbols-outlined" data-icon="wifi">wifi</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Wi-Fi</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 group">
+                        <div
+                            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                            <span class="material-symbols-outlined" data-icon="ac_unit">ac_unit</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">A/C</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 group">
+                        <div
+                            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                            <span class="material-symbols-outlined"
+                                data-icon="electrical_services">electrical_services</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Outlets</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 group opacity-40">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500">
+                            <span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter line-through">Meals</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Detailed Schedule Timeline -->
+            <div class="space-y-4">
+                <h4 class="font-headline font-bold text-slate-900 px-1">Itinéraire détaillé</h4>
+                <div class="bg-surface rounded-2xl p-6 shadow-sm space-y-6">
+                    <!-- Stop 1 -->
+                    <div class="flex gap-4 relative">
+                        <div class="flex flex-col items-center">
+                            <div class="z-10 bg-primary-container p-1 rounded-full">
+                                <span class="material-symbols-outlined text-[14px] text-on-primary-container"
+                                    style="font-variation-settings: 'FILL' 1;">directions_bus</span>
+                            </div>
+                            <div class="absolute top-6 bottom-[-24px] w-0.5 bg-slate-100 left-[11px]"></div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-primary">07:00 • Départ</p>
+                            <p class="text-sm font-semibold">Gare de Madina</p>
+                            <p class="text-xs text-slate-500">Embarquement porte 4B</p>
+                        </div>
+                    </div>
+                    <!-- Stop 2 -->
+                    <div class="flex gap-4 relative">
+                        <div class="flex flex-col items-center">
+                            <div class="z-10 bg-slate-200 p-1 rounded-full">
+                                <span class="material-symbols-outlined text-[14px] text-slate-500">restaurant</span>
+                            </div>
+                            <div class="absolute top-6 bottom-[-24px] w-0.5 bg-slate-100 left-[11px]"></div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">11:30 • Escale (30 min)</p>
+                            <p class="text-sm font-semibold">Kindia • Aire de repos</p>
+                            <p class="text-xs text-slate-500">Pause déjeuner et rafraîchissements</p>
+                        </div>
+                    </div>
+                    <!-- Stop 3 -->
+                    <div class="flex gap-4">
+                        <div class="flex flex-col items-center">
+                            <div class="z-10 bg-primary-fixed p-1 rounded-full">
+                                <span class="material-symbols-outlined text-[14px] text-primary" data-icon="location_on"
+                                    style="font-variation-settings: 'FILL' 1;">location_on</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">15:45 • Arrivée</p>
+                            <p class="text-sm font-semibold">Gare Routière de Kankan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Seat Availability Section -->
+            <div
+                class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex items-center justify-between overflow-hidden relative">
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Disponibilité</p>
+                    <h4 class="font-headline text-lg font-bold">12 Places restantes</h4>
+                    <p class="text-xs text-slate-400">Sièges XL avec inclinaison 140°</p>
+                </div>
+                <div class="relative z-10 bg-blue-500/10 p-3 rounded-full">
+                    <span class="material-symbols-outlined text-3xl text-blue-400"
+                        data-icon="airline_seat_recline_extra">airline_seat_recline_extra</span>
+                </div>
+                <!-- Decorative blue glow -->
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary opacity-20 blur-3xl rounded-full"></div>
+            </div>
+        </div>
+    </main>
+    <!-- Booking Bottom Bar -->
+    <div
+        class="fixed bottom-0 left-0 w-full h-24 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-10px_20px_-5px_rgba(26,61,117,0.08)] px-6 py-4 flex items-center justify-between z-50">
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Total Voyage</p>
+            <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-black font-headline text-primary">250.000</span>
+                <span class="text-xs font-bold text-primary/70">GNF</span>
+            </div>
+        </div>
+        <button
+            class="bg-primary text-white font-headline font-bold px-8 h-14 rounded-2xl shadow-[0_8px_20px_-4px_rgba(26,61,117,0.4)] flex items-center gap-3 active:scale-95 transition-transform duration-200">
+            <span>Réserver maintenant</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </button>
+    </div>
+    <!-- Background Decoration for Premium feel -->
+    <div class="fixed inset-0 pointer-events-none -z-10">
+        <div class="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 blur-[100px] rounded-full"></div>
+        <div class="absolute bottom-1/4 -left-20 w-80 h-80 bg-blue-400/5 blur-[100px] rounded-full"></div>
+    </div>
+</body>
+
+</html>
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#334155",
+                        "secondary": "#475569",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#1a3d75",
+                        "on-secondary-container": "#1e293b",
+                        "background": "#f6f7f8",
+                        "surface": "#ffffff",
+                        "inverse-surface": "#1e293b",
+                        "tertiary": "#0f172a",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed": "#0f172a",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#f6f7f8",
+                        "error-container": "#fee2e2",
+                        "surface-container-low": "#f8fafc",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "primary-fixed": "#dbeafe",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "inverse-primary": "#93c5fd",
+                        "surface-container-highest": "#cbd5e1",
+                        "outline-variant": "#e2e8f0",
+                        "surface-container": "#f1f5f9",
+                        "outline": "#cbd5e1",
+                        "primary": "#1a3d75",
+                        "on-surface": "#0f172a",
+                        "secondary-container": "#f1f5f9",
+                        "surface-bright": "#ffffff",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-tint": "#1a3d75",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "error": "#ef4444",
+                        "on-error-container": "#991b1b",
+                        "on-secondary-fixed": "#0f172a",
+                        "on-secondary-fixed-variant": "#334155",
+                        "on-primary-container": "#dbeafe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f8fafc",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#1e3a8a",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-variant": "#f1f5f9",
+                        "secondary-fixed": "#f1f5f9",
+                        "on-surface-variant": "#475569"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-surface-container-low font-body text-on-surface antialiased">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-lg shadow-sm dark:shadow-none flex justify-between items-center px-6 h-16 w-full max-w-none">
+        <div class="flex items-center gap-4">
+            <button class="material-symbols-outlined text-primary active:scale-95 duration-200">arrow_back</button>
+            <h1 class="font-headline tracking-tight font-extrabold text-lg text-primary uppercase tracking-tighter">
+                GuineeTransport</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden">
+                <img class="w-full h-full object-cover"
+                    data-alt="portrait of a professional West African man in a business casual outfit, smiling warmly against a soft studio background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvwrrXKsIBtCpzPO-k7fujo2fzW4Fb8WVD4aQw3P3lwgZ72_4IoSngLyz_JHTAQ3TqneKo-zhsUBUMjz7xqCmSAuZczyhNN4pdVRTcWW6CFbI6XyGOzYCrtFzM85bObDBFDpK2MwBXwZvv8eY36PKNdqrNX3ZDiIlGsFPZqaPYNkyj18RpnB8Z_yEYHFukpppRBoPgxXvemngDI7PuVfJlnj-jXxsw0ftLAHT01E3RDVhaGYXFGUBzSyg250SHKigz1pbdek4oU8qC" />
+            </div>
+        </div>
+    </header>
+    <main class="pt-16 pb-32 max-w-2xl mx-auto">
+        <!-- Map View Section -->
+        <section class="relative w-full h-64 md:h-80 overflow-hidden bg-slate-200">
+            <img class="w-full h-full object-cover"
+                data-alt="stylized professional map view showing a blue route line connecting two points in a West African coastal city, minimalist aesthetic"
+                data-location="Conakry, Guinea"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFysjp4GkoyLP4pVOFVJLvtWe77RyGxNV5f6lw2f-YVj9-qdJimIXoY-SjivaBLG1BzcRX9Uls6tXN3Pgu39FxWWHDS_kR9sD9NwPFJcWhbt7ZUWVn9Q2scIgWzjpC5Xkpx2SX9WX2YL3bDBvBZazyej2pu-ziWP3Q8L3fKs2tuVx85xjjVMnxRJJjrV1TE4waVoR4IV8k2zOXoNF5YmXbtN8wHf7u-u6VXyEFypj7DeC1iPaGUE0cCUISh8xVrBPb9MRp1KTJxVBL" />
+            <!-- Route Overlay Cards -->
+            <div
+                class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/20">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-start gap-4">
+                        <div class="flex flex-col items-center">
+                            <span class="w-3 h-3 rounded-full bg-primary ring-4 ring-primary-fixed"></span>
+                            <div class="w-0.5 h-6 bg-slate-200 my-1"></div>
+                            <span class="w-3 h-3 rounded-full border-2 border-primary bg-white"></span>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                                    Départ</p>
+                                <p class="font-headline font-bold text-sm">Gare de Madina, Conakry</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                                    Arrivée</p>
+                                <p class="font-headline font-bold text-sm">Centre-Ville, Kankan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Temps estimé</p>
+                        <p class="font-headline font-extrabold text-primary text-lg italic">8h 45m</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- AI Assistant Floating Hint -->
+        <div class="px-6 -mt-3 relative z-10">
+            <div
+                class="bg-primary-container text-on-primary-container p-3 rounded-xl shadow-lg flex items-center gap-3 animate-pulse border border-primary/20">
+                <span class="material-symbols-outlined text-blue-300" data-icon="smart_toy">smart_toy</span>
+                <p class="text-xs font-medium">This driver has a 4.9 rating! You're in safe hands, Alpha.</p>
+            </div>
+        </div>
+        <!-- Trip Details Content -->
+        <div class="px-6 mt-8 space-y-8">
+            <!-- Bus & Operator Info -->
+            <div class="bg-surface p-6 rounded-2xl shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Transporteur</h2>
+                        <h3 class="font-headline text-xl font-bold text-primary">Soguitrans Express</h3>
+                    </div>
+                    <div class="bg-surface-container px-3 py-1 rounded-full flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs text-yellow-500"
+                            style="font-variation-settings: 'FILL' 1;">star</span>
+                        <span class="text-xs font-bold">4.9</span>
+                    </div>
+                </div>
+                <!-- Bus Image Card (Bento style) -->
+                <div class="grid grid-cols-2 gap-3 h-40">
+                    <div class="rounded-xl overflow-hidden shadow-inner">
+                        <img class="w-full h-full object-cover"
+                            data-alt="luxury modern long-distance bus with sleek blue and white design parked in a clean terminal"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBI-NjlQGAvVRT4JJreZMlKh85rtd1KD_Jt9L5Ak9I9A31b3o6RytCruNs3fnNufY04ZB-yJgCit-MXR4g_z-7jYr_Zxq4KDTGnMZfxJxGv45XoVUQzYvRzlWFsZxHz7vjUF_3eLS9YwwrYIFgphV6v00VBzimZ6hxKO-4tTF_idbGQYoHsHcAZeiVO7b_UsW2EY6ggdPXERL8SvSUofGL9zTemmb3XgfEICTiGEF8bOxNZfwjhZuy_TIIFzdqucLrc7ULgdhA2AWj9" />
+                    </div>
+                    <div class="rounded-xl overflow-hidden shadow-inner">
+                        <img class="w-full h-full object-cover"
+                            data-alt="interior of a luxury bus featuring comfortable navy leather seats, ample legroom and ambient lighting"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsgLPJSIW8CVFtk6AqIouWdqY3Mz7Ta0rMDEtirqH06Hm0GygqRm2V_YSGN3wr0Obbt5Xx3SOb1_ZWY9aw-bCkUDz1HDqw4XIJXp0FXtYXPikFZWP0LR4_omXjcdB0TXV00xhpQsY2LlJOboCZoehMlatbBXf4xB2ecrozPcj5uWZTo-VoSN9et097_PaunFDpk9kZg0B2Fp2CatXda8X4tsRm816j5wN4lhNVQg9qpsxsqCT-cFe80v7aT9xsoh4XMRvMjeY7jLU0" />
+                    </div>
+                </div>
+                <!-- Comfort Amenities -->
+                <div class="flex items-center gap-6 py-4 border-y border-slate-50">
+                    <div class="flex flex-col items-center gap-1 group">
+                        <div
+                            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                            <span class="material-symbols-outlined" data-icon="wifi">wifi</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Wi-Fi</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 group">
+                        <div
+                            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                            <span class="material-symbols-outlined" data-icon="ac_unit">ac_unit</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">A/C</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 group">
+                        <div
+                            class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                            <span class="material-symbols-outlined"
+                                data-icon="electrical_services">electrical_services</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Outlets</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1 group opacity-40">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500">
+                            <span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter line-through">Meals</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Detailed Schedule Timeline -->
+            <div class="space-y-4">
+                <h4 class="font-headline font-bold text-slate-900 px-1">Itinéraire détaillé</h4>
+                <div class="bg-surface rounded-2xl p-6 shadow-sm space-y-6">
+                    <!-- Stop 1 -->
+                    <div class="flex gap-4 relative">
+                        <div class="flex flex-col items-center">
+                            <div class="z-10 bg-primary-container p-1 rounded-full">
+                                <span class="material-symbols-outlined text-[14px] text-on-primary-container"
+                                    style="font-variation-settings: 'FILL' 1;">directions_bus</span>
+                            </div>
+                            <div class="absolute top-6 bottom-[-24px] w-0.5 bg-slate-100 left-[11px]"></div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-primary">07:00 • Départ</p>
+                            <p class="text-sm font-semibold">Gare de Madina</p>
+                            <p class="text-xs text-slate-500">Embarquement porte 4B</p>
+                        </div>
+                    </div>
+                    <!-- Stop 2 -->
+                    <div class="flex gap-4 relative">
+                        <div class="flex flex-col items-center">
+                            <div class="z-10 bg-slate-200 p-1 rounded-full">
+                                <span class="material-symbols-outlined text-[14px] text-slate-500">restaurant</span>
+                            </div>
+                            <div class="absolute top-6 bottom-[-24px] w-0.5 bg-slate-100 left-[11px]"></div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">11:30 • Escale (30 min)</p>
+                            <p class="text-sm font-semibold">Kindia • Aire de repos</p>
+                            <p class="text-xs text-slate-500">Pause déjeuner et rafraîchissements</p>
+                        </div>
+                    </div>
+                    <!-- Stop 3 -->
+                    <div class="flex gap-4">
+                        <div class="flex flex-col items-center">
+                            <div class="z-10 bg-primary-fixed p-1 rounded-full">
+                                <span class="material-symbols-outlined text-[14px] text-primary" data-icon="location_on"
+                                    style="font-variation-settings: 'FILL' 1;">location_on</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400">15:45 • Arrivée</p>
+                            <p class="text-sm font-semibold">Gare Routière de Kankan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Seat Availability Section -->
+            <div
+                class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl flex items-center justify-between overflow-hidden relative">
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Disponibilité</p>
+                    <h4 class="font-headline text-lg font-bold">12 Places restantes</h4>
+                    <p class="text-xs text-slate-400">Sièges XL avec inclinaison 140°</p>
+                </div>
+                <div class="relative z-10 bg-blue-500/10 p-3 rounded-full">
+                    <span class="material-symbols-outlined text-3xl text-blue-400"
+                        data-icon="airline_seat_recline_extra">airline_seat_recline_extra</span>
+                </div>
+                <!-- Decorative blue glow -->
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary opacity-20 blur-3xl rounded-full"></div>
+            </div>
+        </div>
+    </main>
+    <!-- Booking Bottom Bar -->
+    <div
+        class="fixed bottom-0 left-0 w-full h-24 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-10px_20px_-5px_rgba(26,61,117,0.08)] px-6 py-4 flex items-center justify-between z-50">
+        <div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Total Voyage</p>
+            <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-black font-headline text-primary">250.000</span>
+                <span class="text-xs font-bold text-primary/70">GNF</span>
+            </div>
+        </div>
+        <button
+            class="bg-primary text-white font-headline font-bold px-8 h-14 rounded-2xl shadow-[0_8px_20px_-4px_rgba(26,61,117,0.4)] flex items-center gap-3 active:scale-95 transition-transform duration-200">
+            <span>Réserver maintenant</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+        </button>
+    </div>
+    <!-- Background Decoration for Premium feel -->
+    <div class="fixed inset-0 pointer-events-none -z-10">
+        <div class="absolute top-1/4 -right-20 w-80 h-80 bg-primary/5 blur-[100px] rounded-full"></div>
+        <div class="absolute bottom-1/4 -left-20 w-80 h-80 bg-blue-400/5 blur-[100px] rounded-full"></div>
+    </div>
+</body>
+
+</html>

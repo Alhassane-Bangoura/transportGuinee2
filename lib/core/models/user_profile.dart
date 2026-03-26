@@ -8,7 +8,10 @@ class UserProfile {
   final String? email;
   final String? phone;
   final String? avatarUrl;
-  final String role; // passenger, driver, syndicate, station_admin
+  final String role; 
+  final int? stationId;
+  final int? routeId;
+  final String? syndicateId;
   final DateTime createdAt;
   final Map<String, dynamic>? metadata;
 
@@ -19,6 +22,9 @@ class UserProfile {
     this.phone,
     this.avatarUrl,
     required this.role,
+    this.stationId,
+    this.routeId,
+    this.syndicateId,
     required this.createdAt,
     this.metadata,
   });
@@ -30,25 +36,23 @@ class UserProfile {
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       avatarUrl: json['avatar_url'] as String?,
-      role: json['role'] as String? ?? 'passenger',
+      role: json['role'] as String? ?? 'PASSAGER',
+      stationId: json['station_id'] as int?,
+      routeId: json['route_id'] as int?,
+      syndicateId: json['syndicate_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
 
-  /// Converts Supabase role (snake_case) to app role (UPPER_CASE)
-  String get appRole {
-    switch (role) {
-      case 'passenger':
-        return 'PASSAGER';
-      case 'driver':
-        return 'CHAUFFEUR';
-      case 'syndicate':
-        return 'SYNDICAT';
-      case 'station_admin':
-        return 'GARE';
-      default:
-        return 'PASSAGER';
-    }
-  }
+  /// Converts Supabase role (UPPER_CASE) to descriptive role
+  String get appRole => role;
+
+  /// Gets the first name from fullName
+  String get firstName => fullName.isNotEmpty ? fullName.split(' ').first : 'Admin';
+
+  // Helpers for common metadata fields
+  String? get cityId => metadata?['city_id']?.toString();
+  String? get employeeId => metadata?['employee_id'] as String?;
+  String? get functionRole => metadata?['function'] as String?;
 }

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>GuineeTransport - Résultats de Recherche</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#334155",
+                        "secondary": "#475569",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#1a3d75",
+                        "on-secondary-container": "#1e293b",
+                        "background": "#f6f7f8",
+                        "surface": "#ffffff",
+                        "inverse-surface": "#1e293b",
+                        "tertiary": "#0f172a",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed": "#0f172a",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#f6f7f8",
+                        "error-container": "#fee2e2",
+                        "surface-container-low": "#f8fafc",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "primary-fixed": "#dbeafe",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "inverse-primary": "#93c5fd",
+                        "surface-container-highest": "#cbd5e1",
+                        "outline-variant": "#e2e8f0",
+                        "surface-container": "#f1f5f9",
+                        "outline": "#cbd5e1",
+                        "primary": "#1a3d75",
+                        "on-surface": "#0f172a",
+                        "secondary-container": "#f1f5f9",
+                        "surface-bright": "#ffffff",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-tint": "#1a3d75",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "error": "#ef4444",
+                        "on-error-container": "#991b1b",
+                        "on-secondary-fixed": "#0f172a",
+                        "on-secondary-fixed-variant": "#334155",
+                        "on-primary-container": "#dbeafe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f8fafc",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#1e3a8a",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-variant": "#f1f5f9",
+                        "secondary-fixed": "#f1f5f9",
+                        "on-surface-variant": "#475569"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .bg-mesh {
+            background-color: #f6f7f8;
+            background-image: radial-gradient(at 0% 0%, rgba(26, 61, 117, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(26, 61, 117, 0.05) 0px, transparent 50%);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background font-body text-on-background min-h-screen pb-24">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-lg shadow-sm dark:shadow-none flex justify-between items-center px-6 h-16 w-full max-w-none">
+        <div class="flex items-center gap-4">
+            <button
+                class="material-symbols-outlined text-primary hover:bg-slate-200/50 p-2 rounded-full transition-colors active:scale-95 duration-200">menu</button>
+            <h1 class="text-xl font-black text-[#1a3d75] dark:text-blue-400 uppercase tracking-tighter">GuineeTransport
+            </h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="hidden md:block text-sm font-headline font-bold text-[#1a3d75]">Conakry → Mamou</span>
+            <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+                <img class="w-full h-full object-cover"
+                    data-alt="close-up portrait of a professional African man smiling, studio lighting, clean background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8qQH69_fnh6y4LdAFLm6OTFBNEnHkNNMaDJy-q0ShwYceKIf8N35_lpL8NclWuqBrTlGveRwouKc5OKC1sSyH3NcnU16EJ8ilXW6D2wA20lUWJinlTv-Nall0gl7btM7158S0_wYJtEt3GQSLNVESjMkQuqEede6kpnaZn4MAFRk97WZT5caVTyim-UapnMgKa5R2l8OnGdNNpOe95sTg5MiyuG3SKp91MHRFWEDdn0xHxbG-Ukp-QHk9m1debHdADxsOV9iy_jyG" />
+            </div>
+        </div>
+    </header>
+    <main class="pt-20 px-4 max-w-2xl mx-auto space-y-6">
+        <!-- AI Assistant Banner -->
+        <section class="mt-4 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div
+                class="bg-primary-container text-on-primary-container p-4 rounded-2xl shadow-lg flex items-start gap-4 overflow-hidden relative">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <span class="material-symbols-outlined text-6xl" data-icon="smart_toy">smart_toy</span>
+                </div>
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                    <span class="material-symbols-outlined text-white" data-icon="smart_toy"
+                        style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+                </div>
+                <div class="flex-1">
+                    <h2 class="font-headline font-extrabold text-sm tracking-tight mb-1">AI ASSISTANT</h2>
+                    <p class="text-on-primary-container/90 text-sm leading-relaxed">
+                        I found 5 trips for you, the 8:00 AM bus is almost full!
+                        <span class="font-bold underline decoration-white/30">Book soon</span> to secure your seat.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <!-- Search Summary Card -->
+        <div class="flex justify-between items-center px-2 py-1">
+            <div class="flex items-center gap-2">
+                <span class="text-primary font-bold">5</span>
+                <span class="text-on-surface-variant text-sm font-medium">Trips available for Today</span>
+            </div>
+            <button
+                class="text-primary text-sm font-bold flex items-center gap-1 hover:bg-primary/5 px-3 py-1 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-lg" data-icon="filter_list">filter_list</span>
+                Filter
+            </button>
+        </div>
+        <!-- Trip Cards List -->
+        <div class="space-y-4">
+            <!-- Recommended VIP Card -->
+            <div class="bg-surface rounded-3xl p-5 shadow-sm border-2 border-primary/10 relative overflow-hidden group">
+                <div
+                    class="absolute top-0 right-0 bg-primary text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl tracking-widest flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs" data-icon="stars"
+                        style="font-variation-settings: 'FILL' 1;">stars</span>
+                    RECOMMENDED VIP
+                </div>
+                <div class="flex justify-between items-start mb-6 pt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-surface-container rounded-2xl flex items-center justify-center">
+                            <img class="w-10 h-10 object-contain"
+                                data-alt="sleek modern white passenger bus with tinted windows against a neutral urban background"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjGADCq7PvO8Wfc2QHQkPxezxebhnoHnSF3qw6pKZaGitNRXI_Gw7g8gZ8ca6xoyky6Q-U0z73sGc_3SE8Uie2co8n7WwQyTf7Ic9o4xO31VYazmH6X6DZjuN2NW9XNhb0CByp8sAJD-eY26Ni0CpG3cPTJWrO59PLJAW3wkszSsyyVE5OhuZfsXE_pO0hgjiXCoqMET8RAmpMCU_DdPk5X0Toi3KrPvDFiWZK5PhoQf5hvI4im5PAfjcyj7o_WLO5aFSvvVxR3NpH" />
+                        </div>
+                        <div>
+                            <h3 class="font-headline font-bold text-primary">SOTRA-GUINÉE</h3>
+                            <div class="flex items-center gap-1 text-on-surface-variant text-xs">
+                                <span class="material-symbols-outlined text-sm text-amber-500" data-icon="star"
+                                    style="font-variation-settings: 'FILL' 1;">star</span>
+                                4.9 (120+ reviews)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-black text-primary tracking-tighter">150.000 FG</div>
+                        <div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Per
+                            Passenger</div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mb-6 relative">
+                    <div class="flex flex-col items-center">
+                        <span class="text-lg font-black text-on-surface">08:00</span>
+                        <span class="text-[10px] font-bold text-on-surface-variant uppercase">Conakry</span>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center px-4">
+                        <div class="w-full flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(26,61,117,0.5)]"></div>
+                            <div class="flex-1 h-[2px] bg-primary-fixed relative">
+                                <span
+                                    class="absolute -top-3 left-1/2 -translate-x-1/2 material-symbols-outlined text-primary text-lg"
+                                    data-icon="directions_bus">directions_bus</span>
+                            </div>
+                            <div class="w-2 h-2 rounded-full border-2 border-primary"></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-lg font-black text-on-surface">14:30</span>
+                        <span class="text-[10px] font-bold text-on-surface-variant uppercase">Mamou</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between border-t border-slate-50 pt-4">
+                    <div class="flex gap-4">
+                        <div
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-error-container text-on-error-container rounded-xl">
+                            <span class="material-symbols-outlined text-sm" data-icon="event_seat"
+                                style="font-variation-settings: 'FILL' 1;">event_seat</span>
+                            <span class="text-xs font-bold">2 Seats Left</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container text-on-surface-variant rounded-xl">
+                            <span class="material-symbols-outlined text-sm" data-icon="wifi">wifi</span>
+                            <span class="material-symbols-outlined text-sm" data-icon="ac_unit">ac_unit</span>
+                            <span class="material-symbols-outlined text-sm" data-icon="bolt">bolt</span>
+                        </div>
+                    </div>
+                    <button
+                        class="bg-primary text-white font-headline font-bold text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+                        Select
+                    </button>
+                </div>
+            </div>
+            <!-- Standard Card 1 -->
+            <div
+                class="bg-surface rounded-3xl p-5 shadow-sm border border-slate-100 group transition-all hover:shadow-md">
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center">
+                            <img class="w-8 h-8 opacity-60"
+                                data-alt="travel transport company logo placeholder showing a stylized road symbol"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxwxz5YGJ31TmrIpWNpssZ_PyXU8ismubvBl_kB96L-7uVbQbT_j-mCb1hrcTHp_6KyehA36uwIsvNKpYkpGcbIuXMvTuRHEScqVPxL2VIXo9Bb-XTZHn71lhjq0wgo_IGhWJNb-z6J97OnB6ZcH2WcB-JxTTJeaBWO4HjREiQf4Peis75r3tAutDiMrTf7rO7vixeXMFNb8onXEdaEaw9voCKCJ210JuHGk_IGQHRtrRaqxJc3-VIDpK-IyQpZsY_Nec89NgH9YPB" />
+                        </div>
+                        <div>
+                            <h3 class="font-headline font-bold text-slate-700">GUINÉE EXPRESS</h3>
+                            <div class="flex items-center gap-1 text-on-surface-variant text-xs">
+                                <span class="material-symbols-outlined text-sm text-amber-500" data-icon="star"
+                                    style="font-variation-settings: 'FILL' 1;">star</span>
+                                4.2 (85 reviews)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xl font-bold text-slate-900 tracking-tight">110.000 FG</div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-col">
+                        <span class="text-lg font-bold text-slate-800">10:00</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Conakry</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center px-4">
+                        <span class="text-[10px] font-bold text-slate-400 mb-1">6h 30m</span>
+                        <div class="w-full h-[1px] bg-slate-200 relative">
+                            <div class="absolute left-0 -top-[2px] w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                            <div class="absolute right-0 -top-[2px] w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-lg font-bold text-slate-800">16:30</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Mamou</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div
+                        class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container text-on-surface-variant rounded-xl">
+                        <span class="material-symbols-outlined text-sm" data-icon="event_seat">event_seat</span>
+                        <span class="text-xs font-medium">12 Seats available</span>
+                    </div>
+                    <button
+                        class="bg-secondary-container text-primary font-headline font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-primary hover:text-white transition-colors">
+                        Book
+                    </button>
+                </div>
+            </div>
+            <!-- VIP Card 2 -->
+            <div class="bg-surface rounded-3xl p-5 shadow-sm border border-slate-100 relative group overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-primary/20"></div>
+                <div class="flex justify-between items-start mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary"
+                                data-icon="airport_shuttle">airport_shuttle</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-headline font-bold text-slate-700">TRANS-ALMA</h3>
+                                <span
+                                    class="bg-blue-50 text-primary text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-primary/10">VIP</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-on-surface-variant text-xs">
+                                <span class="material-symbols-outlined text-sm text-amber-500" data-icon="star"
+                                    style="font-variation-settings: 'FILL' 1;">star</span>
+                                4.7 (210 reviews)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xl font-bold text-slate-900 tracking-tight">140.000 FG</div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-col">
+                        <span class="text-lg font-bold text-slate-800">12:30</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Conakry</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center px-4">
+                        <span class="text-[10px] font-bold text-slate-400 mb-1">6h 15m</span>
+                        <div class="w-full h-[1px] border-t border-dashed border-slate-300 relative"></div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-lg font-bold text-slate-800">18:45</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Mamou</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-1 text-on-surface-variant">
+                            <span class="material-symbols-outlined text-sm" data-icon="event_seat">event_seat</span>
+                            <span class="text-xs font-medium">8 Left</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-primary">
+                            <span class="material-symbols-outlined text-sm" data-icon="bolt"
+                                style="font-variation-settings: 'FILL' 1;">bolt</span>
+                            <span class="text-[10px] font-black uppercase tracking-widest">Fast Track</span>
+                        </div>
+                    </div>
+                    <button
+                        class="bg-slate-900 text-white font-headline font-bold text-sm px-6 py-2.5 rounded-xl transition-all active:scale-95">
+                        Reserve
+                    </button>
+                </div>
+            </div>
+            <!-- Out of reach option (Greyed) -->
+            <div class="bg-white/50 rounded-3xl p-5 border border-slate-100 opacity-60">
+                <div class="flex justify-between items-center opacity-40 grayscale">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center"></div>
+                        <div class="h-4 w-24 bg-slate-200 rounded-full"></div>
+                    </div>
+                    <div class="h-6 w-16 bg-slate-200 rounded-full"></div>
+                </div>
+                <div class="mt-4 flex justify-center italic text-xs text-slate-400">
+                    Next departure tomorrow at 06:00 AM
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- BottomNavBar -->
+    <nav
+        class="fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-4 pb-safe bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg rounded-t-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] border-t border-slate-100 dark:border-slate-800 z-50">
+        <button
+            class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-70 hover:opacity-100 transition-opacity active:scale-90 tap-highlight-transparent">
+            <span class="material-symbols-outlined" data-icon="home">home</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans">Home</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-[#1a3d75] dark:text-blue-400 scale-110 transition-transform active:scale-90 tap-highlight-transparent">
+            <span class="material-symbols-outlined" data-icon="route"
+                style="font-variation-settings: 'FILL' 1;">route</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans">Trips</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-70 hover:opacity-100 transition-opacity active:scale-90 tap-highlight-transparent">
+            <span class="material-symbols-outlined" data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans">Tickets</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-70 hover:opacity-100 transition-opacity active:scale-90 tap-highlight-transparent">
+            <span class="material-symbols-outlined" data-icon="person">person</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans">Profile</span>
+        </button>
+    </nav>
+</body>
+
+</html>

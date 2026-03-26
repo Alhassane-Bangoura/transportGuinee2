@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Azimuth - Onboarding Recherche</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .timeline-dot-solid {
+            width: 12px;
+            height: 12px;
+            background-color: #1a3d75;
+            border-radius: 50%;
+        }
+
+        .timeline-dot-hollow {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #1a3d75;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .timeline-line {
+            width: 2px;
+            flex-grow: 1;
+            background-color: #e2e8f0;
+            margin: 4px 0;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#f1f5f9",
+                        "inverse-surface": "#1e293b",
+                        "on-tertiary-fixed": "#0f172a",
+                        "on-secondary-container": "#1e293b",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "surface-bright": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#1a3d75",
+                        "surface-container": "#f1f5f9",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "on-background": "#0f172a",
+                        "tertiary-container": "#334155",
+                        "on-surface-variant": "#475569",
+                        "error-container": "#fee2e2",
+                        "secondary-fixed": "#f1f5f9",
+                        "surface-tint": "#1a3d75",
+                        "on-secondary-fixed-variant": "#334155",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-surface": "#0f172a",
+                        "error": "#ef4444",
+                        "outline-variant": "#e2e8f0",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-container-low": "#f8fafc",
+                        "on-primary-container": "#dbeafe",
+                        "surface-variant": "#f1f5f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e8f0",
+                        "on-error": "#ffffff",
+                        "surface": "#ffffff",
+                        "primary-fixed": "#dbeafe",
+                        "inverse-primary": "#93c5fd",
+                        "tertiary": "#0f172a",
+                        "surface-container-highest": "#cbd5e1",
+                        "primary-container": "#1a3d75",
+                        "on-primary-fixed": "#1e3a8a",
+                        "on-error-container": "#991b1b",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-dim": "#f6f7f8",
+                        "on-secondary": "#ffffff",
+                        "background": "#f6f7f8",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "secondary": "#475569",
+                        "on-tertiary-container": "#f8fafc",
+                        "outline": "#cbd5e1",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0f172a"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-surface-dim font-body text-on-background selection:bg-primary-fixed selection:text-primary min-h-screen flex flex-col">
+    <!-- Top Navigation Anchor (Manual Overwrite for Onboarding context) -->
+    <header
+        class="fixed top-0 w-full z-50 backdrop-blur-lg bg-slate-50/90 flex items-center justify-between px-6 py-4 shadow-sm">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary" data-icon="arrow_back">arrow_back</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <h1 class="font-headline text-xl font-extrabold tracking-tight text-primary uppercase">GUINEE TRANSPORT</h1>
+            <p class="text-[10px] font-bold text-slate-500 tracking-widest uppercase">Navigation Premium</p>
+        </div>
+        <div class="w-6"></div> <!-- Spacer for balance -->
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="flex-grow pt-24 pb-32 px-6 max-w-lg mx-auto w-full flex flex-col">
+        <!-- Hero Section -->
+        <section class="text-center mb-10">
+            <h2 class="font-headline text-[30px] font-extrabold text-on-surface leading-tight tracking-tight mb-3">
+                Trouvez votre trajet en quelques secondes
+            </h2>
+            <p class="text-on-surface-variant text-base leading-relaxed">
+                Planifiez vos déplacements à travers la Guinée avec une précision inégalée et une sécurité garantie.
+            </p>
+        </section>
+        <!-- Illustration Module: Route Visualization -->
+        <section
+            class="relative bg-surface rounded-[2rem] shadow-xl overflow-hidden mb-10 p-6 aspect-[4/5] flex flex-col border border-outline-variant">
+            <!-- Background Map Style -->
+            <div class="absolute inset-0 opacity-20 grayscale mix-blend-multiply pointer-events-none">
+                <img class="w-full h-full object-cover"
+                    data-alt="Minimalist abstract topographical map with clean lines and subtle blue shades representing a travel route"
+                    data-location="Conakry"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_9C-5_wa8NOCbed3YkOWxEEoCxLSvnQ0tgCZTHAIuPMshBj-sN4hzvzCYA_i_VhZPbXzlLUI3bFBw2DXOEeZNUETJmNlAJAwjyrk8r7Pk5aBdxbIbZy8aZ8MH1Py-d7iw8xqV8tY-EjMoXftoSaGSW9IetJ8UDK3tsGxqefonLEZv8pr2xEOrcqTZorSe_bK8ni45vFmOt-Dxv3kVt8_b3SiQhjATp5skjN1OrtFLycpGQ-LkOpDrWsch8oKymVoIjt4phTxKqSCF" />
+            </div>
+            <!-- Interactive Route Card Representation -->
+            <div class="relative z-10 flex flex-col h-full">
+                <!-- Departure/Destination Card -->
+                <div class="bg-white rounded-2xl shadow-lg p-5 border border-slate-100 flex flex-col gap-4">
+                    <div class="flex gap-4">
+                        <div class="flex flex-col items-center pt-1">
+                            <div class="timeline-dot-solid"></div>
+                            <div class="timeline-line"></div>
+                            <div class="timeline-dot-hollow"></div>
+                        </div>
+                        <div class="flex flex-col gap-6 w-full">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Point de
+                                    départ</span>
+                                <span class="font-headline font-bold text-on-surface">Conakry, Grand Marché</span>
+                            </div>
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Destination</span>
+                                <span class="font-headline font-bold text-on-surface">Labé, Centre Ville</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating Info Badge -->
+                <div
+                    class="mt-auto self-end bg-primary text-white px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3 animate-bounce-subtle">
+                    <span class="material-symbols-outlined text-sm" data-icon="route">route</span>
+                    <span class="text-xs font-bold font-headline uppercase tracking-wider">Trajet Optimisé</span>
+                </div>
+                <!-- Bento Grid Detail -->
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <div class="bg-white/80 backdrop-blur-md rounded-xl p-3 border border-white/50 shadow-sm">
+                        <span class="material-symbols-outlined text-primary mb-1" data-icon="schedule">schedule</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Durée Est.</p>
+                        <p class="font-bold text-sm">6h 30m</p>
+                    </div>
+                    <div class="bg-white/80 backdrop-blur-md rounded-xl p-3 border border-white/50 shadow-sm">
+                        <span class="material-symbols-outlined text-primary mb-1" data-icon="payments">payments</span>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Prix Moyen</p>
+                        <p class="font-bold text-sm">150 000 GNF</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Onboarding Controls -->
+        <section class="mt-auto space-y-8">
+            <!-- Progress Indicator -->
+            <div class="flex justify-center items-center gap-2">
+                <div class="h-1.5 w-6 rounded-full bg-slate-200"></div>
+                <div class="h-1.5 w-12 rounded-full bg-primary"></div>
+                <div class="h-1.5 w-6 rounded-full bg-slate-200"></div>
+                <span class="ml-2 text-xs font-bold text-slate-500 font-headline uppercase tracking-tighter">2 /
+                    3</span>
+            </div>
+            <!-- Primary Action -->
+            <button
+                class="w-full bg-primary text-on-primary py-5 rounded-xl font-headline font-bold text-lg shadow-[0_10px_15px_-3px_rgb(26,61,117,0.2)] flex items-center justify-center gap-2 active:scale-95 transition-transform">
+                Suivant
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+            </button>
+            <!-- Secondary Action -->
+            <button
+                class="w-full py-2 text-slate-500 font-headline font-bold text-sm tracking-widest uppercase hover:text-primary transition-colors">
+                Passer l'introduction
+            </button>
+        </section>
+    </main>
+    <!-- Bottom Navigation Shell (Suppressed for Onboarding as per Filter Rule) -->
+    <!-- Suppressed: Task-Focused journey / Onboarding sequence -->
+</body>
+
+</html>

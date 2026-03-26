@@ -23,185 +23,144 @@ class OnboardingPage2 extends StatefulWidget {
 }
 
 class _OnboardingPage2State extends State<OnboardingPage2> {
-  // Sièges sélectionnés (orange) pour la démo
-  final Set<int> _selected = {4, 7};
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: Stack(
         children: [
-          // En-tête avec logo + Passer
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                RichText(
-                  text: const TextSpan(children: [
-                    TextSpan(
-                      text: 'Guinee',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF1A1A2E),
-                      ),
-                    ),
-                    TextSpan(
-                      text: 'Transport',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ]),
+          // Image de fond premium (tiers supérieur)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(40),
+                bottomRight: Radius.circular(40),
+              ),
+              child: Image.network(
+                'https://r.jina.ai/i/aa288414902d41ba830501869e54d3cd',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(color: AppColors.primary),
+              ),
+            ),
+          ),
+          
+          // Bouton Passer
+          Positioned(
+            top: 60,
+            right: 20,
+            child: TextButton(
+              onPressed: widget.onSkip,
+              child: Text(
+                'PASSER',
+                style: AppTextStyles.label.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
                 ),
-                TextButton(
-                  onPressed: widget.onSkip,
-                  child: Text(
-                    'Passer',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
 
-          const Spacer(),
-
-          // Illustration grille de sièges
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: _buildSeatGrid(),
-          ),
-
-          const Spacer(),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              children: [
-                // Titre
-                Text(
-                  'Réservez votre siège\nen quelques clics',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.displayMedium,
+          // Contenu (deux tiers inférieurs)
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.42,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+              decoration: const BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
                 ),
-                const SizedBox(height: 16),
-                // Description
-                Text(
-                  'Choisissez votre place préférée et confirmez\ninstantanément votre voyage.',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyLarge,
-                ),
-                const SizedBox(height: 32),
-
-                // Dots
-                OnboardingDots(
-                    currentPage: widget.currentPage,
-                    totalPages: widget.totalPages),
-                const SizedBox(height: 24),
-
-                // Bouton Suivant
-                PrimaryButton(
-                  label: 'Suivant',
-                  onPressed: widget.onNext,
-                ),
-
-                const SizedBox(height: 32),
-              ],
+              ),
+              child: Column(
+                children: [
+                   const SizedBox(height: 20),
+                  // Logo / Petit badge
+                  Container(
+                    width: 60,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  
+                  // Titre
+                  Text(
+                    'Recherche\nIntelligente',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.headingLarge.copyWith(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                      height: 1.1,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // Description
+                  Text(
+                    'Planifiez vos déplacements en toute sérénité. Notre algorithme trouve pour vous les meilleurs itinéraires au meilleur prix.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.6,
+                    ),
+                  ),
+                  
+                  const Spacer(),
+                  
+                  // Pagination Dots
+                  OnboardingDots(currentPage: widget.currentPage, totalPages: widget.totalPages),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Bouton Suivant
+                  SizedBox(
+                    width: double.infinity,
+                    height: 64,
+                    child: ElevatedButton(
+                      onPressed: widget.onNext,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Suivant',
+                            style: AppTextStyles.buttonText.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 22),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSeatGrid() {
-    // Grille 4 colonnes x 3 rangées = 12 sièges
-    const int cols = 4;
-    const int rows = 3;
-
-    return Column(
-      children: [
-        // Icône chauffeur en haut
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.person_rounded,
-                  color: AppColors.textSecondary, size: 22),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Grille
-        ...List.generate(rows, (row) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // 2 sièges gauche
-                _buildSeat(row * cols),
-                const SizedBox(width: 10),
-                _buildSeat(row * cols + 1),
-                const SizedBox(width: 24), // couloir
-                // 2 sièges droite
-                _buildSeat(row * cols + 2),
-                const SizedBox(width: 10),
-                _buildSeat(row * cols + 3),
-              ],
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildSeat(int idx) {
-    final bool isSelected = _selected.contains(idx);
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (_selected.contains(idx)) {
-            _selected.remove(idx);
-          } else {
-            _selected.add(idx);
-          }
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 54,
-        height: 52,
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.orange : AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.orange.withValues(alpha: 0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  )
-                ]
-              : null,
-        ),
-        child: Icon(
-          Icons.airline_seat_recline_normal_rounded,
-          size: 26,
-          color: isSelected ? Colors.white : AppColors.textHint,
-        ),
       ),
     );
   }

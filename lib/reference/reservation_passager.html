@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>GuineeTransport - Réservation de Siège</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        .font-headline {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .aisle-gap {
+            grid-column: 3;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#334155",
+                        "secondary": "#475569",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#1a3d75",
+                        "on-secondary-container": "#1e293b",
+                        "background": "#f6f7f8",
+                        "surface": "#ffffff",
+                        "inverse-surface": "#1e293b",
+                        "tertiary": "#0f172a",
+                        "on-background": "#0f172a",
+                        "on-tertiary-fixed": "#0f172a",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#f6f7f8",
+                        "error-container": "#fee2e2",
+                        "surface-container-low": "#f8fafc",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "primary-fixed": "#dbeafe",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "inverse-primary": "#93c5fd",
+                        "surface-container-highest": "#cbd5e1",
+                        "outline-variant": "#e2e8f0",
+                        "surface-container": "#f1f5f9",
+                        "outline": "#cbd5e1",
+                        "primary": "#1a3d75",
+                        "on-surface": "#0f172a",
+                        "secondary-container": "#f1f5f9",
+                        "surface-bright": "#ffffff",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-tint": "#1a3d75",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "error": "#ef4444",
+                        "on-error-container": "#991b1b",
+                        "on-secondary-fixed": "#0f172a",
+                        "on-secondary-fixed-variant": "#334155",
+                        "on-primary-container": "#dbeafe",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#f8fafc",
+                        "surface-container-high": "#e2e8f0",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#1e3a8a",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-variant": "#f1f5f9",
+                        "secondary-fixed": "#f1f5f9",
+                        "on-surface-variant": "#475569"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background min-h-screen pb-32">
+    <!-- Top Navigation Bar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-lg shadow-sm dark:shadow-none flex justify-between items-center px-6 h-16 w-full max-w-none">
+        <div class="flex items-center gap-4">
+            <button
+                class="material-symbols-outlined text-primary hover:bg-slate-200/50 p-2 rounded-full transition-colors active:scale-95 duration-200"
+                data-icon="arrow_back">arrow_back</button>
+            <h1 class="font-plus-jakarta-sans tracking-tight font-extrabold text-lg text-[#1a3d75] dark:text-blue-400">
+                Choix du siège</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-fixed">
+                <img class="w-full h-full object-cover"
+                    data-alt="Close up portrait of a young African professional man with a friendly smile, studio lighting, clean background"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2OHWIv-F9I24PA1ufbbuXD8yfTiaTUc84fCZAsiCa4f9OC_oYtZouEYwPvyw-zwLqH4BODiOcW-ltOvM6VG8fpNcm-IJrMbhP_8a3bjOCJokFUergZ5c4BW0YpPIxIj1sDetUkaCYhjTjIhH48fFdRW-NnAuZggGZYlVeu2EQH_QP1puB7_9ekhaAouOk9p0_SZyJ1ocOa4foA11IgslIqYHSLf4QIg98XUel8MiX3lfqyYCt03tbg3PCiPJWXiV55OdBAo13rfbq" />
+            </div>
+        </div>
+    </header>
+    <main class="pt-24 px-4 max-w-4xl mx-auto space-y-6">
+        <!-- Journey Info Banner -->
+        <div
+            class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant flex justify-between items-center">
+            <div>
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-1">Trajet</p>
+                <h2 class="text-primary font-bold text-lg">Conakry → Mamou</h2>
+            </div>
+            <div class="text-right">
+                <p class="text-on-surface-variant text-xs font-bold uppercase tracking-wider mb-1">Date &amp; Heure</p>
+                <p class="font-bold">24 Oct, 08:30</p>
+            </div>
+        </div>
+        <!-- Layout Grid: AI Assistant & Seat Selection -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Seat Selection Area -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Legend -->
+                <div
+                    class="bg-surface p-4 rounded-xl shadow-sm border border-outline-variant flex justify-around items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded bg-surface border border-outline"></div>
+                        <span class="text-xs font-semibold text-on-surface-variant">Libre</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded bg-primary"></div>
+                        <span class="text-xs font-semibold text-on-surface-variant">Sélectionné</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded bg-surface-container-highest"></div>
+                        <span class="text-xs font-semibold text-on-surface-variant">Occupé</span>
+                    </div>
+                </div>
+                <!-- Bus Interactive Map -->
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-outline-variant relative overflow-hidden">
+                    <!-- Bus Front Decor -->
+                    <div
+                        class="absolute top-0 left-0 right-0 h-12 bg-slate-100 flex items-center justify-center border-b border-outline-variant">
+                        <span class="material-symbols-outlined text-slate-400"
+                            data-icon="steering_wheel">steering_wheel_heat</span>
+                        <span class="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Avant du
+                            véhicule</span>
+                    </div>
+                    <div class="mt-12 flex flex-col items-center">
+                        <div class="seat-grid">
+                            <!-- Rows 1-10 -->
+                            <!-- Row 1 -->
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="1">1</button>
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="2">2</button>
+                            <div class="aisle-gap"></div>
+                            <button
+                                class="w-12 h-12 rounded-xl bg-surface-container-highest text-white/50 flex items-center justify-center text-sm font-bold cursor-not-allowed"
+                                disabled="">3</button>
+                            <!-- Row 2 -->
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="4">4</button>
+                            <button
+                                class="w-12 h-12 rounded-xl border-2 border-primary bg-primary text-white flex items-center justify-center text-sm font-bold shadow-lg shadow-primary/20"
+                                data-seat="5">5</button>
+                            <div class="aisle-gap"></div>
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="6">6</button>
+                            <!-- Row 3 -->
+                            <button
+                                class="w-12 h-12 rounded-xl bg-surface-container-highest text-white/50 flex items-center justify-center text-sm font-bold cursor-not-allowed"
+                                disabled="">7</button>
+                            <button
+                                class="w-12 h-12 rounded-xl bg-surface-container-highest text-white/50 flex items-center justify-center text-sm font-bold cursor-not-allowed"
+                                disabled="">8</button>
+                            <div class="aisle-gap"></div>
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="9">9</button>
+                            <!-- Row 4 -->
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="10">10</button>
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="11">11</button>
+                            <div class="aisle-gap"></div>
+                            <button
+                                class="w-12 h-12 rounded-xl border-2 border-primary/40 border-dashed bg-blue-50/50 flex flex-col items-center justify-center text-xs font-bold animate-pulse text-primary"
+                                data-seat="12">
+                                <span class="material-symbols-outlined text-sm" data-icon="star"
+                                    data-weight="fill">star</span>
+                                12
+                            </button>
+                            <!-- Row 5 (Exit Row) -->
+                            <div class="col-span-2 h-8 flex items-center justify-center">
+                                <span
+                                    class="text-[10px] uppercase font-bold text-slate-300 tracking-widest">Sortie</span>
+                            </div>
+                            <div class="aisle-gap"></div>
+                            <div class="h-8"></div>
+                            <!-- Row 6 -->
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="13">13</button>
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="14">14</button>
+                            <div class="aisle-gap"></div>
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="15">15</button>
+                            <!-- Row 7 -->
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="16">16</button>
+                            <button
+                                class="w-12 h-12 rounded-xl border border-outline bg-surface hover:border-primary flex items-center justify-center text-sm font-bold transition-all"
+                                data-seat="17">17</button>
+                            <div class="aisle-gap"></div>
+                            <button
+                                class="w-12 h-12 rounded-xl bg-surface-container-highest text-white/50 flex items-center justify-center text-sm font-bold cursor-not-allowed"
+                                disabled="">18</button>
+                        </div>
+                    </div>
+                    <!-- Bus Rear Decor -->
+                    <div class="mt-12 pt-4 border-t border-dashed border-outline-variant flex justify-center">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Arrière du
+                            véhicule</span>
+                    </div>
+                </div>
+            </div>
+            <!-- AI Assistant & Sidebar -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- AI Assistant Suggestion -->
+                <div
+                    class="bg-primary-container text-on-primary-container p-6 rounded-3xl shadow-xl shadow-primary/10 relative overflow-hidden group">
+                    <div
+                        class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                        <span class="material-symbols-outlined text-9xl" data-icon="smart_toy">smart_toy</span>
+                    </div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="bg-blue-400 p-2 rounded-xl">
+                            <span class="material-symbols-outlined text-white" data-icon="smart_toy">smart_toy</span>
+                        </div>
+                        <span class="font-headline font-extrabold tracking-tight">AI Assistant</span>
+                    </div>
+                    <p class="text-sm leading-relaxed mb-4 text-blue-50 font-medium">
+                        "Le <span class="font-bold underline">siège 12</span> est situé à l'avant avec plus d'espace
+                        pour les jambes ! C'est le choix idéal pour un long voyage vers Mamou."
+                    </p>
+                    <button
+                        class="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors">
+                        Choisir le siège 12
+                    </button>
+                </div>
+                <!-- Price Summary -->
+                <div class="bg-surface p-6 rounded-3xl shadow-sm border border-outline-variant space-y-4">
+                    <h3 class="font-headline font-bold text-on-surface">Récapitulatif</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-on-surface-variant">Siège sélectionné (5)</span>
+                            <span class="font-bold">45,000 GNF</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-on-surface-variant">Frais de service</span>
+                            <span class="font-bold">2,500 GNF</span>
+                        </div>
+                        <div class="pt-3 border-t border-outline-variant flex justify-between items-center">
+                            <span class="font-bold text-on-surface">Total</span>
+                            <span class="text-xl font-black text-primary">47,500 GNF</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Action Button -->
+                <button
+                    class="w-full bg-primary text-on-primary py-5 rounded-2xl font-headline font-extrabold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                    Confirmer la réservation
+                    <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </main>
+    <!-- Bottom Navigation Bar -->
+    <nav
+        class="fixed bottom-0 left-0 w-full h-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg flex justify-around items-center px-4 pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] border-t border-slate-100 dark:border-slate-800">
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-70 hover:opacity-100 transition-opacity tap-highlight-transparent active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined text-2xl" data-icon="home">home</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Home</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-[#1a3d75] dark:text-blue-400 scale-110 transition-transform tap-highlight-transparent active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined text-2xl" data-icon="route"
+                style="font-variation-settings: 'FILL' 1;">route</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Trips</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-70 hover:opacity-100 transition-opacity tap-highlight-transparent active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined text-2xl" data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Tickets</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-70 hover:opacity-100 transition-opacity tap-highlight-transparent active:scale-90"
+            href="#">
+            <span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest font-plus-jakarta-sans mt-1">Profile</span>
+        </a>
+    </nav>
+</body>
+
+</html>

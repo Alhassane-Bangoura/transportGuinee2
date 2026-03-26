@@ -245,7 +245,7 @@ class _DotsLoaderState extends State<DotsLoader> with SingleTickerProviderStateM
             final double scale = 1.0 + (0.5 * (1.0 - (value - 0.5).abs() * 2));
             final Color color = index == 0 
                 ? AppColors.primary 
-                : (index == 1 ? AppColors.orange : AppColors.primaryLight);
+                : (index == 1 ? AppColors.accent : AppColors.primaryLight);
             
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),

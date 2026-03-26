@@ -1,24 +1,38 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
-import 'mock_data.dart';
 
 // ============================================================================
-// AuthService — Gestion de l'authentification (MODE DÉMO UNIQUEMENT)
+// AuthService — Gestion de l'authentification via Supabase
 // ============================================================================
 
 class AuthService {
-  /// Retourne l'utilisateur connecté (Désactivé en mode Mock)
-  static dynamic get currentUser => null;
+  static final _supabase = Supabase.instance.client;
+
+  /// Retourne l'utilisateur connecté
+  static User? get currentUser => _supabase.auth.currentUser;
 
   /// Vérifie si l'utilisateur est connecté
-  static bool get isLoggedIn => true;
+  static bool get isLoggedIn => currentUser != null;
 
   // ─── Profil ──────────────────────────────────────────────────────────────
 
   /// Récupère le profil complet de l'utilisateur connecté
   static Future<UserProfile?> getCurrentProfile() async {
-    return MockData.passengerProfile;
+    final user = currentUser;
+    if (user == null) return null;
+
+    try {
+      final data = await _supabase
+          .from('profiles')
+          .select()
+          .eq('id', user.id)
+          .single();
+      return UserProfile.fromJson(data);
+    } catch (e) {
+      debugPrint('[AuthService] Error fetching profile: $e');
+      return null;
+    }
   }
 
   // ─── Validation ──────────────────────────────────────────────────────────
@@ -42,57 +56,66 @@ class AuthService {
 
   // ─── Inscription ─────────────────────────────────────────────────────────
 
-  /// Inscrit un nouvel utilisateur (MOCK)
-  static Future<UserProfile?> signUp({
+  /// Inscrit un nouvel utilisateur via Supabase
+  static Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String fullName,
     required String phone,
     required String roleKey,
+    int? stationId,
+    int? routeId,
+    List<int>? routeIds,
     Map<String, dynamic>? metadata,
   }) async {
-    debugPrint('[AuthService] signUp MOCK email=$email role=$roleKey');
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    switch (roleKey.toLowerCase()) {
-      case 'driver':
-        return MockData.driverProfile;
-      case 'syndicate':
-        return MockData.syndicateProfile;
-      case 'station_admin':
-        return MockData.stationAdminProfile;
-      default:
-        return MockData.passengerProfile;
+    final Map<String, dynamic> userMetadata = {
+      'full_name': fullName,
+      'phone': phone,
+      'role_key': roleKey,
+      if (stationId != null) 'station_id': stationId,
+      if (routeId != null) 'route_id': routeId,
+      ...?(metadata),
+    };
+
+    final response = await _supabase.auth.signUp(
+      email: email,
+      password: password,
+      data: userMetadata,
+    );
+
+    // Si c'est un syndicat avec plusieurs trajets, on les insère dans syndicate_routes
+    if (response.user != null && roleKey == 'syndicate' && routeIds != null && routeIds.isNotEmpty) {
+      final List<Map<String, dynamic>> routeEntries = routeIds.map((id) => {
+        'syndicate_id': response.user!.id,
+        'route_id': id,
+      }).toList();
+      
+      await _supabase.from('syndicate_routes').insert(routeEntries);
     }
+
+    return response;
   }
 
   // ─── Connexion ───────────────────────────────────────────────────────────
 
-  /// Connecte l'utilisateur (MODE MOCK)
+  /// Connecte l'utilisateur via Supabase
   static Future<UserProfile?> signIn({
     required String email,
     required String password,
   }) async {
-    debugPrint('[AuthService] signIn MOCK email=$email');
-    // On simule un court délai pour montrer le chargement sans bloquer l'UI
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    final lowEmail = email.toLowerCase();
-    if (lowEmail.contains('driver') || lowEmail.contains('chauffeur')) {
-      return MockData.driverProfile;
-    } else if (lowEmail.contains('syndicate') || lowEmail.contains('syndicat')) {
-      return MockData.syndicateProfile;
-    } else if (lowEmail.contains('gare') || lowEmail.contains('admin')) {
-      return MockData.stationAdminProfile;
-    }
-    
-    return MockData.passengerProfile;
+    final response = await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+
+    if (response.user == null) return null;
+    return await getCurrentProfile();
   }
 
   // ─── Déconnexion ─────────────────────────────────────────────────────────
 
   static Future<void> signOut() async {
-    debugPrint('[AuthService] signOut MOCK');
+    await _supabase.auth.signOut();
   }
 
   // ─── Mise à jour du profil ───────────────────────────────────────────────
@@ -101,7 +124,19 @@ class AuthService {
     String? fullName,
     String? phone,
     String? avatarUrl,
+    Map<String, dynamic>? metadata,
   }) async {
-    debugPrint('[AuthService] updateProfile MOCK');
+    final user = currentUser;
+    if (user == null) return;
+
+    final updates = <String, dynamic>{
+      if (fullName != null) 'full_name': fullName,
+      if (phone != null) 'phone': phone,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
+      if (metadata != null) 'metadata': metadata,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    await _supabase.from('profiles').update(updates).eq('id', user.id);
   }
 }

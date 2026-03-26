@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#f1f5f9",
+                        "inverse-surface": "#1e293b",
+                        "on-tertiary-fixed": "#0f172a",
+                        "on-secondary-container": "#1e293b",
+                        "tertiary-fixed-dim": "#94a3b8",
+                        "surface-bright": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "primary": "#1a3d75",
+                        "surface-container": "#f1f5f9",
+                        "primary-fixed-dim": "#bfdbfe",
+                        "on-tertiary-fixed-variant": "#1e293b",
+                        "on-background": "#0f172a",
+                        "tertiary-container": "#334155",
+                        "on-surface-variant": "#475569",
+                        "error-container": "#fee2e2",
+                        "secondary-fixed": "#f1f5f9",
+                        "surface-tint": "#1a3d75",
+                        "on-secondary-fixed-variant": "#334155",
+                        "secondary-fixed-dim": "#e2e8f0",
+                        "on-surface": "#0f172a",
+                        "error": "#ef4444",
+                        "outline-variant": "#e2e8f0",
+                        "inverse-on-surface": "#f8fafc",
+                        "surface-container-low": "#f8fafc",
+                        "on-primary-container": "#dbeafe",
+                        "surface-variant": "#f1f5f9",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e8f0",
+                        "on-error": "#ffffff",
+                        "surface": "#ffffff",
+                        "primary-fixed": "#dbeafe",
+                        "inverse-primary": "#93c5fd",
+                        "tertiary": "#0f172a",
+                        "surface-container-highest": "#cbd5e1",
+                        "primary-container": "#1a3d75",
+                        "on-primary-fixed": "#1e3a8a",
+                        "on-error-container": "#991b1b",
+                        "tertiary-fixed": "#cbd5e1",
+                        "surface-dim": "#f6f7f8",
+                        "on-secondary": "#ffffff",
+                        "background": "#f6f7f8",
+                        "on-primary-fixed-variant": "#1d4ed8",
+                        "secondary": "#475569",
+                        "on-tertiary-container": "#f8fafc",
+                        "outline": "#cbd5e1",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#0f172a"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .bg-mesh {
+            background-color: #f6f7f8;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(26, 61, 117, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(26, 61, 117, 0.03) 0px, transparent 50%);
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-background font-body text-on-background antialiased overflow-hidden">
+    <!-- Top Navigation Anchor -->
+    <header
+        class="fixed top-0 w-full z-50 backdrop-blur-lg bg-slate-50/90 flex items-center justify-between px-6 py-4 shadow-sm">
+        <div class="flex items-center gap-2">
+            <span class="text-primary font-headline font-extrabold tracking-tighter text-xl uppercase">GUINEE
+                TRANSPORT</span>
+        </div>
+        <button
+            class="text-slate-500 font-label font-bold text-xs uppercase tracking-widest hover:text-primary transition-colors">Passer</button>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="h-screen flex flex-col justify-center items-center px-8 bg-mesh pt-16">
+        <!-- Illustration Section -->
+        <div
+            class="relative w-full max-w-md aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/10 border border-white/50 mb-10">
+            <img alt="Voyage en bus en Guinée" class="w-full h-full object-cover"
+                data-alt="Modern high-end tour bus driving through a vibrant lush green West African landscape with mountains and soft golden sunlight"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmkm12NrHFioD9vKbykxkq8H2d6srRzI1Xevn_AhZVWA7J5eGuZGI2CiRxp9YAUP1Idp3HrDc3o8Fg_vypyiaoYOEa93VyzwdyE29Y9V-dJAQyJ9Cms-12o1Vgi-jDp33av-SMhEiwD8bbhCYl_FwiqYTvLQianTmp4vNaK7JKYMl9ayI5qtfrZC0pQn-qzX8lMT_ETuddSoQKf2XO9KjkhBNeK95rfjuX7UBbxWhKRrWtqA8ACN-HsL56lODYQQzu8ulQvPROu1TV" />
+            <!-- Glass Overlay Card -->
+            <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-8 backdrop-blur-sm bg-white/10">
+                <p class="text-white font-headline font-bold text-lg leading-snug">
+                    “Voyagez facilement à travers la Guinée”
+                </p>
+            </div>
+        </div>
+        <!-- Text Content -->
+        <div class="text-center max-w-sm mb-12">
+            <h1 class="font-headline font-extrabold text-3xl text-on-background tracking-tight mb-4">
+                La simplicité du transport
+            </h1>
+            <p class="text-on-surface-variant text-base leading-relaxed">
+                Réservez vos billets, suivez vos trajets et explorez les plus belles régions de la Guinée en quelques
+                clics seulement.
+            </p>
+        </div>
+        <!-- Progress Indicator -->
+        <div class="flex items-center gap-2 mb-12">
+            <div class="h-1.5 w-8 rounded-full bg-primary"></div>
+            <div class="h-1.5 w-2 rounded-full bg-outline"></div>
+            <div class="h-1.5 w-2 rounded-full bg-outline"></div>
+            <span class="ml-4 font-label font-bold text-xs text-slate-400 uppercase tracking-widest">1 / 3</span>
+        </div>
+        <!-- Action Button -->
+        <div class="w-full max-w-sm px-4">
+            <button
+                class="w-full bg-primary text-on-primary py-5 rounded-xl font-headline font-bold text-lg shadow-lg shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 transition-transform duration-200">
+                Suivant
+                <span class="material-symbols-outlined text-xl">arrow_forward</span>
+            </button>
+        </div>
+    </main>
+    <!-- Navigation Shell (Suppressed for Onboarding logic) -->
+    <!-- BottomNavBar and SideNav are hidden as per "Destination Rule" and "Automatic Suppression" for Onboarding flows -->
+</body>
+
+</html>

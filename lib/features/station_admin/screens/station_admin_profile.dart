@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/models/user_profile.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../auth/login_page.dart';
 import '../../profile/screens/edit_profile_page.dart';
 import '../../../core/services/biometric_service.dart';
@@ -27,12 +28,12 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
   }
 
   Future<void> _loadProfile() async {
-    final profile = await AuthService.getCurrentProfile();
+    final response = await AuthService.getCurrentProfile();
     final available = await BiometricService.isAvailable();
     final enabled = await BiometricService.isBiometricEnabled();
     if (mounted) {
       setState(() {
-        _profile = profile;
+        _profile = response.data;
         _isLoading = false;
         _isBiometricAvailable = available;
         _isBiometricEnabled = enabled;
@@ -131,7 +132,7 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
             shape: BoxShape.circle,
             border: Border.all(color: primary.withValues(alpha: 0.2), width: 4),
             image: const DecorationImage(
-              image: NetworkImage('https://lh3.googleusercontent.com/aida-public/AB6AXuAPz5kPAOQ-Kku67HOnYMU6ZECyikIkfz0cmvnb6J2ijIVVj44tFo0NlIge7PUHDIZmNv_K4c3NtBv37XEAnC11yzJAbGxhyofJaYonRFgWGHMrUMEXqB60Hm3ZY-0UK5KaSTSfJEywXsLGAiVYDYl0m9_8ntDb07EUj13q5maAnsYNiE_WYjvRn6wJFFyXd6QKA1VLZwJggEoDiV2EtH1JYBXKGlCAcfdPaqbzxmSOZBHKBrzjPpqH0zwysS3FazH1ES6g3s_YGSgf'),
+              image: const NetworkImage(AppAssets.stationAdminProfileBackground),
               fit: BoxFit.cover,
             ),
           ),

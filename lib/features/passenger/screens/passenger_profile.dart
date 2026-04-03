@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../auth/login_page.dart';
 import '../../profile/screens/edit_profile_page.dart';
 
@@ -57,6 +59,85 @@ class _PassengerProfileState extends State<PassengerProfile> {
     }
   }
 
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Choisir la langue', style: GoogleFonts.plusJakartaSans(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('Français', style: TextStyle(color: AppColors.primary)),
+              trailing: Icon(Icons.check, color: AppColors.primary),
+            ),
+            ListTile(
+              title: Text('English', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Traduction en cours de développement.')));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPasswordDialog() {
+    final tc = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Mot de passe', style: GoogleFonts.plusJakartaSans(color: Colors.white)),
+        content: TextField(
+          controller: tc,
+          obscureText: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(hintText: 'Nouveau mot de passe', hintStyle: TextStyle(color: Colors.grey)),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+          ElevatedButton(
+            onPressed: () async {
+              if (tc.text.isNotEmpty) {
+                try {
+                  await Supabase.instance.client.auth.updateUser(UserAttributes(password: tc.text));
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Mot de passe mis à jour avec succès!')));
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Erreur inattendue.')));
+                  }
+                }
+              }
+            },
+            child: const Text('Modifier'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTopUpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Recharger (Simulation)', style: GoogleFonts.plusJakartaSans(color: Colors.white)),
+        content: const Text('Le rechargement via Orange Money/MTN MoMo est désactivé en mode simulation.', style: TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Compris')),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color primaryColor = AppColors.primary;
@@ -106,7 +187,52 @@ class _PassengerProfileState extends State<PassengerProfile> {
                         iconColor: const Color(0xFFF59E0B),
                         title: 'Notifications',
                         trailing: _buildBadge('3'),
-                        onTap: () {},
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+                                  const SizedBox(height: 24),
+                                  Container(
+                                    padding: const EdgeInsets.all(20),
+                                    decoration: BoxDecoration(color: const Color(0xFFF59E0B).withValues(alpha: 0.1), shape: BoxShape.circle),
+                                    child: const Icon(Icons.notifications_off_outlined, color: Color(0xFFF59E0B), size: 48),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Text('Aucune notification', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Vous êtes à jour ! Vos alertes de trajets, paiements et messages de votre gare s\'afficheront ici.',
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.plusJakartaSans(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                                  ),
+                                  const SizedBox(height: 32),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 56,
+                                    child: ElevatedButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      ),
+                                      child: Text('Fermer', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.white)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                       _buildMenuItem(
                         icon: Icons.language,
@@ -119,7 +245,7 @@ class _PassengerProfileState extends State<PassengerProfile> {
                             fontSize: 14,
                           ),
                         ),
-                        onTap: () {},
+                        onTap: _showLanguageDialog,
                       ),
                     ],
                   ),
@@ -132,7 +258,7 @@ class _PassengerProfileState extends State<PassengerProfile> {
                         icon: Icons.lock_outline,
                         iconColor: const Color(0xFFEF4444),
                         title: 'Changer le mot de passe',
-                        onTap: () {},
+                        onTap: _showPasswordDialog,
                       ),
                       if (_isBiometricAvailable)
                         _buildMenuItem(
@@ -157,13 +283,33 @@ class _PassengerProfileState extends State<PassengerProfile> {
                         icon: Icons.help_outline,
                         iconColor: const Color(0xFF6366F1),
                         title: 'Centre d\'aide',
-                        onTap: () {},
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              backgroundColor: AppColors.surface,
+                              title: const Text('Centre d\'aide', style: TextStyle(color: Colors.white)),
+                              content: const Text('Notre centre d\'aide est actuellement disponible au +224 600 00 00 00.', style: TextStyle(color: Colors.white70)),
+                              actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fermer'))],
+                            ),
+                          );
+                        },
                       ),
                       _buildMenuItem(
                         icon: Icons.description_outlined,
                         iconColor: const Color(0xFF64748B),
                         title: 'Conditions d\'utilisation',
-                        onTap: () {},
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              backgroundColor: AppColors.surface,
+                              title: const Text('Conditions d\'utilisation', style: TextStyle(color: Colors.white)),
+                              content: const Text('Vos conditions d\'utilisation sont en cours de rédaction juridique.', style: TextStyle(color: Colors.white70)),
+                              actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fermer'))],
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -221,14 +367,14 @@ class _PassengerProfileState extends State<PassengerProfile> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 60, 16, 32),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -255,7 +401,7 @@ class _PassengerProfileState extends State<PassengerProfile> {
                   border: Border.all(color: primary.withValues(alpha: 0.2), width: 4),
                   image: const DecorationImage(
                     image: NetworkImage(
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuCJQJWMzfK1-hg8ZXuj_Tw7966a9-RDqY_9rxvMG9Mf7J7eM5psGRD6oXJQdQ4mbuJ4JElXcSiYCjiUtihoImX0NeeXMMcBfqnGI93nvb-A5rWkcJYwNNL__qrVU8YhVecSZ-Gdue5FGebvwKo9TH2x0-LRQRxi4ArAWNR2hKO7ntGr23WGQOKSvNUPGxYadR0xlcB0VUoaHIWpPk4WDkreVXCGhlbFCRcqvVUZ_R-C-4gEdwu8qas2q8-L7RSB7FkThuLuLDlhiaqT'),
+                        AppAssets.profileHeaderBackground),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -297,72 +443,103 @@ class _PassengerProfileState extends State<PassengerProfile> {
   }
 
   Widget _buildWalletCard(Color primary) {
-    return Transform.translate(
-      offset: const Offset(0, -20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [primary, const Color(0xFF0D9D0D)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return Container(
+      margin: const EdgeInsets.only(top: 20, bottom: 24),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: primary,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
+        ],
+        image: DecorationImage(
+          image: const NetworkImage(AppAssets.patternCubes),
+          opacity: 0.1,
+          repeat: ImageRepeat.repeat,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Solde Portefeuille',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Solde Portefeuille',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '150.000 GNF',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.account_balance_wallet, color: Colors.white, size: 28),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _showTopUpDialog,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    'Recharger',
+                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  '150.000 GNF',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('L\'historique de transactions est vide.')));
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white, width: 2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    'Historique',
+                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
                   ),
                 ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: primary,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                minimumSize: const Size(0, 36), // override global infinity width
               ),
-              child: Text(
-                'Détails',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -378,16 +555,16 @@ class _PassengerProfileState extends State<PassengerProfile> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF94A3B8),
+              color: AppColors.textSecondary,
               letterSpacing: 1.0,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
+            border: Border.all(color: AppColors.border),
           ),
           child: Column(
             children: items,
@@ -419,11 +596,11 @@ class _PassengerProfileState extends State<PassengerProfile> {
         style: GoogleFonts.plusJakartaSans(
           fontSize: 15,
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF0F172A),
+          color: AppColors.textPrimary,
         ),
       ),
       trailing: trailing ??
-          const Icon(Icons.chevron_right, color: Color(0xFFCBD5E1), size: 20),
+          Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20),
     );
   }
 

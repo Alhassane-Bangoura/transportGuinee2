@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/constants/app_assets.dart';
 
 import '../../../core/models/user_profile.dart';
 import '../../profile/screens/edit_profile_page.dart';
@@ -104,7 +105,7 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
           child: Opacity(
             opacity: 0.3,
             child: Image.network(
-              'https://lh3.googleusercontent.com/aida-public/AB6AXuDldn65BomRbpgSP2jQGsHYSqeS8KYk91ds-XPrSeNRO9ByXBrhpDp6Yb-RSUtLGJ4CgyggM-koFOVtncyoy2uwGUYVK_MwDWgT2RbUjtwLwybte6PrwdoKJMhGm1V0XR3YPO2nLWuv_WgLZ_YFPv2fQTzpf8P9KroNUF_IY8k9SO0Uy-YjnbgpNdO-F9lo5RwCGCijPfcDDpX9p-_uXp-Gfr6szBAAQonbwDxg91iqx9AC4lTiLkFRaaXvRslIwXtlexutGhSqUbcM',
+              AppAssets.syndicateProfileBg,
               fit: BoxFit.cover,
             ),
           ),
@@ -142,7 +143,7 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Image.network(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuBhA7cKadw9w6BRZPgYEjjFISsKa9S3f-6Otj_rOR9Jo4jTEnj_evZ_KtU1aae0KKCXkqe1Df_bNcJhYPlwnZNtbHdtNYHUz2BKnht24qkJVCZ6ZI46wAzTiFUylVWrnSVKtrUzHURhg3k8TVD9kCJ8PTJkVHACUQ6H8VuOfMo3PawONLqEUliogvifAEPCgK0uC0NrncIk5m6B-X1BltW6DS9AuuV-NIk16JtcujUj2F09Sb7E82PGWZ-3Oq7r04sQfpAFCMK_sJQP',
+                    AppAssets.syndicateProfileAvatar,
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,

@@ -25,7 +25,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
   @override
   void initState() {
     super.initState();
-    _assistantService = AssistantService(role: widget.userRole);
+    _assistantService = AssistantService(fallbackRole: widget.userRole);
     _loadHistory();
   }
 

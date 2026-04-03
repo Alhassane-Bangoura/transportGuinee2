@@ -11,6 +11,7 @@ class Trip {
   final int availableSeats;
   final double price;
   final String status;
+  final String? syndicateName;
 
   // Champs de la vue trips_with_details
   final String departureCityName;
@@ -45,6 +46,7 @@ class Trip {
     this.distance,
     this.estimatedDuration,
     this.quayNumber,
+    this.syndicateName,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
@@ -68,6 +70,7 @@ class Trip {
       distance: (json['distance'] as num?)?.toDouble(),
       estimatedDuration: (json['estimated_duration'] as num?)?.toInt(),
       quayNumber: json['quay_number'] as String?,
+      syndicateName: json['syndicate_name'] as String?,
     );
   }
 

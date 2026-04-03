@@ -35,89 +35,119 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
     },
   ];
 
+
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = AppColors.success;
     final Color backgroundColor = AppColors.background;
-    final Color textSlate900 = AppColors.textPrimary;
-    final Color textSlate500 = AppColors.textSecondary;
-
-    int total = _passengers.length;
-    int presents = _passengers.where((p) => p['present'] == true).length;
-    int absents = total - presents;
+    final Color textColor = AppColors.textPrimary;
+    final Color subColor = AppColors.textSecondary;
+    final Color primaryColor = AppColors.primary;
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Stack(
+      body: Column(
         children: [
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(textSlate900, textSlate500),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.only(bottom: 120),
-                    children: [
-                      _buildTripSummaryCard(primaryColor, textSlate900, textSlate500),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                        child: Text(
-                          "LISTE D'APPEL",
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: textSlate500,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ),
-                      ..._passengers.map((p) => _buildPassengerCard(p, primaryColor, textSlate900, textSlate500)),
-                    ],
-                  ),
-                ),
-              ],
+          _buildPremiumHeader(),
+          _buildTripSummarySection(primaryColor, textColor),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              itemCount: _passengers.length,
+              itemBuilder: (context, index) {
+                final p = _passengers[index];
+                return _buildModernPassengerCard(p, primaryColor, textColor, subColor);
+              },
             ),
           ),
-          _buildStatsFooter(total, presents, absents, primaryColor),
+          _buildFloatingContactAll(primaryColor),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(Color textColor, Color subColor) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+  Widget _buildPremiumHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
+      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.arrow_back, color: textColor),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white,
-              shadowColor: Colors.black.withValues(alpha: 0.1),
-              elevation: 2,
-              shape: const CircleBorder(),
-            ),
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           ),
-          const SizedBox(width: 16),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Passagers',
+                'GUINEE TRANSPORT',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                  letterSpacing: 1,
                 ),
               ),
               Text(
-                'Gérer les passagers du trajet',
+                'LISTE DES PASSAGERS',
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: subColor,
-                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 2,
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 48), // Spacer
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTripSummarySection(Color primary, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: primary.withOpacity(0.05),
+        border: const Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('TRAJET', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                  Text('Conakry → Mamou', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('DATE', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                  Text('24 Oct. 2023', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(20)),
+                child: Text('BUS G-204', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900)),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
+                child: Text('14/20 CONFIRMÉS', style: GoogleFonts.plusJakartaSans(color: Colors.green, fontSize: 10, fontWeight: FontWeight.w900)),
               ),
             ],
           ),
@@ -126,217 +156,98 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
     );
   }
 
-  Widget _buildTripSummaryCard(Color primary, Color textColor, Color subColor) {
+  Widget _buildModernPassengerCard(Map<String, dynamic> p, Color primary, Color textColor, Color subColor) {
+    bool isPresent = p['present'];
+    String name = p['name'];
+    String seat = p['seat'];
+    
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    'EN COURS',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Conakry → Kankan',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _buildIconLabel(Icons.schedule, '08:30', subColor),
-                    const SizedBox(width: 16),
-                    _buildIconLabel(Icons.group, '12 Passagers', subColor),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFF1F5F9)),
-              image: const DecorationImage(
-                image: NetworkImage(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuCNJAPTs_6Wyzig5-FicWV0sdTWPTlUGjZB_U7soDcL2zx7dhauYtTKMLnxCE9IYnrmd_k3MsUK5pckajYAr2Em3Tc3J63V_tr2lw7pOa83qL3LLte57hz2-8nvM-KCYOaj8MelzAZNjXR3GqrGOAe24Pavo6HKIzmlMVjGeTvDLK8EqX__cKLMSvrMZwiovdRxi1Ueo3ryo_SqRp742dI4mlBedbCEutS_GS-IvPbOwAzacYZrEE4Y9dEfaKN8DoTlt7xzTkIZM9XT'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIconLabel(IconData icon, String label, Color color) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: color),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 12,
-            color: color,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPassengerCard(Map<String, dynamic> p, Color primary, Color textColor, Color subColor) {
-    bool isWaiting = p['isWaiting'] ?? false;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: isPresent ? Colors.green.withOpacity(0.05) : AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: isPresent ? Colors.green.withOpacity(0.2) : AppColors.border),
       ),
       child: Column(
         children: [
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  p['initials'],
-                  style: GoogleFonts.plusJakartaSans(
-                    color: isWaiting ? const Color(0xFF94A3B8) : primary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                  image: DecorationImage(
+                    image: NetworkImage(isPresent ? 
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAT4LLefTVEgZQ3uKz9NJcyvmPo2QwlPPJKEoxtmpLV4HVTxpLqbE1KhWAG_8FIieuvPFYhcBXylyOZ57MxAUYCIwZ4DVu2IT354WQ_frjmABiD0pe2_O6Ahl4JHzkSykVml9-QQEJeQMgG3i1sUBMoyz3MGhMwK-38EAYEAoggZTSWQYXrhFngoLhAVea8Y68ZEfNewcTXw-ILq7mhoJRiyYncuoHmaXPqPRVh5GXNpkv2hyMEZ8eACRNMr-42blc_hlHCPH2vhXie' :
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAhB-Tt1AoI7CUWD6y3UZb8xHBcR15nMpyfwv84ZdoBSHIplOP4gNDZMvVy_lFsaCoVMsELl6jDLSdGtlHsqiYPSqdskp2VrUhzIw4CM2mlgbGEO_OvZBvkpoTa4yd0zbXJdEXguG80IkPujjxTMiJgQ91-uCvRGIESeGpaV9PoRwI4oUv8ts2hgQeYWJTX_na0cSWffSoJHuKu_IGAxxOFH3XghbAQqVORrQhEy51uNmGFobfzayQKPgFv7I_HPquVhBRBvdvgcMVg'),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      p['name'],
-                      style: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: textColor,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(name, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(6)),
+                          child: Text(seat, style: GoogleFonts.plusJakartaSans(color: primary, fontWeight: FontWeight.w900, fontSize: 12)),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          'Siège: ${p['seat']}',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: subColor,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(width: 4, height: 4, decoration: BoxDecoration(color: subColor.withValues(alpha: 0.3), shape: BoxShape.circle)),
-                        const SizedBox(width: 6),
-                        Text(
-                          p['status'],
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            color: isWaiting ? const Color(0xFF94A3B8) : primary,
-                            fontWeight: FontWeight.w600,
-                            fontStyle: isWaiting ? FontStyle.italic : FontStyle.normal,
-                          ),
-                        ),
+                        const Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
+                        const SizedBox(width: 4),
+                        Text('+224 622 00 00 00', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
                       ],
                     ),
                   ],
                 ),
               ),
-              Switch(
-                value: p['present'],
-                onChanged: (val) => setState(() => p['present'] = val),
-                activeThumbColor: Colors.white,
-                activeTrackColor: primary,
-                inactiveThumbColor: Colors.white,
-                inactiveTrackColor: const Color(0xFFE2E8F0),
-                trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-              ),
             ],
           ),
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: Color(0xFFF8FAFC)),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              InkWell(
-                onTap: () {},
-                child: Row(
-                  children: [
-                    Icon(Icons.confirmation_number_outlined, size: 14, color: primary),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Voir le ticket',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => p['present'] = !isPresent),
+                  child: Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: isPresent ? Colors.green.withOpacity(0.1) : Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                      border: isPresent ? Border.all(color: Colors.green.withOpacity(0.3)) : null,
                     ),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(isPresent ? Icons.verified_rounded : Icons.check_circle_outline, color: isPresent ? Colors.green : Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          isPresent ? 'DÉJÀ PRÉSENT' : 'CONFIRMER PRÉSENCE',
+                          style: GoogleFonts.plusJakartaSans(color: isPresent ? Colors.green : Colors.white, fontWeight: FontWeight.w800, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              Text(
-                p['present'] ? 'Présent' : 'Absent',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 10,
-                  color: const Color(0xFF94A3B8),
-                  fontWeight: FontWeight.w600,
-                ),
+              const SizedBox(width: 12),
+              Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(color: primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                child: Icon(Icons.chat_bubble_outline_rounded, color: primary, size: 20),
               ),
             ],
           ),
@@ -345,59 +256,29 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
     );
   }
 
-  Widget _buildStatsFooter(int total, int presents, int absents, Color primary) {
-    return Positioned(
-      bottom: 100,
-      left: 16,
-      right: 16,
+  Widget _buildFloatingContactAll(Color primary) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border)),
+      ),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        height: 56,
         decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withValues(alpha: 0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          color: primary,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: primary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildStatItem('Total', total.toString(), Colors.white),
-            Container(width: 1, height: 32, color: const Color(0xFF334155)),
-            _buildStatItem('Présents', presents.toString(), primary),
-            Container(width: 1, height: 32, color: const Color(0xFF334155)),
-            _buildStatItem('Absents', absents.toString(), const Color(0xFFF87171)),
+            const Icon(Icons.group_outlined, color: Colors.white),
+            const SizedBox(width: 12),
+            Text('CONTACTER TOUS LES PASSAGERS', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5)),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, Color valueColor) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
-            color: const Color(0xFF94A3B8),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: valueColor,
-          ),
-        ),
-      ],
     );
   }
 }

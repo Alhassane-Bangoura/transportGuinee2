@@ -4,7 +4,7 @@ class SyndicateService {
   static final _supabase = Supabase.instance.client;
 
   /// Vérifie si un trajet est déjà géré par un syndicat
-  static Future<bool> isRouteAvailable(int routeId) async {
+  static Future<bool> isRouteAvailable(String routeId) async {
     final response = await _supabase
         .from('syndicate_routes')
         .select('id')
@@ -15,7 +15,7 @@ class SyndicateService {
   }
 
   /// Récupère la liste des trajets d'une gare avec leur statut de disponibilité
-  static Future<List<Map<String, dynamic>>> getStationRoutesWithAvailability(int stationId) async {
+  static Future<List<Map<String, dynamic>>> getStationRoutesWithAvailability(String stationId) async {
     // 1. Récupérer tous les trajets de la gare
     final routesResponse = await _supabase
         .from('routes')
@@ -27,12 +27,12 @@ class SyndicateService {
         .from('syndicate_routes')
         .select('route_id');
     
-    final Set<int> assignedRouteIds = (assignedRoutesResponse as List)
-        .map((r) => r['route_id'] as int)
+    final Set<String> assignedRouteIds = (assignedRoutesResponse as List)
+        .map((r) => r['route_id'] as String)
         .toSet();
 
     return (routesResponse as List).map((r) {
-      final int id = r['id'];
+      final String id = r['id'];
       return {
         'id': id,
         'name': r['name'],
@@ -42,7 +42,7 @@ class SyndicateService {
   }
 
   /// Assigne des trajets à un syndicat (après vérification d'unicité)
-  static Future<void> assignRoutesToSyndicate(String syndicateId, List<int> routeIds) async {
+  static Future<void> assignRoutesToSyndicate(String syndicateId, List<String> routeIds) async {
     // La contrainte UNIQUE en DB protégera en cas de conflit concurrent,
     // mais on injecte les lignes ici.
     final List<Map<String, dynamic>> data = routeIds.map((rid) => {

@@ -81,9 +81,15 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone       TEXT,
   avatar_url  TEXT,
   role        user_role NOT NULL DEFAULT 'passenger',
+  station_id  UUID,
+  route_id    UUID,
   metadata    JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  -- Contraintes optionnelles si vous souhaitez lier aux stations/routes réelles
+  CONSTRAINT fk_station FOREIGN KEY (station_id) REFERENCES stations(id) ON DELETE SET NULL,
+  CONSTRAINT fk_route FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE SET NULL
 );
 
 COMMENT ON TABLE profiles IS 'Profils publics des utilisateurs, miroir de auth.users.';
@@ -128,6 +134,7 @@ COMMENT ON TABLE stations IS 'Gares routières rattachées à une ville.';
 
 CREATE TABLE IF NOT EXISTS routes (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name                  TEXT,                      -- Nom lisible (ex: Conakry -> Kindia)
   departure_city_id     UUID NOT NULL REFERENCES cities(id) ON DELETE RESTRICT,
   arrival_city_id       UUID NOT NULL REFERENCES cities(id) ON DELETE RESTRICT,
   departure_station_id  UUID NOT NULL REFERENCES stations(id) ON DELETE RESTRICT,
@@ -145,6 +152,23 @@ CREATE TABLE IF NOT EXISTS routes (
 );
 
 COMMENT ON TABLE routes IS 'Itinéraires entre deux gares (et donc deux villes).';
+
+
+-- ═══════════════════════════════════════════════
+-- 2.4 bis SYNDICATE_ROUTES (Lien Syndicats <-> Routes)
+-- ═══════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS syndicate_routes (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  syndicate_id  UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  route_id      UUID NOT NULL REFERENCES routes(id) ON DELETE CASCADE,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+  -- Un trajet ne peut être géré que par UN SEUL syndicat (Contrainte d'exclusivité)
+  UNIQUE(route_id)
+);
+
+COMMENT ON TABLE syndicate_routes IS 'Table de mapping exclusif entre un trajet et le syndicat qui le gère.';
 
 
 -- ═══════════════════════════════════════════════
@@ -322,13 +346,15 @@ RETURNS TRIGGER AS $$
 DECLARE
   _role_text TEXT;
   _role user_role;
+  _station_id UUID;
+  _route_id UUID;
 BEGIN
-  -- 1. Récupérer le texte du rôle
-  _role_text := NEW.raw_user_meta_data ->> 'role_key';
+  -- 1. Récupérer le texte du rôle depuis les métadonnées (insensible à la casse)
+  _role_text := LOWER(NEW.raw_user_meta_data ->> 'role_key');
   
-  -- 2. Tenter la conversion avec sécurité (fallback sur passenger en cas d'erreur)
+  -- 2. Tenter la conversion avec sécurité (fallback sur passenger)
   BEGIN
-    IF _role_text IS NOT NULL THEN
+    IF _role_text IS NOT NULL AND _role_text <> '' THEN
       _role := _role_text::user_role;
     ELSE
       _role := 'passenger'::user_role;
@@ -337,22 +363,55 @@ BEGIN
     _role := 'passenger'::user_role;
   END;
 
-  -- 3. Insertion dans profiles avec gestion de conflit (UPSERT)
-  INSERT INTO public.profiles (id, full_name, email, phone, role, metadata)
-  VALUES (
-    NEW.id,
-    COALESCE(NEW.raw_user_meta_data ->> 'full_name', ''),
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data ->> 'phone', NEW.phone, ''),
-    _role,
-    COALESCE(NEW.raw_user_meta_data, '{}'::jsonb)
-  )
-  ON CONFLICT (id) DO UPDATE SET
-    full_name = EXCLUDED.full_name,
-    email = EXCLUDED.email,
-    phone = EXCLUDED.phone,
-    role = EXCLUDED.role,
-    metadata = EXCLUDED.metadata;
+  -- 3. Extraction sécurisée des UUID (pour éviter l'erreur de cast sur chaîne vide)
+  BEGIN
+    _station_id := NULLIF(NEW.raw_user_meta_data ->> 'station_id', '')::UUID;
+  EXCEPTION WHEN OTHERS THEN
+    _station_id := NULL;
+  END;
+
+  BEGIN
+    _route_id := NULLIF(NEW.raw_user_meta_data ->> 'route_id', '')::UUID;
+  EXCEPTION WHEN OTHERS THEN
+    _route_id := NULL;
+  END;
+
+  -- 4. Insertion dans profiles avec gestion de conflit (UPSERT)
+  BEGIN
+    INSERT INTO public.profiles (
+      id, 
+      full_name, 
+      email, 
+      phone, 
+      role, 
+      station_id,
+      route_id,
+      metadata
+    )
+    VALUES (
+      NEW.id,
+      COALESCE(NEW.raw_user_meta_data ->> 'full_name', ''),
+      COALESCE(NEW.email, ''),
+      COALESCE(NEW.raw_user_meta_data ->> 'phone', NEW.phone, ''),
+      _role,
+      _station_id,
+      _route_id,
+      COALESCE(NEW.raw_user_meta_data, '{}'::jsonb)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      full_name = EXCLUDED.full_name,
+      email = EXCLUDED.email,
+      phone = EXCLUDED.phone,
+      role = EXCLUDED.role,
+      station_id = EXCLUDED.station_id,
+      route_id = EXCLUDED.route_id,
+      metadata = EXCLUDED.metadata,
+      updated_at = now();
+  EXCEPTION WHEN OTHERS THEN
+    -- On log l'erreur mais on ne bloque pas l'inscription auth.users
+    -- (Important pour ne pas avoir d'erreur 500 bloquante)
+    RAISE WARNING 'Erreur lors de la création du profil pour %: %', NEW.id, SQLERRM;
+  END;
 
   RETURN NEW;
 END;
@@ -365,8 +424,28 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
 
 
 -- ═══════════════════════════════════════════════
--- 4.3 Mise à jour des sièges disponibles après réservation
+-- 4.4 Fonctions Helper pour RLS (Bypass récursion)
 -- ═══════════════════════════════════════════════
+
+-- Ces fonctions permettent de vérifier le rôle sans déclencher de récursion RLS.
+CREATE OR REPLACE FUNCTION public.get_auth_role()
+RETURNS user_role AS $$
+  SELECT role FROM public.profiles WHERE id = auth.uid();
+$$ LANGUAGE sql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.get_auth_station()
+RETURNS UUID AS $$
+  SELECT station_id FROM public.profiles WHERE id = auth.uid();
+$$ LANGUAGE sql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.is_staff()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() 
+    AND role IN ('driver', 'syndicate', 'station_admin')
+  );
+$$ LANGUAGE sql SECURITY DEFINER;
 
 CREATE OR REPLACE FUNCTION update_trip_seats_on_booking()
 RETURNS TRIGGER AS $$
@@ -457,22 +536,29 @@ ALTER TABLE trips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE syndicate_routes ENABLE ROW LEVEL SECURITY;
 
 
 -- ═══════════════════════════════════════════════
 -- 5.1 PROFILES
 -- ═══════════════════════════════════════════════
 
--- Tout le monde peut voir les profils (pour afficher noms de chauffeurs, etc.)
+-- Tout le monde peut voir les profils (essentiel pour afficher les noms)
 CREATE POLICY "profiles_select_all"
   ON profiles FOR SELECT
   USING (true);
 
--- Un utilisateur ne peut modifier que SON profil
-CREATE POLICY "profiles_update_own"
+-- Un utilisateur ne peut modifier que SON profil,
+-- OU un station_admin peut modifier les profils de SA GARE
+CREATE POLICY "profiles_update_authorized"
   ON profiles FOR UPDATE
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+  USING (
+    auth.uid() = id
+    OR (
+      get_auth_role() = 'station_admin'
+      AND get_auth_station() = profiles.station_id
+    )
+  );
 
 -- L'insertion est gérée par le trigger SECURITY DEFINER
 CREATE POLICY "profiles_insert_via_trigger"
@@ -519,13 +605,31 @@ CREATE POLICY "vehicles_select_all"
   USING (true);
 
 -- Les chauffeurs et syndicats peuvent mettre à jour les véhicules
+-- Les chauffeurs et syndicats peuvent mettre à jour les véhicules,
+-- Les admins de gare peuvent mettre à jour les véhicules de LEUR gare.
 CREATE POLICY "vehicles_update_authorized"
   ON vehicles FOR UPDATE
   USING (
     EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('driver', 'syndicate', 'station_admin')
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid()
+      AND p.role IN ('driver', 'syndicate', 'station_admin')
+      AND (
+        p.role != 'station_admin'
+        OR p.station_id = (SELECT station_id FROM profiles WHERE id = vehicles.owner_id)
+      )
+    )
+  );
+
+-- Politique de suppression pour les admins
+CREATE POLICY "vehicles_delete_authorized"
+  ON vehicles FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid()
+      AND p.role = 'station_admin'
+      AND p.station_id = (SELECT station_id FROM profiles WHERE id = vehicles.owner_id)
     )
   );
 
@@ -535,18 +639,25 @@ CREATE POLICY "vehicles_update_authorized"
 -- ═══════════════════════════════════════════════
 
 -- Lecture publique (tous les utilisateurs voient les trajets)
+-- Lecture publique
 CREATE POLICY "trips_select_all"
   ON trips FOR SELECT
   USING (true);
 
 -- Seuls les chauffeurs, syndicats et admins de gare peuvent créer des trajets
+-- On vérifie que pour les admins, ils créent des trajets au départ de LEUR gare
 CREATE POLICY "trips_insert_authorized"
   ON trips FOR INSERT
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('driver', 'syndicate', 'station_admin')
+      SELECT 1 FROM profiles p
+      JOIN routes r ON r.id = route_id
+      WHERE p.id = auth.uid()
+      AND p.role IN ('driver', 'syndicate', 'station_admin')
+      AND (
+        p.role != 'station_admin' 
+        OR r.departure_station_id = p.station_id
+      )
     )
   );
 
@@ -556,9 +667,14 @@ CREATE POLICY "trips_update_authorized"
   USING (
     driver_id = auth.uid()
     OR EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role IN ('syndicate', 'station_admin')
+      SELECT 1 FROM profiles p
+      JOIN routes r ON r.id = trips.route_id
+      WHERE p.id = auth.uid()
+      AND p.role IN ('syndicate', 'station_admin')
+      AND (
+        p.role != 'station_admin'
+        OR r.departure_station_id = p.station_id
+      )
     )
   );
 
@@ -590,7 +706,44 @@ CREATE POLICY "bookings_select_staff"
 -- Un passager authentifié peut créer une réservation
 CREATE POLICY "bookings_insert_authenticated"
   ON bookings FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.role() = 'authenticated');
+
+
+-- ═══════════════════════════════════════════════
+-- 5.8 SYNDICATE_ROUTES
+-- ═══════════════════════════════════════════════
+
+-- Tout le monde peut voir quel syndicat gère quel trajet
+CREATE POLICY "syndicate_routes_select_all"
+  ON syndicate_routes FOR SELECT
+  USING (true);
+
+-- Seul l'utilisateur associé au syndicat (ou un admin) peut s'enregistrer pour un trajet
+CREATE POLICY "syndicate_routes_insert_authorized"
+  ON syndicate_routes FOR INSERT
+  WITH CHECK (
+    auth.uid() = syndicate_id
+    OR EXISTS (
+      SELECT 1 FROM profiles p
+      JOIN routes r ON r.id = route_id
+      WHERE p.id = auth.uid()
+      AND p.role = 'station_admin'
+      AND r.departure_station_id = p.station_id
+    )
+  );
+
+-- Suppression par l'admin de la gare concernée
+CREATE POLICY "syndicate_routes_delete_authorized"
+  ON syndicate_routes FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      JOIN routes r ON r.id = route_id
+      WHERE p.id = auth.uid()
+      AND p.role = 'station_admin'
+      AND r.departure_station_id = p.station_id
+    )
+  );
 
 -- Un passager peut modifier sa réservation (ex: annuler)
 CREATE POLICY "bookings_update_own"
@@ -833,9 +986,10 @@ ON CONFLICT (name, city_id) DO NOTHING;
 -- 7.2 DONNÉES DE SEED — Routes principales
 -- ────────────────────────────────────────────────────────────────────────────
 
-INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, arrival_station_id, base_price, distance, estimated_duration) VALUES
+INSERT INTO routes (name, departure_city_id, arrival_city_id, departure_station_id, arrival_station_id, base_price, distance, estimated_duration) VALUES
   -- Conakry → Kindia
   (
+    'Conakry → Kindia',
     (SELECT id FROM cities WHERE name = 'Conakry'),
     (SELECT id FROM cities WHERE name = 'Kindia'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Madina'),
@@ -844,6 +998,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Conakry → Mamou
   (
+    'Conakry → Mamou',
     (SELECT id FROM cities WHERE name = 'Conakry'),
     (SELECT id FROM cities WHERE name = 'Mamou'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Madina'),
@@ -852,6 +1007,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Conakry → Labé
   (
+    'Conakry → Labé',
     (SELECT id FROM cities WHERE name = 'Conakry'),
     (SELECT id FROM cities WHERE name = 'Labé'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Madina'),
@@ -860,6 +1016,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Conakry → Kankan
   (
+    'Conakry → Kankan',
     (SELECT id FROM cities WHERE name = 'Conakry'),
     (SELECT id FROM cities WHERE name = 'Kankan'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Madina'),
@@ -868,6 +1025,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Conakry → Nzérékoré
   (
+    'Conakry → Nzérékoré',
     (SELECT id FROM cities WHERE name = 'Conakry'),
     (SELECT id FROM cities WHERE name = 'Nzérékoré'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Madina'),
@@ -876,6 +1034,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Conakry → Boké
   (
+    'Conakry → Boké',
     (SELECT id FROM cities WHERE name = 'Conakry'),
     (SELECT id FROM cities WHERE name = 'Boké'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Bambéto'),
@@ -884,6 +1043,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Kindia → Mamou
   (
+    'Kindia → Mamou',
     (SELECT id FROM cities WHERE name = 'Kindia'),
     (SELECT id FROM cities WHERE name = 'Mamou'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Kindia'),
@@ -892,6 +1052,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Mamou → Labé
   (
+    'Mamou → Labé',
     (SELECT id FROM cities WHERE name = 'Mamou'),
     (SELECT id FROM cities WHERE name = 'Labé'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Mamou'),
@@ -900,6 +1061,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Kankan → Siguiri
   (
+    'Kankan → Siguiri',
     (SELECT id FROM cities WHERE name = 'Kankan'),
     (SELECT id FROM cities WHERE name = 'Siguiri'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Kankan'),
@@ -908,6 +1070,7 @@ INSERT INTO routes (departure_city_id, arrival_city_id, departure_station_id, ar
   ),
   -- Conakry → Faranah
   (
+    'Conakry → Faranah',
     (SELECT id FROM cities WHERE name = 'Conakry'),
     (SELECT id FROM cities WHERE name = 'Faranah'),
     (SELECT id FROM stations WHERE name = 'Gare Routière de Madina'),
@@ -1027,6 +1190,7 @@ GRANT INSERT, UPDATE ON tickets TO authenticated;
 GRANT UPDATE ON profiles TO authenticated;
 GRANT INSERT, UPDATE ON trips TO authenticated;
 GRANT UPDATE ON vehicles TO authenticated;
+GRANT INSERT, DELETE ON syndicate_routes TO authenticated;
 
 -- Accès aux séquences (pour les inserts avec gen_random_uuid)
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;

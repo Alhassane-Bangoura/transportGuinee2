@@ -1,7 +1,7 @@
 class Station {
-  final int id;
+  final String id;
   final String name;
-  final int cityId;
+  final String cityId;
   final String? address;
 
   Station({
@@ -13,9 +13,9 @@ class Station {
 
   factory Station.fromJson(Map<String, dynamic> json) {
     return Station(
-      id: json['id'] as int,
+      id: json['id'] as String,
       name: json['name'] as String,
-      cityId: json['city_id'] as int,
+      cityId: json['city_id'] as String,
       address: json['address'] as String?,
     );
   }

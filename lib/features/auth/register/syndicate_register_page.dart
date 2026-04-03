@@ -6,6 +6,7 @@ import '../../../core/models/station.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/services/syndicate_service.dart';
+import '../../../core/widgets/success_dialog.dart';
 import '../login_page.dart';
 
 class SyndicateRegisterPage extends StatefulWidget {
@@ -33,7 +34,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
   List<Map<String, dynamic>> _routes = [];
   City? _selectedCity;
   Station? _selectedStation;
-  final List<int> _selectedRouteIds = [];
+  final List<String> _selectedRouteIds = [];
 
   @override
   void initState() {
@@ -97,7 +98,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -389,7 +390,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.surface, // Correction ici
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border, width: 1.5),
             boxShadow: [
@@ -471,7 +472,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
         else
           Container(
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.surface, // Correction ici
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border, width: 1.5),
             ),
@@ -490,7 +491,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                   onChanged: isAvailable ? (v) {
                     setState(() {
                       if (v == true) {
-                        _selectedRouteIds.add(route['id']);
+                        _selectedRouteIds.add(route['id'] as String);
                       } else {
                         _selectedRouteIds.remove(route['id']);
                       }
@@ -541,7 +542,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: enabled ? AppColors.white : AppColors.border.withValues(alpha: 0.1),
+            color: enabled ? AppColors.surface : AppColors.border.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border, width: 1.5),
           ),
@@ -627,8 +628,19 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compte créé ! Connectez-vous.'), backgroundColor: Colors.green));
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+
+      SuccessDialog.show(
+        context: context,
+        title: "Syndicat Enregistré !",
+        message: "Les détails de votre organisation ont été soumis. Vous pouvez maintenant vous connecter pour gérer vos chauffeurs.",
+        buttonText: "SE CONNECTER",
+        onButtonPressed: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString().replaceAll('AuthException: ', '')}')));

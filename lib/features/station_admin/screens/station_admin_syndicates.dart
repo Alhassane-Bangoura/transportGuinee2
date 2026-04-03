@@ -23,15 +23,23 @@ class _StationAdminSyndicatesState extends State<StationAdminSyndicates> {
 
   Future<void> _loadData() async {
     try {
-      final profile = await AuthService.getCurrentProfile();
+      final authResponse = await AuthService.getCurrentProfile();
+      final profile = authResponse.data;
       if (profile != null && profile.stationId != null) {
-        final syndicates = await StationService.getStationSyndicates(profile.stationId!);
+        final syndResponse = await StationService.getStationSyndicates(profile.stationId!);
         if (mounted) {
           setState(() {
-            _syndicates = syndicates;
+            _syndicates = syndResponse.data ?? [];
             _isLoading = false;
           });
+          if (!syndResponse.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(syndResponse.message)),
+            );
+          }
         }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint('Error loading syndicates: $e');

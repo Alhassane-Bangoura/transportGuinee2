@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/city.dart';
 import '../models/station.dart';
@@ -13,7 +14,7 @@ class LocationService {
   }
 
   /// Récupère les gares d'une ville
-  static Future<List<Station>> getStationsByCity(int cityId) async {
+  static Future<List<Station>> getStationsByCity(String cityId) async {
     final data = await _supabase
         .from('stations')
         .select()
@@ -29,25 +30,39 @@ class LocationService {
   }
 
   /// Récupère les trajets (routes) d'une gare de départ
-  static Future<List<RouteModel>> getRoutesByStation(int stationId) async {
-    final data = await _supabase
-        .from('routes')
-        .select('''
-          *,
-          departure_station:stations!departure_station_id(name),
-          arrival_station:stations!arrival_station_id(name)
-        ''')
-        .eq('departure_station_id', stationId);
+  static Future<List<RouteModel>> getRoutesByStation(String stationId) async {
+    try {
+      final data = await _supabase
+          .from('routes')
+          .select('''
+            *,
+            departure_station:stations!departure_station_id(name),
+            arrival_station:stations!arrival_station_id(
+              name, 
+              city:cities!city_id(name)
+            )
+          ''')
+          .eq('departure_station_id', stationId);
 
-    return (data as List).map((json) {
-      return RouteModel(
-        id: json['id'] as int,
-        departureStationId: json['departure_station_id'] as int,
-        arrivalStationId: json['arrival_station_id'] as int,
-        departureStationName: json['departure_station']['name'] as String?,
-        arrivalStationName: json['arrival_station']['name'] as String?,
-        syndicateId: json['syndicate_id'] as String?,
-      );
-    }).toList();
+      debugPrint('[LocationService] Fetched ${data.length} routes for station $stationId');
+
+      return (data as List).map((json) {
+        final arrivalStation = json['arrival_station'];
+        final arrivalCity = arrivalStation != null ? arrivalStation['city'] : null;
+        
+        return RouteModel(
+          id: json['id'] as String,
+          departureStationId: json['departure_station_id'] as String,
+          arrivalStationId: json['arrival_station_id'] as String,
+          departureStationName: json['departure_station']['name'] as String?,
+          arrivalStationName: arrivalStation?['name'] as String?,
+          arrivalCityName: arrivalCity?['name'] as String?,
+          syndicateId: json['syndicate_id'] as String?,
+        );
+      }).toList();
+    } catch (e) {
+      debugPrint('[LocationService] Error fetching routes: $e');
+      return [];
+    }
   }
 }

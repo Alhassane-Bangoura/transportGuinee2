@@ -7,20 +7,18 @@ import '../../features/station_admin/screens/station_admin_dashboard.dart';
 
 class NavigationService {
   static Widget getDashboardForRole(String role, {UserProfile? profile}) {
-    switch (role.toUpperCase()) {
-      case 'PASSENGER':
-      case 'PASSAGER':
+    // Standardize role comparison based on database keys in handle_new_user trigger
+    switch (role.toLowerCase()) {
+      case 'passenger':
         return PassengerDashboard(profile: profile);
-      case 'DRIVER':
-      case 'CHAUFFEUR':
+      case 'driver':
         return DriverDashboard(profile: profile);
-      case 'SYNDICATE':
-      case 'SYNDICAT':
-        return const SyndicateDashboard();
-      case 'STATION_ADMIN':
-      case 'GARE':
-        return const StationAdminDashboard();
+      case 'syndicate':
+        return SyndicateDashboard(profile: profile);
+      case 'station_admin':
+        return StationAdminDashboard(profile: profile);
       default:
+        // Fallback to passenger if role is unknown
         return PassengerDashboard(profile: profile);
     }
   }

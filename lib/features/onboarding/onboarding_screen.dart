@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'pages/onboarding_page1.dart';
 import 'pages/onboarding_page2.dart';
 import 'pages/onboarding_page3.dart';
+import 'pages/onboarding_page4.dart';
+import 'pages/onboarding_page5.dart';
 import '../auth/role_selection_page.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -16,7 +19,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentPage = 0;
-  final int _totalPages = 3;
+  final int _totalPages = 5;
 
   void _nextPage() {
     if (_currentPage < _totalPages - 1) {
@@ -33,11 +36,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _finish();
   }
 
-  void _finish() {
-    // Naviguer vers le choix du rôle (à créer)
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
-    );
+  Future<void> _finish() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstLaunch', false);
+
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
+      );
+    }
   }
 
   @override
@@ -49,7 +56,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           // PageView
@@ -70,6 +77,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 totalPages: _totalPages,
               ),
               OnboardingPage3(
+                onNext: _nextPage,
+                onSkip: _skip,
+                currentPage: _currentPage,
+                totalPages: _totalPages,
+              ),
+              OnboardingPage4(
+                onNext: _nextPage,
+                onSkip: _skip,
+                currentPage: _currentPage,
+                totalPages: _totalPages,
+              ),
+              OnboardingPage5(
                 onNext: _nextPage,
                 onSkip: _skip,
                 currentPage: _currentPage,

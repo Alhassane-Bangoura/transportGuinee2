@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
-// Removed unused app_text_styles import
+import '../../../core/services/trip_service.dart';
+import '../../../core/models/trip.dart';
+import '../../../core/utils/app_response.dart';
+import 'passenger_booking.dart';
 
 class PassengerTrips extends StatefulWidget {
   const PassengerTrips({super.key});
@@ -40,50 +43,46 @@ class _PassengerTripsState extends State<PassengerTrips> {
 
           // Results Section
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-              children: [
-                _buildResultsHeader(primaryColor, textSlate900),
-                _buildTripCard(
-                  company: 'SOTRA-GUINÉE',
-                  classType: 'Standard Class',
-                  price: '85.000 GNF',
-                  departureTime: '07:30',
-                  departureStation: 'Matam',
-                  arrivalTime: '14:45',
-                  arrivalStation: 'Mamou',
-                  seatsLeft: 12,
-                  primaryColor: primaryColor,
-                  icon: Icons.airport_shuttle,
-                ),
-                const SizedBox(height: 16),
-                _buildTripCard(
-                  company: 'GUINÉE EXPRESS',
-                  classType: 'VIP Service',
-                  price: '120.000 GNF',
-                  departureTime: '08:00',
-                  departureStation: 'Bambeto',
-                  arrivalTime: '18:30',
-                  arrivalStation: 'Labé',
-                  seatsLeft: 24,
-                  primaryColor: primaryColor,
-                  icon: Icons.bus_alert,
-                ),
-                const SizedBox(height: 16),
-                _buildTripCard(
-                  company: 'KANKAN VOYAGE',
-                  classType: 'Nuit Class',
-                  price: '150.000 GNF',
-                  departureTime: '19:00',
-                  departureStation: 'Madina',
-                  arrivalTime: '06:00',
-                  arrivalStation: 'Kankan',
-                  seatsLeft: 4,
-                  primaryColor: primaryColor,
-                  icon: Icons.airport_shuttle,
-                  isLowSeats: true,
-                ),
-              ],
+            child: FutureBuilder<AppResponse<List<Trip>>>(
+              future: TripService.getUpcomingTrips(limit: 10),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                }
+                
+                if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.isSuccess) {
+                  return Center(
+                    child: Text('Aucun trajet disponible.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary)),
+                  );
+                }
+
+                final trips = snapshot.data!.data ?? [];
+                
+                if (trips.isEmpty) {
+                  return Center(
+                    child: Text('Aucun trajet pour le moment.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary)),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                  itemCount: trips.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return _buildResultsHeader(primaryColor, textSlate900, trips.length);
+                    }
+                    final trip = trips[index - 1];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildTripCard(
+                        context,
+                        trip,
+                        primaryColor,
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -282,7 +281,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
     );
   }
 
-  Widget _buildResultsHeader(Color primaryColor, Color titleColor) {
+  Widget _buildResultsHeader(Color primaryColor, Color titleColor, int count) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -303,7 +302,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              '12 bus trouvés',
+              '$count bus trouvés',
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 10,
                 color: primaryColor,
@@ -316,19 +315,13 @@ class _PassengerTripsState extends State<PassengerTrips> {
     );
   }
 
-  Widget _buildTripCard({
-    required String company,
-    required String classType,
-    required String price,
-    required String departureTime,
-    required String departureStation,
-    required String arrivalTime,
-    required String arrivalStation,
-    required int seatsLeft,
-    required Color primaryColor,
-    required IconData icon,
-    bool isLowSeats = false,
-  }) {
+  Widget _buildTripCard(
+    BuildContext context,
+    Trip trip,
+    Color primaryColor,
+  ) {
+    bool isLowSeats = trip.availableSeats < 10;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -351,27 +344,38 @@ class _PassengerTripsState extends State<PassengerTrips> {
               Row(
                 children: [
                   Container(
+                    height: 130,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: primaryColor.withValues(alpha: 0.1),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    child: Center(
+                      child: Icon(Icons.directions_bus, size: 48, color: primaryColor.withValues(alpha: 0.3)),
+                    ),
+                  ),
+                  Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
                       color: primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(icon, color: primaryColor, size: 20),
+                    child: Icon(Icons.directions_bus, color: primaryColor, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        company,
+                        trip.syndicateName ?? 'Syndicat',
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
                       ),
                       Text(
-                        classType.toUpperCase(),
+                        (trip.vehicleType ?? 'Standard').toUpperCase(),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
                           color: const Color(0xFF94A3B8),
@@ -387,7 +391,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    price,
+                    trip.formattedPrice,
                     style: GoogleFonts.plusJakartaSans(
                       color: primaryColor,
                       fontWeight: FontWeight.bold,
@@ -409,7 +413,9 @@ class _PassengerTripsState extends State<PassengerTrips> {
           // Timeline
           Row(
             children: [
-              _buildTimelinePoint(departureTime, departureStation),
+              _buildTimelinePoint(
+                  "${trip.departureTime.hour.toString().padLeft(2, '0')}:${trip.departureTime.minute.toString().padLeft(2, '0')}", 
+                  trip.departureStationName),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -423,14 +429,18 @@ class _PassengerTripsState extends State<PassengerTrips> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                         color: Colors.white,
-                        child: Icon(Icons.directions_bus,
-                            color: primaryColor, size: 16),
+                        child: Text(trip.formattedDuration, style: TextStyle(color: primaryColor, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
                 ),
               ),
-              _buildTimelinePoint(arrivalTime, arrivalStation, isEnd: true),
+              // Simuler une arrivée en ajoutant la durée estimée si possible
+              _buildTimelinePoint(
+                  trip.estimatedDuration != null 
+                      ? "${trip.departureTime.add(Duration(minutes: trip.estimatedDuration!)).hour.toString().padLeft(2, '0')}:${trip.departureTime.add(Duration(minutes: trip.estimatedDuration!)).minute.toString().padLeft(2, '0')}"
+                      : "--:--", 
+                  trip.arrivalStationName, isEnd: true),
             ],
           ),
           const SizedBox(height: 24),
@@ -444,7 +454,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
                       color: isLowSeats ? Colors.red : primaryColor),
                   const SizedBox(width: 4),
                   Text(
-                    '$seatsLeft sièges restants',
+                    '${trip.availableSeats} sièges restants',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -454,7 +464,14 @@ class _PassengerTripsState extends State<PassengerTrips> {
                 ],
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PassengerBooking(trip: trip),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryColor,
                   foregroundColor: Colors.white,

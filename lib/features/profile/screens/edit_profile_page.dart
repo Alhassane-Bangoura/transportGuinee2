@@ -85,7 +85,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           'Modifier le profil',
           style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
@@ -117,15 +117,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 const SizedBox(height: 32),
                 _buildSectionTitle('DÉTAILS SPÉCIFIQUES'),
                 const SizedBox(height: 16),
-                ..._metadataControllers.entries.map((entry) {
-                  // Skip technical IDs that shouldn't be edited directly here
-                  if (entry.key.contains('_id')) return const SizedBox.shrink();
+                ..._metadataControllers.entries.where((entry) => 
+                  !entry.key.contains('_id') && 
+                  entry.key != 'phone' && 
+                  entry.key != 'full_name'
+                ).map((entry) {
+                  final String rawKey = entry.key;
+                  String label = rawKey.replaceAll('_', ' ').toUpperCase();
+                  if (rawKey == 'role_key') label = 'RÔLE';
+                  if (rawKey == 'emergency_name') label = "CONTACT D'URGENCE";
+                  if (rawKey == 'emergency_phone') label = "TÉL. D'URGENCE";
                   
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: _buildTextField(
                       controller: entry.value,
-                      label: entry.key.replaceAll('_', ' ').toUpperCase(),
+                      label: label,
                       icon: _getIconForMetadata(entry.key),
                     ),
                   );
@@ -184,9 +191,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
-      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary),
         prefixIcon: Icon(icon, color: AppColors.primary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -201,7 +209,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surface,
       ),
     );
   }

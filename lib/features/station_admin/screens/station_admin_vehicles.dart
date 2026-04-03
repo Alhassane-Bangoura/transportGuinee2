@@ -12,9 +12,11 @@ class StationAdminVehicles extends StatefulWidget {
 }
 
 class _StationAdminVehiclesState extends State<StationAdminVehicles> {
-  int _selectedTab = 0;
+  int _selectedFilterIndex = 0;
   List<Map<String, dynamic>> _vehicles = [];
   bool _isLoading = true;
+
+  final List<String> _filters = ['Tous', 'En attente', 'Remplissage', 'Prêt'];
 
   @override
   void initState() {
@@ -24,15 +26,23 @@ class _StationAdminVehiclesState extends State<StationAdminVehicles> {
 
   Future<void> _loadData() async {
     try {
-      final profile = await AuthService.getCurrentProfile();
+      final authResponse = await AuthService.getCurrentProfile();
+      final profile = authResponse.data;
       if (profile != null && profile.stationId != null) {
-        final vehicles = await StationService.getStationVehicles(profile.stationId!);
+        final vehResponse = await StationService.getStationVehicles(profile.stationId!);
         if (mounted) {
           setState(() {
-            _vehicles = vehicles;
+            _vehicles = vehResponse.data ?? [];
             _isLoading = false;
           });
+          if (!vehResponse.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(vehResponse.message)),
+            );
+          }
         }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint('Error loading vehicles: $e');
@@ -40,51 +50,42 @@ class _StationAdminVehiclesState extends State<StationAdminVehicles> {
     }
   }
 
+  List<Map<String, dynamic>> get _filteredVehicles {
+    if (_selectedFilterIndex == 0) return _vehicles;
+    if (_selectedFilterIndex == 1) return _vehicles.where((v) => v['status'] == 'delayed' || v['status'] == 'en_attente').toList();
+    if (_selectedFilterIndex == 2) return _vehicles.where((v) => v['status'] == 'loading' || v['status'] == 'remplissage' || v['status'] == 'scheduled').toList();
+    if (_selectedFilterIndex == 3) return _vehicles.where((v) => v['status'] == 'ready' || v['status'] == 'validé').toList();
+    return _vehicles;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
     }
 
-    final Color primaryColor = AppColors.primary;
-    final Color backgroundColor = AppColors.background;
-    final Color textSlate900 = AppColors.textPrimary;
-    final Color textSlate500 = AppColors.textSecondary;
-
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(primaryColor, textSlate900),
-            _buildTabs(primaryColor, textSlate500),
+            _buildPremiumHeader(),
+            _buildFilterChips(),
             Expanded(
               child: RefreshIndicator(
+                color: AppColors.primary,
+                backgroundColor: AppColors.surface,
                 onRefresh: _loadData,
                 child: ListView(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   children: [
-                    if (_vehicles.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(40),
-                          child: Text('Aucun véhicule trouvé', style: GoogleFonts.plusJakartaSans(color: textSlate500)),
-                        ),
-                      )
+                    if (_filteredVehicles.isEmpty)
+                      _buildEmptyState()
                     else
-                      ..._vehicles.map((v) => Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: _buildVehicleCard(
-                          '${v['type']} (${v['license_plate']})',
-                          v['status'],
-                          v['driver_name'],
-                          'Assigné', // Placeholder for syndicate/assignment
-                          '${v['total_seats']} places',
-                          'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400',
-                          primaryColor,
-                          statusColor: v['status'] == 'scheduled' ? Colors.amber : primaryColor,
-                        ),
-                      )),
+                      ..._filteredVehicles.map((v) => _buildPremiumVehicleCard(v)),
                   ],
                 ),
               ),
@@ -95,208 +96,327 @@ class _StationAdminVehiclesState extends State<StationAdminVehicles> {
     );
   }
 
-  Widget _buildHeader(Color primary, Color textColor) {
+  Widget _buildPremiumHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: primary.withValues(alpha: 0.1))),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.arrow_back)),
-              Text(
-                'Véhicules de la gare',
-                style: GoogleFonts.plusJakartaSans(
-                  color: textColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabs(Color primary, Color subColor) {
-    return Container(
-      color: Colors.white,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            _buildTabItem(0, 'Tous', primary, subColor),
-            const SizedBox(width: 24),
-            _buildTabItem(1, 'En attente', primary, subColor),
-            const SizedBox(width: 24),
-            _buildTabItem(2, 'En chargement', primary, subColor),
-            const SizedBox(width: 24),
-            _buildTabItem(3, 'En trajet', primary, subColor),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabItem(int index, String label, Color primary, Color subColor) {
-    final bool isSelected = _selectedTab == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedTab = index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: isSelected ? primary : Colors.transparent,
-              width: 3,
-            ),
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            color: isSelected ? primary : subColor,
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVehicleCard(
-    String name,
-    String status,
-    String driver,
-    String syndicate,
-    String seats,
-    String image,
-    Color primary, {
-    required Color statusColor,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: primary.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
       ),
       child: Column(
         children: [
-          Container(
-            height: 180,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-              image: DecorationImage(
-                image: NetworkImage(image),
-                fit: BoxFit.cover,
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.directions_bus, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('GUINEE TRANSPORT',
+                          style: GoogleFonts.plusJakartaSans(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                        ),
+                        Text('SUIVI DE LA FLOTTE EN GARE',
+                          style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle, border: Border.all(color: AppColors.border)),
+                      child: IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.notifications_outlined, color: AppColors.textSecondary, size: 24),
+                        constraints: const BoxConstraints(),
+                        padding: const EdgeInsets.all(10),
+                      ),
+                    ),
+                    Positioned(
+                      top: 8, right: 8,
+                      child: Container(
+                        width: 10, height: 10,
+                        decoration: BoxDecoration(color: Colors.red, shape: BoxShape.circle, border: Border.all(color: AppColors.background, width: 2)),
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: TextField(
+                style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Rechercher par numéro de plaque...',
+                  hintStyle: GoogleFonts.plusJakartaSans(color: AppColors.textHint, fontSize: 14),
+                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textHint),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChips() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Row(
+          children: List.generate(_filters.length, (index) {
+            final isSelected = _selectedFilterIndex == index;
+            return GestureDetector(
+              onTap: () => setState(() => _selectedFilterIndex = index),
+              child: Container(
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primary : AppColors.surface,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+                ),
+                child: Text(
+                  _filters[index],
+                  style: GoogleFonts.plusJakartaSans(
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      margin: const EdgeInsets.only(top: 60),
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.directions_car_filled_outlined, color: AppColors.textHint, size: 64),
+          const SizedBox(height: 20),
+          Text('Aucun véhicule trouvé',
+            style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text('Modifiez vos filtres de recherche',
+            style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumVehicleCard(Map<String, dynamic> v) {
+    String rawStatus = v['status'] ?? 'unknown';
+    bool isReady = rawStatus == 'ready' || rawStatus == 'validé';
+    bool isLoading = rawStatus == 'loading' || rawStatus == 'remplissage' || rawStatus == 'scheduled';
+    bool isDelayed = rawStatus == 'delayed' || rawStatus == 'en_attente';
+    bool isDeparted = rawStatus == 'active' || rawStatus == 'parti';
+
+    Color statusColor = AppColors.primary;
+    Color statusBgColor = AppColors.primary.withOpacity(0.1);
+    String statusLabel = 'INCONNU';
+    String actionLabel = 'Gérer';
+    IconData actionIcon = Icons.chevron_right_rounded;
+    Color actionColor = AppColors.primary;
+
+    if (isReady) {
+      statusColor = Colors.green;
+      statusBgColor = Colors.green.withOpacity(0.1);
+      statusLabel = 'PRÊT';
+      actionLabel = 'Confirmer Départ';
+      actionIcon = Icons.check_circle_rounded;
+      actionColor = Colors.white;
+    } else if (isLoading) {
+      statusColor = Colors.amber;
+      statusBgColor = Colors.amber.withOpacity(0.1);
+      statusLabel = 'REMPLISSAGE';
+    } else if (isDelayed) {
+      statusColor = AppColors.textSecondary;
+      statusBgColor = AppColors.surface;
+      statusLabel = 'EN ATTENTE';
+      actionColor = AppColors.textSecondary;
+    } else if (isDeparted) {
+      statusColor = Colors.blue;
+      statusBgColor = Colors.blue.withOpacity(0.1);
+      statusLabel = 'PARTI';
+      actionLabel = 'Suivre';
+      actionIcon = Icons.map_rounded;
+    }
+
+    int maxSeats = v['total_seats'] ?? 15;
+    int currentSeats = isReady ? maxSeats : (isLoading ? (maxSeats * 0.8).round() : 0);
+    if (isDeparted) currentSeats = maxSeats;
+    double progress = currentSeats / maxSeats;
+    String plate = v['license_plate'] ?? 'XX-0000-X';
+    String dest = "Vers Destination"; // Modify with actual arrival city if available
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      name,
-                      style: GoogleFonts.plusJakartaSans(
-                        color: const Color(0xFF0F172A),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                          child: Text(
+                            plate,
+                            style: GoogleFonts.plusJakartaSans(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          dest,
+                          style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+                        ),
+                      ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: statusColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        color: statusBgColor,
+                        border: Border.all(color: statusColor.withOpacity(0.3)),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                       child: Text(
-                        status.toUpperCase(),
-                        style: GoogleFonts.plusJakartaSans(
-                          color: statusColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        statusLabel,
+                        style: GoogleFonts.plusJakartaSans(color: statusColor, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                _buildInfoRow(Icons.person, driver, primary),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.groups, 'Syndicat: $syndicate', primary),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.airline_seat_recline_normal, seats, primary),
-                const SizedBox(height: 16),
-                const Divider(height: 1),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
-                      flex: 3,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.visibility, size: 18),
-                            const SizedBox(width: 8),
-                            const Text('Détails', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.person, color: AppColors.textSecondary, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              v['driver_name'] ?? 'Inconnu',
+                              style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w600),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF64748B).withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(10),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(isDeparted ? Icons.location_on_rounded : Icons.event_seat_rounded, color: AppColors.textSecondary, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            isDeparted ? 'En route' : '$currentSeats / $maxSeats',
+                            style: GoogleFonts.plusJakartaSans(color: statusColor, fontSize: 16, fontWeight: FontWeight.w900),
+                          ),
+                        ],
                       ),
-                      child: const Icon(Icons.block, color: Color(0xFF64748B)),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(Icons.verified_user, color: primary),
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 8,
+                    backgroundColor: AppColors.background,
+                    valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: const BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+              border: Border(top: BorderSide(color: AppColors.border)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isDeparted ? 'Départ: 07:15' : (isReady ? 'Départ imminent' : 'Position en file: --'),
+                  style: GoogleFonts.plusJakartaSans(color: AppColors.textHint, fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+                isReady
+                  ? ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: Text(actionLabel, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w800)),
+                    )
+                  : InkWell(
+                      onTap: () {},
+                      child: Row(
+                        children: [
+                          Text(actionLabel, style: GoogleFonts.plusJakartaSans(color: actionColor, fontSize: 14, fontWeight: FontWeight.w800)),
+                          const SizedBox(width: 4),
+                          Icon(actionIcon, color: actionColor, size: 18),
+                        ],
+                      ),
+                    ),
               ],
             ),
           ),
@@ -304,20 +424,5 @@ class _StationAdminVehiclesState extends State<StationAdminVehicles> {
       ),
     );
   }
-
-  Widget _buildInfoRow(IconData icon, String text, Color primary) {
-    return Row(
-      children: [
-        Icon(icon, color: primary, size: 16),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: GoogleFonts.plusJakartaSans(
-            color: const Color(0xFF64748B),
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
 }
+

@@ -24,17 +24,24 @@ class _StationAdminRelayScreenState extends State<StationAdminRelayScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final profile = await AuthService.getCurrentProfile();
+      final authResponse = await AuthService.getCurrentProfile();
+      final profile = authResponse.data;
       if (profile != null && profile.stationId != null) {
-        // Cette méthode devra être ajoutée à StationService
-        final syndicates = await StationService.getStationSyndicates(profile.stationId!);
+        final syndResponse = await StationService.getStationSyndicates(profile.stationId!);
         if (mounted) {
           setState(() {
-            // On filtre les syndicats inactifs (Basé sur le statut renvoyé par le service)
-            _inactiveSyndicates = syndicates.where((s) => s['status'] == 'Inactif').toList();
+            final allSyndicates = syndResponse.data ?? [];
+            _inactiveSyndicates = allSyndicates.where((s) => s['is_active'] == false || s['status'] == 'Inactif').toList();
             _isLoading = false;
           });
+          if (!syndResponse.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(syndResponse.message)),
+            );
+          }
         }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint('Error loading relay data: $e');

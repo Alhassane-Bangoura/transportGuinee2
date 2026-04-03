@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
-// Removed unused app_text_styles import
+import '../../../core/constants/app_assets.dart';
+
+import '../../../core/services/booking_service.dart';
+import '../../../core/models/booking.dart';
+import 'package:intl/intl.dart';
 
 class PassengerTickets extends StatefulWidget {
   const PassengerTickets({super.key});
@@ -13,52 +17,11 @@ class PassengerTickets extends StatefulWidget {
 class _PassengerTicketsState extends State<PassengerTickets> {
   String _selectedFilter = 'Actifs';
 
-  final List<Map<String, dynamic>> _allTickets = [
-    {
-      'from': 'Conakry',
-      'to': 'Labé',
-      'station': 'Gare de Madina',
-      'date': '24 Oct 2023',
-      'time': '08:00 AM',
-      'seat': '12A (Fenêtre)',
-      'price': '150.000 GNF',
-      'status': 'Confirmé',
-      'isActif': true,
-    },
-    {
-      'from': 'Conakry',
-      'to': 'Kankan',
-      'station': 'Gare de Matam',
-      'date': '28 Oct 2023',
-      'time': '07:30 AM',
-      'seat': '05C (Allée)',
-      'price': '200.000 GNF',
-      'status': 'Confirmé',
-      'isActif': true,
-    },
-    {
-      'from': 'Labé',
-      'to': 'Conakry',
-      'station': 'Gare Centrale',
-      'date': '15 Oct 2023',
-      'time': '07:00 AM',
-      'seat': '04C (Allée)',
-      'price': '150.000 GNF',
-      'status': 'Terminé',
-      'isActif': false,
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     final Color primaryColor = AppColors.primary;
     final Color backgroundColor = AppColors.background;
     final Color textSlate900 = AppColors.onBackground;
-
-    final filteredTickets = _allTickets.where((ticket) {
-      if (_selectedFilter == 'Actifs') return ticket['isActif'] == true;
-      return ticket['isActif'] == false;
-    }).toList();
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -98,30 +61,55 @@ class _PassengerTicketsState extends State<PassengerTickets> {
             ),
           ),
           Expanded(
-            child: filteredTickets.isEmpty
-                ? _buildEmptyState(textSlate900)
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                    itemCount: filteredTickets.length,
-                    itemBuilder: (context, index) {
-                      final ticket = filteredTickets[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: TicketCard(
-                          from: ticket['from'],
-                          to: ticket['to'],
-                          station: ticket['station'],
-                          date: ticket['date'],
-                          time: ticket['time'],
-                          seat: ticket['seat'],
-                          price: ticket['price'],
-                          status: ticket['status'],
-                          primaryColor: primaryColor,
-                          isActif: ticket['isActif'],
-                        ),
-                      );
-                    },
-                  ),
+            child: StreamBuilder<List<Booking>>(
+              stream: BookingService.getUserBookingsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                final allBookings = snapshot.data ?? [];
+                final filteredBookings = allBookings.where((b) {
+                  if (_selectedFilter == 'Actifs') return b.isActive;
+                  return !b.isActive;
+                }).toList();
+
+                if (filteredBookings.isEmpty) {
+                  return _buildEmptyState(textSlate900);
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  itemCount: filteredBookings.length,
+                  itemBuilder: (context, index) {
+                    final booking = filteredBookings[index];
+                    String date = booking.departureTime != null 
+                        ? DateFormat('dd MMM yyyy').format(booking.departureTime!)
+                        : 'N/A';
+                    String time = booking.departureTime != null 
+                        ? DateFormat('HH:mm').format(booking.departureTime!)
+                        : 'N/A';
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: TicketCard(
+                        from: booking.departureCityName ?? 'N/A',
+                        to: booking.arrivalCityName ?? 'N/A',
+                        station: booking.departureStationName ?? 'N/A',
+                        date: date,
+                        time: time,
+                        seat: booking.seats.toString(),
+                        price: booking.formattedPrice,
+                        status: booking.status.toUpperCase(),
+                        primaryColor: primaryColor,
+                        isActif: booking.isActive,
+                        booking: booking,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -228,6 +216,7 @@ class TicketCard extends StatelessWidget {
   final String status;
   final Color primaryColor;
   final bool isActif;
+  final Booking? booking;
 
   const TicketCard({
     super.key,
@@ -241,6 +230,7 @@ class TicketCard extends StatelessWidget {
     required this.status,
     required this.primaryColor,
     required this.isActif,
+    this.booking,
   });
 
   @override
@@ -348,9 +338,9 @@ class TicketCard extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.all(20),
-            child: isActif && price == '150.000 GNF' // Only one has QR in mockup
-                ? _buildActiveActions(primaryColor)
-                : _buildReservationDetails(primaryColor),
+            child: isActif 
+                ? _buildActiveActions(context, primaryColor)
+                : _buildReservationDetails(context, primaryColor),
           ),
         ],
       ),
@@ -449,7 +439,7 @@ class TicketCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActiveActions(Color primary) {
+  Widget _buildActiveActions(BuildContext context, Color primary) {
     return Column(
       children: [
         Container(
@@ -465,46 +455,97 @@ class TicketCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuAyQnwRqRz9CG2Cw1eID561wyjrJ1UxCZDNnVbenc7q3ws0E0Bh0Ek9baEPXYNRlwMMxogDvpRcnRyrYB1rsP2DgCG58Ic3-0KaLhQEzYZOYp95ecwzpHrWAgb-p8TkpB7o4amkUf36RPisXbYAVCB7Z8N1V6GrR8QLkzGiwMzw0vGr3JOO2bfWceEodieR_po-VvlD59PnJ9KyDj2Y7C-edPTMXcuDVY0mDedjgRJsLa78TnOFdb0ulHz5SbqRn6zaHVFraXlP25-Z'),
+                image: const NetworkImage(AppAssets.ticketBus),
                 fit: BoxFit.cover,
                 opacity: 0.8,
               ),
             ),
           ),
         ),
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.qr_code_scanner),
-            label: const Text('Afficher le Billet'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: Colors.white,
-              elevation: 4,
-              shadowColor: primary.withValues(alpha: 0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              textStyle: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: true,
+                  builder: (context) => Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+                        const SizedBox(height: 24),
+                        Text('Votre Billet Électronique', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                        const SizedBox(height: 24),
+                        Container(
+                          width: 200,
+                          height: 200,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(Icons.qr_code_2, size: 160, color: Colors.black87),
+                        ),
+                        const SizedBox(height: 16),
+                        Text('Présentez ce QR Code au contrôleur', style: GoogleFonts.plusJakartaSans(color: Colors.white70)),
+                        const SizedBox(height: 32),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Billet téléchargé (simulation) !')));
+                            },
+                            icon: const Icon(Icons.file_download, color: Colors.white),
+                            label: Text('Télécharger en PDF', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primary,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Afficher le Billet'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+                elevation: 4,
+                shadowColor: primary.withValues(alpha: 0.4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                textStyle: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
 
-  Widget _buildReservationDetails(Color primary) {
+  Widget _buildReservationDetails(BuildContext context, Color primary) {
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Détails complets générés (Simulation).')));
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFE8F9E8),
           foregroundColor: primary,

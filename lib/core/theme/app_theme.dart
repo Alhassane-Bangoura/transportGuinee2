@@ -13,18 +13,21 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      brightness: Brightness.dark, // Forcer le mode sombre global
       textTheme: _textTheme,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
-        brightness: Brightness.light,
+        brightness: Brightness.dark,
         primary: AppColors.primary,
-        onPrimary: AppColors.white,
-        surface: AppColors.white,
-        onSurface: AppColors.textPrimary,
+        onPrimary: AppColors.onPrimary,
+        surface: AppColors.surface,
+        onSurface: AppColors.onSurface,
+        background: AppColors.background,
+        onBackground: AppColors.onBackground,
       ),
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
@@ -37,7 +40,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.white,
+          foregroundColor: AppColors.onPrimary,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

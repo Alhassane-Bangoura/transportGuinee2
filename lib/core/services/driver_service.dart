@@ -26,10 +26,12 @@ class DriverService {
   /// Assigne un chauffeur au syndicat actuel après validation hiérarchique
   static Future<bool> assignDriverToSyndicate(UserProfile driver) async {
     try {
-      final currentUser = await AuthService.getCurrentProfile();
-      if (currentUser == null || currentUser.role != 'syndicate') {
+      final response = await AuthService.getCurrentProfile();
+      if (!response.isSuccess || response.data == null || response.data!.role != 'syndicate') {
         throw Exception('Seuls les syndicats peuvent ajouter des chauffeurs.');
       }
+      
+      final currentUser = response.data!;
 
       // 1. Vérification de la station (GARE)
       if (driver.stationId != currentUser.stationId) {
@@ -58,16 +60,18 @@ class DriverService {
   /// Récupère la liste des chauffeurs rattachés au syndicat actuel
   static Future<List<Map<String, dynamic>>> getSyndicateDrivers() async {
     try {
-      final currentUser = await AuthService.getCurrentProfile();
-      if (currentUser == null) return [];
+      final response = await AuthService.getCurrentProfile();
+      if (!response.isSuccess || response.data == null) return [];
+      
+      final currentUser = response.data!;
 
-      final response = await _supabase
+      final data = await _supabase
           .from('profiles')
           .select()
           .eq('role', 'driver')
           .contains('metadata', {'syndicate_id': currentUser.id});
 
-      return List<Map<String, dynamic>>.from(response);
+      return List<Map<String, dynamic>>.from(data);
     } catch (e) {
       print('Error fetching drivers: $e');
       return [];

@@ -9,7 +9,7 @@ class AppTextStyles {
         fontSize: 28,
         fontWeight: FontWeight.w800,
         color: AppColors.textPrimary,
-        height: 1.2,
+        height: 1.3,
         letterSpacing: -0.5,
       );
 
@@ -43,7 +43,7 @@ class AppTextStyles {
       );
 
   static TextStyle get label => GoogleFonts.plusJakartaSans(
-        fontSize: 11,
+        fontSize: 13,
         fontWeight: FontWeight.w800,
         color: AppColors.textSecondary,
         letterSpacing: 1.2,
@@ -52,7 +52,7 @@ class AppTextStyles {
   static TextStyle get buttonText => GoogleFonts.plusJakartaSans(
         fontSize: 16,
         fontWeight: FontWeight.w700,
-        color: AppColors.white,
+        color: AppColors.onPrimary,
         letterSpacing: 0.5,
       );
 }

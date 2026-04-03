@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../onboarding_screen.dart';
 
@@ -21,7 +22,7 @@ class OnboardingPage3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           // Image de fond premium (tiers supérieur)
@@ -36,7 +37,7 @@ class OnboardingPage3 extends StatelessWidget {
                 bottomRight: Radius.circular(40),
               ),
               child: Image.network(
-                'https://r.jina.ai/i/6cdec3f0694e419890f6b43063851532',
+                AppAssets.onboardingStep3,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(color: AppColors.primary),
               ),
@@ -47,14 +48,29 @@ class OnboardingPage3 extends StatelessWidget {
           Positioned(
             top: 60,
             right: 20,
-            child: TextButton(
-              onPressed: onSkip,
-              child: Text(
-                'PASSER',
-                style: AppTextStyles.label.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: TextButton(
+                onPressed: onSkip,
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.black.withValues(alpha: 0.2),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+                child: Text(
+                  'PASSER',
+                  style: AppTextStyles.label.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                  ),
                 ),
               ),
             ),
@@ -69,7 +85,7 @@ class OnboardingPage3 extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
               decoration: const BoxDecoration(
-                color: AppColors.white,
+                color: AppColors.background, // Correction ici
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(40),
                   topRight: Radius.circular(40),
@@ -95,9 +111,9 @@ class OnboardingPage3 extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: AppTextStyles.headingLarge.copyWith(
                       fontSize: 32,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
-                      height: 1.1,
+                      height: 1.3,
                     ),
                   ),
                   
@@ -127,12 +143,13 @@ class OnboardingPage3 extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onNext,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: AppColors.onAccent,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        elevation: 0,
+                        elevation: 4,
+                        shadowColor: AppColors.accent.withValues(alpha: 0.5),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

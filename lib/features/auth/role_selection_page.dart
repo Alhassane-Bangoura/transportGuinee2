@@ -12,7 +12,7 @@ class RoleSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -40,7 +40,7 @@ class RoleSelectionPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
+                    color: AppColors.surface, // Correction ici
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -61,6 +61,7 @@ class RoleSelectionPage extends StatelessWidget {
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
                   height: 1.2,
+                  color: AppColors.textPrimary, // Correction ici
                 ),
               ),
               const SizedBox(height: 16),
@@ -130,12 +131,12 @@ class RoleSelectionPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.surface, // Correction ici
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.border, width: 1),
+          border: Border.all(color: AppColors.border, width: 1.5), // Correction ici
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.04),
+              color: Colors.black.withValues(alpha: 0.2), // Correction ici
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),

@@ -24,15 +24,23 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
 
   Future<void> _loadData() async {
     try {
-      final profile = await AuthService.getCurrentProfile();
+      final authResponse = await AuthService.getCurrentProfile();
+      final profile = authResponse.data;
       if (profile != null && profile.stationId != null) {
-        final platforms = await StationService.getStationPlatforms(profile.stationId!);
+        final platResponse = await StationService.getStationPlatforms(profile.stationId!);
         if (mounted) {
           setState(() {
-            _platforms = platforms;
+            _platforms = platResponse.data ?? [];
             _isLoading = false;
           });
+          if (!platResponse.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(platResponse.message)),
+            );
+          }
         }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint('Error loading platforms: $e');

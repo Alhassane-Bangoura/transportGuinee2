@@ -5,6 +5,7 @@ import '../../../core/models/city.dart';
 import '../../../core/models/station.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/success_dialog.dart';
 import '../login_page.dart';
 
 class StationAdminRegisterPage extends StatefulWidget {
@@ -75,7 +76,7 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -368,7 +369,7 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.surface, // Correction ici
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border, width: 1.5),
             boxShadow: [
@@ -455,7 +456,7 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: enabled ? AppColors.white : AppColors.border.withValues(alpha: 0.1),
+            color: enabled ? AppColors.surface : AppColors.border.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border, width: 1.5),
           ),
@@ -539,8 +540,19 @@ class _StationAdminRegisterPageState extends State<StationAdminRegisterPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compte créé ! Connectez-vous.'), backgroundColor: Colors.green));
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+
+      SuccessDialog.show(
+        context: context,
+        title: "Compte Admin Créé !",
+        message: "Votre accès administrateur de gare a été configuré. Vous pouvez maintenant gérer les flux et départs.",
+        buttonText: "SE CONNECTER",
+        onButtonPressed: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString().replaceAll('AuthException: ', '')}')));

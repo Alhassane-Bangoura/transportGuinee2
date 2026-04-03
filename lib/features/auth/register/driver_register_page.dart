@@ -7,6 +7,7 @@ import '../../../core/models/station.dart';
 import '../../../core/models/route_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/success_dialog.dart';
 import '../login_page.dart';
 
 class DriverRegisterPage extends StatefulWidget {
@@ -77,9 +78,17 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       _routes = [];
     });
     if (station != null) {
+      debugPrint('Loading routes for station: ${station.id}');
       try {
         final routes = await LocationService.getRoutesByStation(station.id);
-        setState(() => _routes = routes);
+        setState(() {
+          _routes = routes;
+          // Automatiquement sélectionner s'il n'y a qu'un seul trajet
+          if (routes.length == 1) {
+            _selectedRoute = routes.first;
+          }
+        });
+        debugPrint('Loaded ${routes.length} routes');
       } catch (e) {
         debugPrint('Error loading routes: $e');
       }
@@ -100,7 +109,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -400,7 +409,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.surface, // Correction ici
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border, width: 1.5),
             boxShadow: [
@@ -520,7 +529,13 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
               items: items
                   .map((e) => DropdownMenuItem<T>(
                         value: e,
-                        child: Text(itemLabel(e), style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                        child: Text(
+                          itemLabel(e),
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.premiumDark, // Forcer le texte sombre sur fond blanc
+                          ),
+                        ),
                       ))
                   .toList(),
               onChanged: enabled ? onChanged : null,
@@ -580,12 +595,14 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
+          data: ThemeData.light().copyWith(
             colorScheme: const ColorScheme.light(
               primary: AppColors.primary,
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              surface: Colors.white,
+              onSurface: AppColors.premiumDark,
             ),
+            dialogBackgroundColor: Colors.white,
           ),
           child: child!,
         );
@@ -661,8 +678,19 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compte créé ! Connectez-vous.'), backgroundColor: Colors.green));
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+
+      SuccessDialog.show(
+        context: context,
+        title: "Félicitations Chauffeur !",
+        message: "Votre compte a été créé avec succès. Bienvenue dans l'équipe GuineeTransport !",
+        buttonText: "SE CONNECTER",
+        onButtonPressed: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : ${e.toString().replaceAll('AuthException: ', '')}')));

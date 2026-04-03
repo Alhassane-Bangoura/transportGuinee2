@@ -1,9 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/navigation_service.dart';
-import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../../core/services/biometric_service.dart';
+import '../../core/theme/app_colors.dart';
 import 'role_selection_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,6 +20,14 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _isBiometricAvailable = false;
+
+  // New Theme Colors based on user's screenshot
+  // Utiliser les vraies couleurs de AppColors
+  Color get bgColor => AppColors.background;
+  Color get cardColor => AppColors.surface;
+  Color get primaryMint => AppColors.primary;
+  Color get mutedText => AppColors.textSecondary;
+  Color get inputBorder => AppColors.border;
 
   @override
   void initState() {
@@ -54,19 +62,21 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      final profile = await AuthService.signIn(
+      final response = await AuthService.signIn(
         email: credentials['email']!,
         password: credentials['password']!,
       );
       
       if (!mounted) return;
 
-      if (profile == null) {
+      if (!response.isSuccess || response.data == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil introuvable.'), backgroundColor: Colors.orange),
+          SnackBar(content: Text(response.message), backgroundColor: Colors.orange),
         );
         return;
       }
+
+      final profile = response.data!;
 
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
@@ -97,203 +107,179 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.premiumDark,
+      backgroundColor: bgColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 20),
               
-              // Logo/Icon placeholder (Spotify style)
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 800),
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
-                    ),
-                  );
-                },
-                child: const Center(
-                  child: Icon(
-                    Icons.directions_bus_filled_rounded,
-                    color: AppColors.success,
-                    size: 60,
-                  ),
+              // Bus Icon
+              Icon(Icons.directions_bus, size: 56, color: primaryMint),
+              const SizedBox(height: 16),
+              
+              // App Title
+              const Text(
+                'GuinéeTransport',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 8),
+              
+              // Subtitle
+              Text(
+                'Votre voyage commence ici',
+                style: TextStyle(
+                  color: mutedText,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 48),
 
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 1000),
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: child,
-                  );
-                },
+              // Login Card
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: inputBorder.withValues(alpha: 0.5), width: 1),
+                ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Se connecter',
-                      style: AppTextStyles.headingLarge.copyWith(
-                        color: Colors.white,
-                        fontSize: 32,
+                      'CONNEXION',
+                      style: TextStyle(
+                        color: primaryMint,
+                        letterSpacing: 2,
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Si vous avez besoin d\'aide, Cliquez ici',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.success,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                    const SizedBox(height: 32),
 
-              const SizedBox(height: 48),
-
-              // Form
-              _animateWidget(
-                delay: 200,
-                child: _buildInputField(
-                  label: 'Email ou nom d\'utilisateur',
-                  controller: _emailController,
-                  hint: 'Entrez votre email',
-                  icon: Icons.person_outline_rounded,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-
-              _animateWidget(
-                delay: 400,
-                child: _buildInputField(
-                  label: 'Mot de passe',
-                  controller: _passwordController,
-                  hint: 'Mot de passe',
-                  icon: Icons.lock_outline_rounded,
-                  isPassword: true,
-                  obscureText: !_isPasswordVisible,
-                  onToggleVisibility: () {
-                    setState(() => _isPasswordVisible = !_isPasswordVisible);
-                  },
-                ),
-              ),
-
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    'Récupérer le mot de passe',
-                    style: AppTextStyles.label.copyWith(
-                      color: AppColors.premiumGrey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Login Button
-              _animateWidget(
-                delay: 600,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
-                          )
-                        : Text(
-                            'Se connecter',
-                            style: AppTextStyles.buttonText.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-              
-              _animateWidget(
-                delay: 800,
-                child: Column(
-                  children: [
-                    const Text(
-                      'Ou',
-                      style: TextStyle(color: AppColors.premiumGrey, fontSize: 14),
+                    // Email Input
+                    _buildInputField(
+                      label: 'ADRESSE E-MAIL',
+                      controller: _emailController,
+                      hint: 'exemple@mail.gn',
+                      iconText: '@',
+                      keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 24),
-                    // Social Logins
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+
+                    // Password Input
+                    _buildInputField(
+                      label: 'MOT DE PASSE',
+                      controller: _passwordController,
+                      hint: '••••••••',
+                      iconData: Icons.lock_outline_rounded,
+                      isPassword: true,
+                      obscureText: !_isPasswordVisible,
+                      onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Forgot Password
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          // TODO: Forgot password logic
+                        },
+                        child: Text(
+                          'Mot de passe oublié ?',
+                          style: TextStyle(color: mutedText, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Login Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryMint,
+                          foregroundColor: bgColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                          elevation: 0,
+                        ),
+                        child: _isLoading
+                            ? SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(color: bgColor, strokeWidth: 2),
+                              )
+                            : const Text(
+                                'CONTINUER',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Inscription Link (Highly Visible)
+                    Column(
                       children: [
-                        _socialButton(icon: Icons.g_mobiledata_rounded, color: Colors.red),
-                        const SizedBox(width: 40),
-                        _socialButton(icon: Icons.apple_rounded, color: Colors.white),
+                        Text(
+                          "Nouveau sur GuinéeTransport ?",
+                          style: TextStyle(color: mutedText, fontSize: 13),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: primaryMint, width: 1.5),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            child: Text(
+                              "CRÉER UN COMPTE",
+                              style: TextStyle(
+                                color: primaryMint,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 48),
-
-              // Register Link
-              _animateWidget(
-                delay: 1000,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Pas encore de compte ? ',
-                      style: TextStyle(color: AppColors.premiumGrey),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const RoleSelectionPage()),
-                        );
-                      },
-                      child: const Text(
-                        'S\'inscrire ici',
-                        style: TextStyle(
-                          color: AppColors.info,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 40),
+
+              // Biometric fingerprint icon
+              if (_isBiometricAvailable)
+                GestureDetector(
+                  onTap: _handleBiometricLogin,
+                  child: Icon(Icons.fingerprint, size: 48, color: mutedText),
+                ),
             ],
           ),
         ),
@@ -301,40 +287,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _animateWidget({required Widget child, int delay = 0}) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 30 * (1 - value)),
-            child: child,
-          ),
-        );
-      },
-      child: child,
-    );
-  }
-
-  Widget _socialButton({required IconData icon, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.premiumSteel),
-      ),
-      child: Icon(icon, color: color, size: 32),
-    );
-  }
-
   Widget _buildInputField({
     required String label,
     required TextEditingController controller,
     required String hint,
-    required IconData icon,
+    String? iconText,
+    IconData? iconData,
     bool isPassword = false,
     bool obscureText = false,
     VoidCallback? onToggleVisibility,
@@ -343,43 +301,52 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+        Text(
+          label,
+          style: TextStyle(
+            color: mutedText,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.premiumNavy,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.premiumSteel),
-          ),
-          child: TextField(
-            controller: controller,
-            obscureText: obscureText,
-            keyboardType: keyboardType,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(color: AppColors.premiumMutedBlue),
-              suffixIcon: isPassword
-                  ? IconButton(
-                      icon: Icon(
-                        obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: AppColors.premiumGrey,
-                      ),
-                      onPressed: onToggleVisibility,
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          style: TextStyle(color: (iconData != null || iconText != null) ? primaryMint : Colors.white, fontSize: 16),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: inputBorder, fontSize: 16),
+            prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: iconText != null
+                  ? Text(
+                      iconText,
+                      style: TextStyle(color: mutedText, fontSize: 20),
+                      textAlign: TextAlign.center,
                     )
-                  : null,
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  : Icon(iconData, color: mutedText, size: 20),
             ),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      obscureText ? Icons.visibility_off_outlined : Icons.remove_red_eye_outlined,
+                      color: mutedText,
+                    ),
+                    onPressed: onToggleVisibility,
+                  )
+                : null,
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: inputBorder, width: 1.5),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryMint, width: 2),
+            ),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ],
@@ -406,16 +373,18 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      final profile = await AuthService.signIn(email: email, password: password);
+      final response = await AuthService.signIn(email: email, password: password);
       if (!mounted) return;
 
-      if (profile == null) {
+      if (!response.isSuccess || response.data == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil introuvable.'), backgroundColor: Colors.orange),
+          SnackBar(content: Text(response.message), backgroundColor: Colors.orange),
         );
         return;
       }
 
+      final profile = response.data!;
+      
       // Save credentials for biometric login if enabled
       if (await BiometricService.isBiometricEnabled()) {
         await BiometricService.saveCredentials(email, password);

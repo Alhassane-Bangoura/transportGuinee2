@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import '../../../core/models/user_profile.dart';
 import '../../../core/services/auth_service.dart';
@@ -8,10 +9,15 @@ import 'syndicate_drivers.dart';
 import 'syndicate_add_driver.dart';
 import 'syndicate_trips.dart';
 import 'syndicate_profile.dart';
+import 'syndicate_driver_management.dart';
+import 'syndicate_activity.dart';
+import 'syndicate_vehicle_filling.dart';
 import '../../assistant/screens/assistant_screen.dart';
+import '../../../core/widgets/premium_bottom_nav_bar.dart';
 
 class SyndicateDashboard extends StatefulWidget {
-  const SyndicateDashboard({super.key});
+  final UserProfile? profile;
+  const SyndicateDashboard({super.key, this.profile});
 
   @override
   State<SyndicateDashboard> createState() => _SyndicateDashboardState();
@@ -25,14 +31,19 @@ class _SyndicateDashboardState extends State<SyndicateDashboard> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    if (widget.profile != null) {
+      _profile = widget.profile;
+      _isLoadingProfile = false;
+    } else {
+      _loadProfile();
+    }
   }
 
   Future<void> _loadProfile() async {
-    final profile = await AuthService.getCurrentProfile();
+    final response = await AuthService.getCurrentProfile();
     if (mounted) {
       setState(() {
-        _profile = profile;
+        _profile = response.data;
         _isLoadingProfile = false;
       });
     }
@@ -54,60 +65,158 @@ class _SyndicateDashboardState extends State<SyndicateDashboard> {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Stack(
+      body: IndexedStack(
+        index: _currentIndex,
         children: [
-          IndexedStack(
-            index: _currentIndex,
-            children: [
-              _buildHomeContent(primaryColor, textSlate900),
-              const SyndicateDriversPage(),
-              const SyndicateAddDriverPage(),
-              const SyndicateTripsPage(),
-              SyndicateProfilePage(profile: _profile, onRefresh: _loadProfile),
-            ],
-          ),
-          _buildBottomNav(primaryColor),
+          _buildHomeContent(primaryColor, textSlate900),
+          const SyndicateDriversPage(),
+          const SyndicateAddDriverPage(),
+          const SyndicateTripsPage(),
+          SyndicateProfilePage(profile: _profile, onRefresh: _loadProfile),
         ],
       ),
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AssistantScreen(userRole: 'SYNDICAT'),
+      extendBody: true,
+      bottomNavigationBar: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          PremiumBottomNavBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() {
+                if (index < 2) {
+                  _currentIndex = index;
+                } else {
+                  _currentIndex = index + 1;
+                }
+              });
+            },
+            centerButton: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.accent,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.accent.withOpacity(0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                );
-              },
-              backgroundColor: AppColors.primary,
-              child: const Icon(Icons.smart_toy, color: Colors.white),
-            )
-          : null,
+                ],
+                border: Border.all(color: AppColors.surface, width: 4),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => setState(() => _currentIndex = 2),
+                  borderRadius: BorderRadius.circular(28),
+                  child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+                ),
+              ),
+            ),
+            items: [
+              NavItem(icon: Icons.dashboard_outlined, label: 'Dashboard'),
+              NavItem(icon: Icons.group_outlined, label: 'Chauffeurs'),
+              NavItem(icon: Icons.route_outlined, label: 'Trajets'),
+              NavItem(icon: Icons.person_outline, label: 'Profil'),
+            ],
+          ),
+          if (_currentIndex == 0) _buildFloatingAssistantBar(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingAssistantBar() {
+    return Positioned(
+      bottom: 100, // Adjusted to be above bottom nav
+      left: 16,
+      right: 16,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.smart_toy, color: Colors.white, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Comment puis-je vous aider ?',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.mic_none_rounded, color: AppColors.textSecondary),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.surfaceVariant,
+                    padding: const EdgeInsets.all(8),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  onPressed: () {
+                    final role = _profile?.role.toUpperCase() ?? 'SYNDICAT';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AssistantScreen(userRole: role),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.all(8),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildHomeContent(Color primary, Color textColor) {
     return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
       slivers: [
         _buildSliverHeader(primary, textColor),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 180), // Extra bottom padding for assistant bar
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              Text(
-                'Tableau de bord',
-                style: AppTextStyles.headingLarge.copyWith(fontSize: 24, fontWeight: FontWeight.w800),
-              ),
-              Text(
-                "Aujourd'hui, Conakry",
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 24),
-              _buildStatsGrid(primary),
-              const SizedBox(height: 24),
+              _buildStatsSection(primary),
+              const SizedBox(height: 32),
+              _buildDailyDepartures(primary, textColor),
+              const SizedBox(height: 32),
               _buildPriorityAlerts(primary, textColor),
-              const SizedBox(height: 24),
-              _buildManagedRoutes(primary, textColor),
             ]),
           ),
         ),
@@ -120,378 +229,361 @@ class _SyndicateDashboardState extends State<SyndicateDashboard> {
       pinned: true,
       floating: false,
       elevation: 0,
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.white,
-      expandedHeight: 80,
+      backgroundColor: AppColors.background.withOpacity(0.8),
+      surfaceTintColor: Colors.transparent,
+      expandedHeight: 100,
       toolbarHeight: 80,
       automaticallyImplyLeading: false,
-      flexibleSpace: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
+      flexibleSpace: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: FlexibleSpaceBar(
+            background: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'GUINEE TRANSPORT',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.primary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        Text(
+                          'Organisation intelligente des trajets',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.accent,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                            textStyle: const TextStyle(height: 1.5),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.account_balance_rounded, color: Colors.white, size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _profile?.fullName ?? 'Syndicat Transport',
-                        style: AppTextStyles.headingLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w800),
-                      ),
-                      Text(
-                        'Conakry, Guinée',
-                        style: AppTextStyles.bodyMedium.copyWith(fontSize: 12, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ],
+                    Row(
+                      children: [
+                        _buildHeaderButton(Icons.notifications_outlined),
+                        const SizedBox(width: 12),
+                        _buildHeaderButton(Icons.search_rounded),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              Row(
-                children: [
-                  _buildIconBtn(Icons.search_rounded),
-                  const SizedBox(width: 8),
-                  _buildIconBtn(Icons.notifications_none_rounded),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildStatsGrid(Color primary) {
+  Widget _buildHeaderButton(IconData icon) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.08),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        onPressed: () {},
+        icon: Icon(icon, color: AppColors.primary, size: 22),
+        style: IconButton.styleFrom(
+          padding: const EdgeInsets.all(12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsSection(Color primary) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(child: _buildStatCard('Chauffeurs', '1,240', '+2%', true)),
-            const SizedBox(width: 12),
-            Expanded(child: _buildStatCard('Trajets', '320', '+5%', true)),
+            Row(
+              children: [
+                const Icon(Icons.analytics_outlined, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Statistiques de la flotte',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-        const SizedBox(height: 12),
-        _buildRevenueCard('12.5M', '+8%'),
+        const SizedBox(height: 20),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.3,
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SyndicateDriverManagement()),
+                );
+              },
+              child: _buildMiniStatCard('Chauffeurs actifs', '124', '+12%', true, Icons.group_rounded),
+            ),
+            _buildMiniStatCard('Véhicules dispo', '86', '+5%', true, Icons.directions_bus_rounded),
+            _buildMiniStatCard("Départs aujourd'hui", '42', '+18%', true, Icons.schedule_rounded),
+            _buildMiniStatCard('Places réservées', '310', '+25%', true, Icons.airline_seat_recline_normal_rounded),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, String trend, bool isPositive) {
+  Widget _buildMiniStatCard(String label, String value, String trend, bool isPositive, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Icon(icon, color: AppColors.primary.withOpacity(0.5), size: 18),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.05),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  label == 'Chauffeurs' ? Icons.badge_outlined : Icons.route_outlined,
-                  color: AppColors.primary,
-                  size: 16,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (isPositive ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   trend,
-                  style: AppTextStyles.label.copyWith(
-                    color: isPositive ? AppColors.success : AppColors.error,
-                    fontSize: 10,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: isPositive ? Colors.green : Colors.red,
+                    fontSize: 9,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            value,
-            style: AppTextStyles.headingLarge.copyWith(fontSize: 24, fontWeight: FontWeight.w800),
-          ),
-          Text(
-            label,
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRevenueCard(String value, String trend) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Revenu Total (GNF)',
-                style: AppTextStyles.bodyMedium.copyWith(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
-              ),
-              const SizedBox(height: 4),
-              Text(
                 value,
-                style: AppTextStyles.headingLarge.copyWith(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Text(
+                label,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
-          ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.trending_up_rounded, color: AppColors.success, size: 24),
-                const SizedBox(height: 4),
-                Text(
-                  trend,
-                  style: AppTextStyles.label.copyWith(color: AppColors.success, fontWeight: FontWeight.w800),
-                ),
-              ],
-            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPriorityAlerts(Color primary, Color textColor) {
+  Widget _buildDailyDepartures(Color primary, Color textColor) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Alertes prioritaires',
-                style: AppTextStyles.headingLarge.copyWith(fontSize: 18, fontWeight: FontWeight.w800)),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+            Row(
+              children: [
+                const Icon(Icons.departure_board_outlined, color: AppColors.accent, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  "Départs du jour",
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SyndicateActivity()),
+                );
+              },
+              child: Text(
+                'Voir tout',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
               ),
-              child: Text('3 NOUVELLES',
-                  style: AppTextStyles.label.copyWith(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.accent)),
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        _buildAlertRow(
-          Icons.priority_high_rounded,
-          'Licence expirée',
-          'Mamadou Diallo - Toyota Hiace AG-234',
-          AppColors.error,
+        const SizedBox(height: 12),
+        _buildSyndicateTripCard(
+          driverName: 'Moussa Barry',
+          driverMeta: 'Permis: Cat. D • Exp: 8 ans',
+          initials: 'MB',
+          vehicle: 'Toyota Coaster (AG-442-CX)',
+          departureTime: '14:30',
+          seats: '4 / 22',
+          isAtCapacity: true,
         ),
         const SizedBox(height: 12),
-        _buildAlertRow(
-          Icons.description_outlined,
-          'Assurance expirée',
-          'Abdoulaye Barry - Renault Master TK-091',
-          AppColors.accent,
-        ),
-        const SizedBox(height: 12),
-        _buildAlertRow(
-          Icons.person_off_outlined,
-          'Chauffeur suspendu',
-          'Ousmane Sylla - Suspension temporaire (7j)',
-          AppColors.textSecondary,
-          action: 'Profil',
+        _buildSyndicateTripCard(
+          driverName: 'Alpha Diallo',
+          driverMeta: 'Permis: Cat. C • Exp: 12 ans',
+          initials: 'AD',
+          vehicle: 'Renault Master (CK-112-ZZ)',
+          departureTime: '15:15',
+          seats: '12 / 18',
+          isAtCapacity: false,
         ),
       ],
     );
   }
 
-  Widget _buildAlertRow(IconData icon, String title, String desc, Color color, {String action = 'Gérer'}) {
+  Widget _buildSyndicateTripCard({
+    required String driverName,
+    required String driverMeta,
+    required String initials,
+    required String vehicle,
+    required String departureTime,
+    required String seats,
+    required bool isAtCapacity,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: AppTextStyles.bodyMedium.copyWith(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                Text(desc,
-                    style: AppTextStyles.bodyMedium.copyWith(fontSize: 12, color: AppColors.textSecondary)),
-              ],
-            ),
-          ),
-          Text(
-            action,
-            style: AppTextStyles.label.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primary,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildManagedRoutes(Color primary, Color textColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Lignes de transport gérées',
-          style: AppTextStyles.headingLarge.copyWith(fontSize: 18, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 16),
-        _buildRouteCard('Conakry', 'Mamou', '45 départs/j', '850/j', 0.85),
-        const SizedBox(height: 12),
-        _buildRouteCard('Conakry', 'Labé', '28 départs/j', '520/j', 0.92),
-        const SizedBox(height: 12),
-        _buildRouteCard('Conakry', 'Kankan', '18 départs/j', '340/j', 0.78),
-      ],
-    );
-  }
-
-  Widget _buildRouteCard(String from, String to, String trips, String passengers, double progress) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         children: [
-          Container(
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.05),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Text(from, style: AppTextStyles.headingLarge.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.east_rounded, color: AppColors.primary, size: 16),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      initials,
+                      style: GoogleFonts.plusJakartaSans(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
                     ),
-                    Text(to, style: AppTextStyles.headingLarge.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
-                  ],
+                  ),
                 ),
-                const Icon(Icons.more_horiz_rounded, color: AppColors.textSecondary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        driverName,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        driverMeta,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant.withOpacity(0.3),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+            ),
             child: Column(
               children: [
                 Row(
-                  children: [
-                    Expanded(child: _buildRouteMetric('Trajets', trips)),
-                    Expanded(child: _buildRouteMetric('Passagers', passengers)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Taux de remplissage',
-                        style: AppTextStyles.bodyMedium.copyWith(fontSize: 12, color: AppColors.textSecondary)),
-                    Text('${(progress * 100).toInt()}%',
-                        style: AppTextStyles.headingLarge.copyWith(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w800)),
+                    Expanded(
+                      flex: 2,
+                      child: _buildTripDetailItem('VÉHICULE', vehicle),
+                    ),
+                    Expanded(
+                      child: _buildTripDetailItem('DÉPART', departureTime, isEmphasized: true),
+                    ),
+                    Expanded(
+                      child: _buildTripDetailItem('PLACES', seats, 
+                        dotColor: isAtCapacity ? AppColors.accent : Colors.green),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 8,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SyndicateVehicleFilling()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'Valider départ',
+                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
                   ),
                 ),
               ],
@@ -502,108 +594,112 @@ class _SyndicateDashboardState extends State<SyndicateDashboard> {
     );
   }
 
-  Widget _buildRouteMetric(String label, String value) {
+  Widget _buildTripDetailItem(String label, String value, {bool isEmphasized = false, Color? dotColor}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.bodyMedium.copyWith(fontSize: 11, color: AppColors.textSecondary)),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textHint,
+            letterSpacing: 0.5,
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(value, style: AppTextStyles.headingLarge.copyWith(fontSize: 15, fontWeight: FontWeight.w800)),
+        Row(
+          children: [
+            if (dotColor != null) ...[
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 4),
+            ],
+            Flexible(
+              child: Text(
+                value,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: isEmphasized ? FontWeight.w900 : FontWeight.w700,
+                  color: isEmphasized ? AppColors.primary : AppColors.textPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildIconBtn(IconData icon) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(child: Icon(icon, color: AppColors.primary, size: 20)),
-    );
-  }
-
-  Widget _buildBottomNav(Color primary) {
-    return Positioned(
-      bottom: 24,
-      left: 16,
-      right: 16,
-      child: Container(
-        height: 72,
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.3),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  Widget _buildPriorityAlerts(Color primary, Color textColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            _buildNavItem(0, Icons.dashboard_rounded, 'Accueil'),
-            _buildNavItem(1, Icons.badge_rounded, 'Chauffeurs'),
-            _buildAddBtn(),
-            _buildNavItem(3, Icons.route_rounded, 'Trajets'),
-            _buildNavItem(4, Icons.person_rounded, 'Profil'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label) {
-    bool isSelected = _currentIndex == index;
-    return InkWell(
-      onTap: () => setState(() => _currentIndex = index),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? AppColors.accent : Colors.white.withValues(alpha: 0.4),
-            size: 24,
-          ),
-          const SizedBox(height: 4),
-          if (isSelected)
-            Container(
-              width: 4,
-              height: 4,
-              decoration: const BoxDecoration(
-                color: AppColors.accent,
-                shape: BoxShape.circle,
+            const Icon(Icons.warning_amber_rounded, color: AppColors.accent, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'Alertes prioritaires',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddBtn() {
-    return InkWell(
-      onTap: () => setState(() => _currentIndex = 2),
-      child: Container(
-        width: 52,
-        height: 52,
-        decoration: BoxDecoration(
-          color: AppColors.accent,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accent.withValues(alpha: 0.4),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
           ],
-          border: Border.all(color: AppColors.primary, width: 2),
         ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
-      ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.notifications_active_rounded, color: AppColors.accent, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Retard détecté - Moussa Barry',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'Départ prévu pour 14:30 non validé.',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColors.textHint),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

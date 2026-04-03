@@ -7,10 +7,14 @@ import 'station_admin_departures.dart';
 import 'station_admin_vehicles.dart';
 import 'station_admin_syndicates.dart';
 import 'station_admin_profile.dart';
-import '../../assistant/screens/assistant_screen.dart';
+import 'station_admin_ai_assistant.dart';
+import '../../../core/widgets/premium_bottom_nav_bar.dart';
+
+import '../../../core/models/user_profile.dart';
 
 class StationAdminDashboard extends StatefulWidget {
-  const StationAdminDashboard({super.key});
+  final UserProfile? profile;
+  const StationAdminDashboard({super.key, this.profile});
 
   @override
   State<StationAdminDashboard> createState() => _StationAdminDashboardState();
@@ -23,7 +27,6 @@ class _StationAdminDashboardState extends State<StationAdminDashboard> {
     const StationAdminHome(),
     const StationAdminPlatforms(),
     const StationAdminVehicles(),
-    const StationAdminDepartures(),
     const StationAdminSyndicates(),
     const StationAdminProfile(),
   ];
@@ -38,77 +41,39 @@ class _StationAdminDashboardState extends State<StationAdminDashboard> {
         index: _currentIndex,
         children: _pages,
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.95),
-          border: const Border(top: BorderSide(color: Color(0xFFF1F5F9))),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(0, Icons.dashboard, 'Dashboard', primaryColor, textSlate400),
-                _buildNavItem(1, Icons.layers, 'Quais', primaryColor, textSlate400),
-                _buildNavItem(2, Icons.directions_bus, 'Véhicules', primaryColor, textSlate400),
-                _buildNavItem(3, Icons.departure_board, 'Départs', primaryColor, textSlate400),
-                _buildNavItem(4, Icons.business, 'Syndicats', primaryColor, textSlate400),
-                _buildNavItem(5, Icons.person, 'Profil', primaryColor, textSlate400),
-              ],
-            ),
-          ),
-        ),
-      ),
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AssistantScreen(userRole: 'ADMIN_GARE'),
-                  ),
-                );
-              },
-              backgroundColor: AppColors.primary,
-              child: const Icon(Icons.smart_toy, color: Colors.white),
-            )
-          : null,
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label, Color primary, Color inactiveColor) {
-    final bool isSelected = _currentIndex == index;
-    return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? primary : inactiveColor,
-            size: 24,
-            fill: isSelected ? 1 : 0,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              color: isSelected ? primary : inactiveColor,
-              fontSize: 10,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            ),
-          ),
+      extendBody: true,
+      bottomNavigationBar: PremiumBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: [
+          NavItem(icon: Icons.dashboard_outlined, label: 'Accueil'),
+          NavItem(icon: Icons.layers_outlined, label: 'Quais'),
+          NavItem(icon: Icons.directions_bus_outlined, label: 'Bus'),
+          NavItem(icon: Icons.business_outlined, label: 'Syndicats'),
+          NavItem(icon: Icons.person_outline, label: 'Profil'),
         ],
       ),
+      floatingActionButton: _currentIndex == 0
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const StationAdminAIAssistant(),
+                    ),
+                  );
+                },
+                backgroundColor: AppColors.primary,
+                child: const Icon(Icons.smart_toy, color: AppColors.onPrimary),
+              ),
+            )
+          : null,
     );
   }
 }

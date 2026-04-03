@@ -23,15 +23,23 @@ class _StationAdminUnassignedDriversState extends State<StationAdminUnassignedDr
 
   Future<void> _loadData() async {
     try {
-      final profile = await AuthService.getCurrentProfile();
+      final authResponse = await AuthService.getCurrentProfile();
+      final profile = authResponse.data;
       if (profile != null && profile.stationId != null) {
-        final drivers = await StationService.getUnassignedDrivers(profile.stationId!);
+        final drvResponse = await StationService.getUnassignedDrivers(profile.stationId!);
         if (mounted) {
           setState(() {
-            _drivers = drivers;
+            _drivers = drvResponse.data ?? [];
             _isLoading = false;
           });
+          if (!drvResponse.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(drvResponse.message)),
+            );
+          }
         }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
       }
     } catch (e) {
       debugPrint('Error loading unassigned drivers: $e');

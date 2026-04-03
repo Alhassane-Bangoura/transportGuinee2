@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../../../core/constants/app_assets.dart';
 
 class SyndicateTripsPage extends StatefulWidget {
   const SyndicateTripsPage({super.key});
@@ -10,278 +11,501 @@ class SyndicateTripsPage extends StatefulWidget {
 }
 
 class _SyndicateTripsPageState extends State<SyndicateTripsPage> {
-  String _selectedTab = 'Aujourd\'hui';
-
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = AppColors.background;
-
     return Scaffold(
-      backgroundColor: backgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildTabs(),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                children: [
-                  _buildTripCard(
-                    'Conakry → Mamou',
-                    'Mamadou Diallo',
-                    '08:30',
-                    14,
-                    20,
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuCv0mcVGiM6HgScSJSFHtbCvsxyOHpaLP68V1qvWJnMRRH_MYdj-ndlBCcHDHDKqD49Pb2otwSnHeKATlY8kVQji1pkjo-nq2raQ7xbVYw7i__--foH05dVvNPelp2OnL1rEu9ahwyK7P8Ko4F-XwoRGmuALtrkg6-ZGI-H3Rttqjv5WAwQ5Sh6uLEh-5pC3zNERpXKFeTDG5iIj5pp7EsQYgN_TmhLme3EM_4r-oV7l2qJiTkAm7h68cjK4lCOzK7Rq_otQVZHBDeN',
-                  ),
-                  const SizedBox(height: 16),
-                  _buildTripCard(
-                    'Conakry → Labé',
-                    'Ibrahim Sow',
-                    '10:15',
-                    19,
-                    20,
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuC7mKFlXUx-gRFfFdH9uGb9POuYDCwWUztO5KRn0w1IGXrEb4trHWjV6RbdiE2Y2At7myOCOPR8l2zY4WrIandvqDuGYhm2zZvS2Q1JhelO9-WfqSO272OZz7oIgcNhhOHpnCdMUbeCBKxv8-24U2I_z0QvnuHjJ6yyOMSsX4pw8moKB2FD2xYn_fHJ9w72-I4RFY9DyEF2k9eueprTcw1WryfgGLOhEvwBBHXG_F552wcOksgBYAsW-SW_pJN-EcSVPZ24JETMndVW',
-                    isCritical: true,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildTripCard(
-                    'Conakry → Kindia',
-                    'Aissatou Barry',
-                    '14:00',
-                    5,
-                    20,
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuDQ8RrChdxT4F5ka7jaa69W0WRK-DxjTsivwDFeaA5KdS1uD8mIxF6a6BVXchvWm-Bu33AJfWnfOJ_wVAOIF4MtnUmQwtlTml1_7AdLOaGDuq2ErFKah72K5OQkpJI9hTmXR_s7Ttw5c4sUtOW6t8hQgtZUtB8-FSvCqCA6RIseFCJveLsFaquRmG6LI8xHDkWwFDxTaG5CGTTOEsSsGyak8K36co5ohTYFkGHFGN60ogC41EiU-Dq7NC9c5GgojzC7lBQWlJa9OkTT',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: AppColors.background,
+      body: Column(
         children: [
-          Text(
-            'Remplissage des véhicules',
-            style: AppTextStyles.headingLarge.copyWith(fontSize: 24, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
-                'Gare: ',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-              ),
-              Text(
-                'Conakry (Bambéto)',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabs() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          _buildTabItem('Aujourd\'hui'),
-          const SizedBox(width: 8),
-          _buildTabItem('Prochains'),
-          const SizedBox(width: 8),
-          _buildTabItem('Historique'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabItem(String label) {
-    bool isActive = _selectedTab == label;
-    return InkWell(
-      onTap: () => setState(() => _selectedTab = label),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isActive ? AppColors.primary : AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.label.copyWith(
-            color: isActive ? Colors.white : AppColors.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTripCard(String route, String driver, String time, int current, int total, String img, {bool isCritical = false}) {
-    double progress = current / total;
-    Color progressBarColor = isCritical ? AppColors.error : AppColors.primary;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          _buildPremiumHeader(),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               children: [
+                _buildAITips(),
+                const SizedBox(height: 32),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
-                        image: DecorationImage(
-                          image: NetworkImage(img),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          driver,
-                          style: AppTextStyles.headingLarge.copyWith(fontSize: 16, fontWeight: FontWeight.w800),
+                        Text('SUIVI DES DÉPARTS', 
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.primary, 
+                            fontSize: 10, 
+                            fontWeight: FontWeight.w800, 
+                            letterSpacing: 1.5
+                          )
                         ),
-                        Text(
-                          route,
-                          style: AppTextStyles.bodyMedium.copyWith(fontSize: 12, color: AppColors.textSecondary),
+                        Text('Activité du Trajet', 
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white, 
+                            fontSize: 24, 
+                            fontWeight: FontWeight.w900, 
+                            letterSpacing: -0.5
+                          )
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface, 
+                        borderRadius: BorderRadius.circular(12), 
+                        border: Border.all(color: AppColors.border)
+                      ),
+                      child: const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 20),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _buildDepartureReadyCard(
+                  'Sprinter - Mercedes Benz',
+                  'RC-9021-B',
+                  'Moussa Camara',
+                  12, 15,
+                  AppAssets.vehicleInterior1,
+                  AppAssets.driverActivityAvatar,
+                ),
+                const SizedBox(height: 24),
+                _buildDepartureReadyCard(
+                  'Toyota Hiace',
+                  'RC-4412-A',
+                  'Ibrahima Diallo',
+                  8, 18,
+                  AppAssets.vehicleInterior2,
+                  AppAssets.driverAvatar3,
+                  isWaiting: true,
+                ),
+                const SizedBox(height: 48),
+                Text('RÉCAPITULATIF DU JOUR', 
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textSecondary, 
+                    fontSize: 12, 
+                    fontWeight: FontWeight.w800, 
+                    letterSpacing: 1.5
+                  )
+                ),
+                const SizedBox(height: 16),
+                _buildSummaryGrid(),
+                const SizedBox(height: 48),
+                Text('DERNIERS DÉPARTS VALIDÉS', 
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textSecondary, 
+                    fontSize: 12, 
+                    fontWeight: FontWeight.w800, 
+                    letterSpacing: 1.5
+                  )
+                ),
+                const SizedBox(height: 16),
+                _buildRecentDepartures(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle, 
+                  border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 2)
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: Image.network(
+                    AppAssets.syndicateActivityAvatar, 
+                    fit: BoxFit.cover
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text('GuineeTransport', 
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.primary, 
+                  fontWeight: FontWeight.w900, 
+                  fontSize: 18, 
+                  letterSpacing: -0.5
+                )
+              ),
+            ],
+          ),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_outlined, color: AppColors.textSecondary, size: 24)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAITips() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.lightbulb_outline_rounded, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Optimisation IA du planning', 
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.primary, 
+                    fontWeight: FontWeight.w800, 
+                    fontSize: 15
+                  )
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Le flux passager vers Conakry est en hausse de 15%. Nous recommandons d\'avancer le départ du Sprinter CR-402 de 20 minutes.',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textSecondary, 
+                    fontSize: 13, 
+                    height: 1.5, 
+                    fontWeight: FontWeight.w500
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDepartureReadyCard(String model, String plate, String driver, int current, int total, String vehicleImg, String driverImg, {bool isWaiting = false}) {
+    double progress = current / total;
+    Color statusColor = isWaiting ? Colors.amber : Colors.green;
+    String statusText = isWaiting ? 'EN ATTENTE' : 'PRÊT À PARTIR';
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2), 
+            blurRadius: 40, 
+            offset: const Offset(0, 20)
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                child: Image.network(vehicleImg, height: 180, width: double.infinity, fit: BoxFit.cover),
+              ),
+              Positioned(
+                top: 16, right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(color: statusColor, borderRadius: BorderRadius.circular(100)),
+                  child: Text(statusText, 
+                    style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white, 
+                      fontSize: 10, 
+                      fontWeight: FontWeight.w900, 
+                      letterSpacing: 0.5
+                    )
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(model, 
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white, 
+                            fontSize: 18, 
+                            fontWeight: FontWeight.w800
+                          )
+                        ),
+                        Text('Matricule: $plate', 
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textSecondary, 
+                            fontSize: 12, 
+                            fontWeight: FontWeight.w600
+                          )
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text('$current/$total', 
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.primary, 
+                            fontSize: 20, 
+                            fontWeight: FontWeight.w900
+                          )
+                        ),
+                        Text('SIÈGES', 
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textSecondary, 
+                            fontSize: 10, 
+                            fontWeight: FontWeight.w800
+                          )
                         ),
                       ],
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: LinearProgressIndicator(
+                    value: progress, 
+                    minHeight: 8, 
+                    backgroundColor: AppColors.background, 
+                    valueColor: AlwaysStoppedAnimation<Color>(isWaiting ? Colors.amber : AppColors.primary)
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    time,
-                    style: AppTextStyles.headingLarge.copyWith(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Taux de remplissage',
-                  style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                ),
-                RichText(
-                  text: TextSpan(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(20)),
+                  child: Row(
                     children: [
-                      TextSpan(
-                        text: '$current',
-                        style: AppTextStyles.headingLarge.copyWith(fontSize: 18, color: AppColors.primary, fontWeight: FontWeight.w900),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(driverImg, width: 44, height: 44, fit: BoxFit.cover),
                       ),
-                      TextSpan(
-                        text: ' / $total places',
-                        style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Chauffeur', 
+                              style: GoogleFonts.plusJakartaSans(
+                                color: AppColors.textSecondary, 
+                                fontSize: 10, 
+                                fontWeight: FontWeight.w700
+                              )
+                            ),
+                            Text(driver, 
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white, 
+                                fontSize: 14, 
+                                fontWeight: FontWeight.w800
+                              )
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1), 
+                          borderRadius: BorderRadius.circular(12)
+                        ),
+                        child: const Icon(Icons.call_rounded, color: AppColors.primary, size: 20),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isWaiting ? null : () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: statusColor,
+                      disabledBackgroundColor: AppColors.background,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      elevation: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(isWaiting ? 'EN ATTENTE DE PASSAGERS' : 'VALIDER DÉPART', 
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.w900, 
+                            fontSize: 13, 
+                            letterSpacing: 1
+                          )
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(isWaiting ? Icons.group_outlined : Icons.local_shipping_rounded, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 10,
-                backgroundColor: AppColors.surfaceVariant,
-                valueColor: AlwaysStoppedAnimation<Color>(progressBarColor),
-              ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryGrid() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      childAspectRatio: 1.6,
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      children: [
+        _buildSummaryCard('VALIDÉS', '24', Icons.done_all_rounded, Colors.blue),
+        _buildSummaryCard('EN ATTENTE', '07', Icons.schedule_rounded, Colors.amber),
+        _buildSummaryCard('PONCTUALITÉ', '92%', Icons.speed_rounded, Colors.green),
+        _buildSummaryCard('RECETTE', '1.2M', Icons.payments_rounded, AppColors.primary),
+      ],
+    );
+  }
+
+  Widget _buildSummaryCard(String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface, 
+        borderRadius: BorderRadius.circular(24), 
+        border: Border.all(color: AppColors.border)
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const Spacer(),
+          Text(value, 
+            style: GoogleFonts.plusJakartaSans(
+              color: Colors.white, 
+              fontSize: 22, 
+              fontWeight: FontWeight.w900
+            )
+          ),
+          Text(label, 
+            style: GoogleFonts.plusJakartaSans(
+              color: AppColors.textSecondary, 
+              fontSize: 10, 
+              fontWeight: FontWeight.w800
+            )
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentDepartures() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface, 
+        borderRadius: BorderRadius.circular(24), 
+        border: Border.all(color: AppColors.border)
+      ),
+      child: Column(
+        children: [
+          _buildDepartureItem('Sprinter RC-112-C', 'Mamou', '10:45'),
+          const Divider(height: 1, color: AppColors.border),
+          _buildDepartureItem('Coaster RC-885-A', 'Labé', '09:15'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDepartureItem(String vehicle, String destination, String time) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.05), 
+              borderRadius: BorderRadius.circular(16)
             ),
-            if (isCritical) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'DERNIÈRE PLACE DISPONIBLE',
-                  style: AppTextStyles.label.copyWith(color: AppColors.error, fontSize: 9, fontWeight: FontWeight.w800),
+            child: const Icon(Icons.local_shipping_outlined, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(vehicle, 
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white, 
+                    fontSize: 14, 
+                    fontWeight: FontWeight.w800
+                  )
+                ),
+                Text('Destination: $destination', 
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.textSecondary, 
+                    fontSize: 12, 
+                    fontWeight: FontWeight.w600
+                  )
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(time, 
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white, 
+                  fontSize: 14, 
+                  fontWeight: FontWeight.w800
+                )
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1), 
+                  borderRadius: BorderRadius.circular(4)
+                ),
+                child: Text('VALIDÉ', 
+                  style: GoogleFonts.plusJakartaSans(
+                    color: AppColors.primary, 
+                    fontSize: 8, 
+                    fontWeight: FontWeight.w900
+                  )
                 ),
               ),
             ],
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.visibility_rounded, size: 18),
-                    label: const Text('Voir places'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: BorderSide(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      textStyle: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.check_circle_rounded, size: 18),
-                    label: const Text('Valider'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      textStyle: const TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
-

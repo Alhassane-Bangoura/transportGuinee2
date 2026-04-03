@@ -9,8 +9,8 @@ class UserProfile {
   final String? phone;
   final String? avatarUrl;
   final String role; 
-  final int? stationId;
-  final int? routeId;
+  final String? stationId;
+  final String? routeId;
   final String? syndicateId;
   final DateTime createdAt;
   final Map<String, dynamic>? metadata;
@@ -36,9 +36,9 @@ class UserProfile {
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       avatarUrl: json['avatar_url'] as String?,
-      role: json['role'] as String? ?? 'PASSAGER',
-      stationId: json['station_id'] as int?,
-      routeId: json['route_id'] as int?,
+      role: json['role'] as String? ?? 'passenger',
+      stationId: json['station_id'] as String?,
+      routeId: json['route_id'] as String?,
       syndicateId: json['syndicate_id'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       metadata: json['metadata'] as Map<String, dynamic>?,

@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/splash_screen.dart';
+import 'core/widgets/notification_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,6 @@ void main() async {
   // Orientation portrait uniquement
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
   ]);
 
   runApp(const GuineaTransportApp());
@@ -44,6 +44,7 @@ class GuineaTransportApp extends StatelessWidget {
       title: 'Guinée Transport',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      builder: (context, child) => NotificationOverlay(child: child!),
       home: const SplashScreen(),
     );
   }

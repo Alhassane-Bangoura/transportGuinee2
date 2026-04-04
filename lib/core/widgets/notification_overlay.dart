@@ -74,7 +74,7 @@ class _NotificationOverlayState extends State<NotificationOverlay> {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.premiumTeal.withOpacity(0.3), width: 1),
+          border: Border.all(color: AppColors.success.withOpacity(0.3), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.4),
@@ -89,12 +89,12 @@ class _NotificationOverlayState extends State<NotificationOverlay> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppColors.premiumTeal.withOpacity(0.1),
+                color: AppColors.success.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 _getIcon(notification.type),
-                color: AppColors.premiumTeal,
+                color: AppColors.success,
                 size: 24,
               ),
             ),

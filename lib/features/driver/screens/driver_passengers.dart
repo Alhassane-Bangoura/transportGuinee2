@@ -123,14 +123,14 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('TRAJET', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
-                  Text('Conakry → Mamou', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                  Text('Conakry → Mamou', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('DATE', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
-                  Text('24 Oct. 2023', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                  Text('24 Oct. 2023', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)),
                 ],
               ),
             ],
@@ -141,7 +141,7 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(20)),
-                child: Text('BUS G-204', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900)),
+                child: Text('BUS G-204', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontSize: 10, fontWeight: FontWeight.w900)),
               ),
               const SizedBox(width: 8),
               Container(
@@ -163,11 +163,18 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isPresent ? Colors.green.withOpacity(0.05) : AppColors.surface,
+        color: isPresent ? AppColors.success.withValues(alpha: 0.05) : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isPresent ? Colors.green.withOpacity(0.2) : AppColors.border),
+        border: Border.all(color: isPresent ? AppColors.success.withValues(alpha: 0.2) : AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -194,7 +201,7 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(name, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
+                        Text(name, style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(6)),
@@ -222,20 +229,20 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
                 child: GestureDetector(
                   onTap: () => setState(() => p['present'] = !isPresent),
                   child: Container(
-                    height: 48,
+                    height: 52,
                     decoration: BoxDecoration(
-                      color: isPresent ? Colors.green.withOpacity(0.1) : Colors.green,
-                      borderRadius: BorderRadius.circular(12),
-                      border: isPresent ? Border.all(color: Colors.green.withOpacity(0.3)) : null,
+                      color: isPresent ? AppColors.success.withValues(alpha: 0.1) : AppColors.success,
+                      borderRadius: BorderRadius.circular(14),
+                      border: isPresent ? Border.all(color: AppColors.success.withValues(alpha: 0.3)) : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(isPresent ? Icons.verified_rounded : Icons.check_circle_outline, color: isPresent ? Colors.green : Colors.white, size: 20),
+                        Icon(isPresent ? Icons.verified_rounded : Icons.check_circle_outline, color: isPresent ? AppColors.success : Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           isPresent ? 'DÉJÀ PRÉSENT' : 'CONFIRMER PRÉSENCE',
-                          style: GoogleFonts.plusJakartaSans(color: isPresent ? Colors.green : Colors.white, fontWeight: FontWeight.w800, fontSize: 12),
+                          style: GoogleFonts.plusJakartaSans(color: isPresent ? AppColors.success : Colors.white, fontWeight: FontWeight.w800, fontSize: 12),
                         ),
                       ],
                     ),
@@ -266,14 +273,14 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
       child: Container(
         height: 56,
         decoration: BoxDecoration(
-          color: primary,
+          color: AppColors.textPrimary,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: primary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))],
+          boxShadow: [BoxShadow(color: AppColors.textPrimary.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 5))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.group_outlined, color: Colors.white),
+            const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 20),
             const SizedBox(width: 12),
             Text('CONTACTER TOUS LES PASSAGERS', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5)),
           ],

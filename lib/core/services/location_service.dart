@@ -57,6 +57,7 @@ class LocationService {
           departureStationName: json['departure_station']['name'] as String?,
           arrivalStationName: arrivalStation?['name'] as String?,
           arrivalCityName: arrivalCity?['name'] as String?,
+          arrivalCityId: json['arrival_city_id'] as String?,
           syndicateId: json['syndicate_id'] as String?,
         );
       }).toList();

@@ -32,7 +32,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
           child: Container(
             decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
@@ -95,7 +95,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
                   const SizedBox(height: 32),
 
                   // Itinerary
-                  Text('Itinéraire détaillé', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text('Itinéraire détaillé', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   const SizedBox(height: 20),
                   _buildItinerary(),
                   const SizedBox(height: 32),
@@ -203,7 +203,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('TRANSPORTEUR', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-                  Text(trip.syndicateName ?? 'Soguitrans Express', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text(trip.syndicateName ?? 'Soguitrans Express', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                 ],
               ),
               Container(
@@ -213,7 +213,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
                   children: [
                     Icon(Icons.star, color: Colors.amber, size: 12),
                     SizedBox(width: 4),
-                    Text('4.9', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('4.9', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   ],
                 ),
               ),
@@ -305,7 +305,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(time, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w800, color: isFirst ? AppColors.primary : AppColors.textSecondary)),
-                Text(location, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
+                Text(location, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 if (desc != null) Text(desc, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textSecondary)),
               ],
             ),

@@ -37,7 +37,7 @@ class BookingService {
 
       final data = await _supabase
           .from('bookings')
-          .select('*, trips:trip_id(*, routes:route_id(departure_city:cities!routes_departure_city_id_fkey(name), arrival_city:cities!routes_arrival_city_id_fkey(name), departure_station:stations!routes_departure_station_id_fkey(name), arrival_station:stations!routes_arrival_station_id_fkey(name))), tickets(*)')
+          .select('*, trips:trip_id(*, routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
           .eq('user_id', userId)
           .order('created_at', ascending: false);
           
@@ -75,7 +75,7 @@ class BookingService {
       final response = await _supabase
           .from('bookings')
           .insert(newBooking)
-          .select('*, trips:trip_id(*, routes:route_id(departure_city:cities!routes_departure_city_id_fkey(name), arrival_city:cities!routes_arrival_city_id_fkey(name), departure_station:stations!routes_departure_station_id_fkey(name), arrival_station:stations!routes_arrival_station_id_fkey(name))), tickets(*)')
+          .select('*, trips:trip_id(*, routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
           .single();
 
       // On insère aussi un faux ticket pour compléter la simulation

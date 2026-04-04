@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-/// Écran des Trajets du Chauffeur
-/// Correspond à mes_trajet_chauffeurs.html
 class DriverMyTrips extends StatefulWidget {
   const DriverMyTrips({super.key});
 
@@ -18,10 +16,10 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: AppColors.primary),
+          icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
           onPressed: () {},
         ),
         title: Column(
@@ -31,7 +29,7 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
               style: GoogleFonts.plusJakartaSans(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w900,
-                fontSize: 18,
+                fontSize: 16,
                 letterSpacing: -0.5,
               ),
             ),
@@ -47,30 +45,12 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
           ],
         ),
         actions: [
-          Stack(
-            children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.notifications_outlined, color: AppColors.textSecondary),
-              ),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildNotificationIcon(),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -80,16 +60,16 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                 Text(
                   'Mes Trajets du jour',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(100),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '4 trajets',
@@ -121,7 +101,7 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
               imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDq4VDL0470zXGpT9sBH46HEhda1MKiPevxYjKkGHKV9xOwDi50LzQ_bOCAsC5_Uc1lL_NjSNZjxqHT-4OxORMfwR3ESsHrP7KM6Jo1PZsSoyCCLHX9aLvylnGXQ_osISeZaFs7wYUNK-9P4whVtg8dgLDsbQEjUMevurGp0zoUI5CjoX9Nannoz0Gm2ztg5o44sdzYwKlOmBbmYL8Byq0Dqu67ZQbccjNA_OauIcq9W4N56ScLDB5e-FcNDVjFjlv7wVZbnUIAQWdk',
               status: 'PROGRAMMÉE',
               statusColor: AppColors.textSecondary,
-              opacity: 0.8,
+              opacity: 0.9,
             ),
             const SizedBox(height: 16),
             _buildTripCard(
@@ -132,13 +112,35 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
               imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX_jfIBjaFFHKQjgUSV82V7-96bSfX0n0SuXLMNqsulJc3TyjJWCNpOI-rJo6jNNfWY-NXpMwSUlq7IX07JeMGqTCTe_lqjdIaDr0Nb4MWrc8oi60XTlO3rMS46sOGgT9CRXWgRIWYmsRqeOGfkqV6RusVSJKQsmPPqN3FJwHsqI1TlFzvbTmTSziXfvJf9uXbld5Lc6BtjS1RogX0rs5_UyaxByOg9xpA-q6gGKLWiKGcnvLKhQtNve2y_qWknzsmLXYrgpKQF8nP',
               status: 'PROGRAMMÉE',
               statusColor: AppColors.textSecondary,
-              opacity: 0.8,
+              opacity: 0.9,
             ),
-            const SizedBox(height: 100),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildNotificationIcon() {
+    return Stack(
+      children: [
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.notifications_outlined, color: AppColors.textSecondary),
+        ),
+        Positioned(
+          top: 10,
+          right: 10,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: AppColors.error,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.surface, width: 1.5),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -155,30 +157,25 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
     return Opacity(
       opacity: opacity,
       child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            )
-          ],
+          boxShadow: const [BoxShadow(color: AppColors.shadow, blurRadius: 4, offset: Offset(0, 2))],
         ),
         child: Column(
           children: [
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                  child: Image.network(imgUrl, height: 130, width: double.infinity, fit: BoxFit.cover),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  child: Image.network(imgUrl, height: 140, width: double.infinity, fit: BoxFit.cover),
                 ),
                 Container(
-                  height: 130,
+                  height: 140,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -214,7 +211,6 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,22 +218,22 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                           Text(
                             route,
                             style: GoogleFonts.plusJakartaSans(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Row(
                             children: [
-                              const Icon(Icons.schedule, size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
+                              const Icon(Icons.schedule_rounded, size: 16, color: AppColors.textSecondary),
+                              const SizedBox(width: 6),
                               Text(
                                 '$time • $type',
-                                style: GoogleFonts.plusJakartaSans(
+                                style: GoogleFonts.inter(
                                   color: AppColors.textSecondary,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -275,24 +271,27 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: status == 'EN COURS' ? AppColors.primary : AppColors.surfaceVariant,
+                            foregroundColor: status == 'EN COURS' ? Colors.white : AppColors.textPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
-                          child: const Text('Voir les passagers', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                          child: Text(
+                            'Voir les passagers',
+                            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.border),
+                          color: AppColors.surfaceVariant,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(
                           onPressed: () {},
-                          icon: const Icon(Icons.map, color: AppColors.textSecondary),
+                          icon: const Icon(Icons.map_rounded, color: AppColors.textSecondary),
                         ),
                       ),
                     ],
@@ -303,45 +302,6 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.home, 'Accueil', false),
-          _buildNavItem(Icons.route, 'Trajets', true),
-          _buildNavItem(Icons.group, 'Équipage', false),
-          _buildNavItem(Icons.person, 'Profil', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: isActive ? AppColors.primary : AppColors.textSecondary, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.plusJakartaSans(
-            color: isActive ? AppColors.primary : AppColors.textSecondary,
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
     );
   }
 }

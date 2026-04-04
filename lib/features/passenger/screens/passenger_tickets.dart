@@ -21,7 +21,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
   Widget build(BuildContext context) {
     final Color primaryColor = AppColors.primary;
     final Color backgroundColor = AppColors.background;
-    final Color textSlate900 = AppColors.onBackground;
+    final Color textSlate900 = AppColors.textPrimary;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -67,7 +67,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                
+
                 final allBookings = snapshot.data ?? [];
                 final filteredBookings = allBookings.where((b) {
                   if (_selectedFilter == 'Actifs') return b.isActive;
@@ -83,10 +83,11 @@ class _PassengerTicketsState extends State<PassengerTickets> {
                   itemCount: filteredBookings.length,
                   itemBuilder: (context, index) {
                     final booking = filteredBookings[index];
-                    String date = booking.departureTime != null 
-                        ? DateFormat('dd MMM yyyy').format(booking.departureTime!)
+                    String date = booking.departureTime != null
+                        ? DateFormat('dd MMM yyyy')
+                            .format(booking.departureTime!)
                         : 'N/A';
-                    String time = booking.departureTime != null 
+                    String time = booking.departureTime != null
                         ? DateFormat('HH:mm').format(booking.departureTime!)
                         : 'N/A';
 
@@ -125,7 +126,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
         color: Colors.transparent,
       ),
       child: Center(
-        child: Icon(icon, color: const Color(0xFF0F172A), size: 24),
+        child: Icon(icon, color: AppColors.textPrimary, size: 24),
       ),
     );
   }
@@ -137,7 +138,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
         height: 44,
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: const Color(0xFFE2E8F0).withValues(alpha: 0.5),
+          color: AppColors.border.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -175,7 +176,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: isActive ? primaryColor : const Color(0xFF64748B),
+              color: isActive ? primaryColor : AppColors.textSecondary,
             ),
           ),
         ),
@@ -235,8 +236,8 @@ class TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color textSlate900 = const Color(0xFF0F172A);
-    final Color textSlate500 = const Color(0xFF64748B);
+    final Color textSlate900 = AppColors.textPrimary;
+    final Color textSlate500 = AppColors.textSecondary;
 
     return Container(
       decoration: BoxDecoration(
@@ -249,7 +250,7 @@ class TicketCard extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
@@ -270,7 +271,7 @@ class TicketCard extends StatelessWidget {
                       station,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
-                        color: textSlate500,
+                        color: const Color(0xFF475569),
                       ),
                     ),
                   ],
@@ -281,7 +282,8 @@ class TicketCard extends StatelessWidget {
                     color: primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(Icons.directions_bus, color: primaryColor, size: 24),
+                  child:
+                      Icon(Icons.directions_bus, color: primaryColor, size: 24),
                 ),
               ],
             ),
@@ -338,7 +340,7 @@ class TicketCard extends StatelessWidget {
 
           Padding(
             padding: const EdgeInsets.all(20),
-            child: isActif 
+            child: isActif
                 ? _buildActiveActions(context, primaryColor)
                 : _buildReservationDetails(context, primaryColor),
           ),
@@ -353,7 +355,7 @@ class TicketCard extends StatelessWidget {
       style: GoogleFonts.plusJakartaSans(
         fontSize: 10,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF64748B),
+        color: AppColors.textSecondary, // Gris Slate 600 pour lisibilité
         letterSpacing: 1.0,
       ),
     );
@@ -390,7 +392,7 @@ class TicketCard extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: const Color(0xFF0F172A),
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -408,7 +410,7 @@ class TicketCard extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isActif ? primaryColor : const Color(0xFF64748B),
+            color: isActif ? primaryColor : AppColors.textSecondary,
           ),
         ),
       ],
@@ -420,7 +422,7 @@ class TicketCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: CustomPaint(
         painter: DashedLinePainter(
-          color: const Color(0xFFE2E8F0),
+          color: AppColors.border,
         ),
         child: Container(height: 1),
       ),
@@ -434,7 +436,7 @@ class TicketCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFF6F8F6), // Matches Background
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
     );
   }
@@ -450,7 +452,8 @@ class TicketCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0).withValues(alpha: 0.5)),
+            border: Border.all(
+                color: AppColors.border.withValues(alpha: 0.5)),
           ),
           child: Container(
             decoration: BoxDecoration(
@@ -462,78 +465,100 @@ class TicketCard extends StatelessWidget {
             ),
           ),
         ),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: true,
-                  builder: (context) => Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
-                        const SizedBox(height: 24),
-                        Text('Votre Billet Électronique', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                        const SizedBox(height: 24),
-                        Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(Icons.qr_code_2, size: 160, color: Colors.black87),
-                        ),
-                        const SizedBox(height: 16),
-                        Text('Présentez ce QR Code au contrôleur', style: GoogleFonts.plusJakartaSans(color: Colors.white70)),
-                        const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Billet téléchargé (simulation) !')));
-                            },
-                            icon: const Icon(Icons.file_download, color: Colors.white),
-                            label: Text('Télécharger en PDF', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: Colors.white)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primary,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (context) => Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(32)),
                   ),
-                );
-              },
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Afficher le Billet'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-                elevation: 4,
-                shadowColor: primary.withValues(alpha: 0.4),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                            color: AppColors.border,
+                            borderRadius: BorderRadius.circular(2)),
+                      ),
+                      const SizedBox(height: 24),
+                      Text('Votre Billet Électronique',
+                          style: GoogleFonts.plusJakartaSans(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary)),
+                      const SizedBox(height: 24),
+                      Container(
+                        width: 200,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(Icons.qr_code_2,
+                            size: 160, color: Colors.black87),
+                      ),
+                      const SizedBox(height: 16),
+                      Text('Présentez ce QR Code au contrôleur',
+                          style: GoogleFonts.plusJakartaSans(
+                              color: AppColors.textSecondary)),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Billet téléchargé (simulation) !')));
+                          },
+                          icon: const Icon(Icons.file_download,
+                              color: Colors.white),
+                          label: Text('Télécharger en PDF',
+                              style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primary,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                textStyle: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+              );
+            },
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Afficher le Billet'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primary,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              shadowColor: primary.withValues(alpha: 0.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              textStyle: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
           ),
+        ),
       ],
     );
   }
@@ -544,7 +569,8 @@ class TicketCard extends StatelessWidget {
       height: 52,
       child: ElevatedButton(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Détails complets générés (Simulation).')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Détails complets générés (Simulation).')));
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFE8F9E8),
@@ -586,10 +612,10 @@ class DashedLinePainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..strokeWidth = 1;
-    
+
     int maxDashes = 1000;
     int count = 0;
-    
+
     while (startX < size.width && count < maxDashes) {
       canvas.drawLine(Offset(startX, 0), Offset(startX + dashWidth, 0), paint);
       startX += dashWidth + dashSpace;

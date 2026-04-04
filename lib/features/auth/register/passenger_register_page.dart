@@ -65,7 +65,7 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
               const Text(
                 'GuinéeTransport',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,

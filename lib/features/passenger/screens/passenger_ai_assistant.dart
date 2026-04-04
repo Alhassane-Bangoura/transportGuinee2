@@ -270,7 +270,7 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
           borderRadius: const BorderRadius.only(topRight: Radius.circular(20), bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
           border: Border.all(color: AppColors.border),
         ),
-        child: Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 15, color: Colors.white, height: 1.4, fontWeight: FontWeight.w500)),
+        child: Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 15, color: AppColors.textPrimary, height: 1.4, fontWeight: FontWeight.w500)),
       ),
     );
   }
@@ -367,7 +367,7 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
     return Column(
       crossAxisAlignment: isEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
-        Text(time, style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
+        Text(time, style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
         Text(city, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.textSecondary)),
         Text(sub, style: GoogleFonts.plusJakartaSans(fontSize: 9, color: AppColors.textSecondary.withValues(alpha: 0.7))),
       ],
@@ -387,7 +387,7 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
         itemBuilder: (_, i) => ActionChip(
           label: Text(chips[i], style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700)),
           backgroundColor: AppColors.surface,
-          labelStyle: const TextStyle(color: Colors.white),
+          labelStyle: const TextStyle(color: AppColors.textPrimary),
           side: const BorderSide(color: AppColors.border),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           onPressed: () => _handleSubmitted(chips[i]),
@@ -417,7 +417,7 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
                   Expanded(
                     child: TextField(
                       controller: _messageController,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: AppColors.textPrimary),
                       onSubmitted: _handleSubmitted,
                       textInputAction: TextInputAction.send,
                       decoration: InputDecoration(

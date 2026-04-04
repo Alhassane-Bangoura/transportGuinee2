@@ -46,8 +46,8 @@ class _DriverTripsPageState extends State<DriverTripsPage>
                 controller: _tabController,
                 children: [
                   _buildTripsList(),
-                  const Center(child: Text('Prochains trajets', style: TextStyle(color: Colors.white))),
-                  const Center(child: Text('Historique', style: TextStyle(color: Colors.white))),
+                  const Center(child: Text('Prochains trajets', style: TextStyle(color: AppColors.textPrimary))),
+                  const Center(child: Text('Historique', style: TextStyle(color: AppColors.textPrimary))),
                 ],
               ),
             ),
@@ -173,7 +173,7 @@ class _DriverTripsPageState extends State<DriverTripsPage>
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
-                color: Colors.white,
+                color: AppColors.textPrimary,
               ),
             ),
             Container(
@@ -243,17 +243,17 @@ class _DriverTripsPageState extends State<DriverTripsPage>
   }) {
     final bool isOpacified = status == 'PROGRAMMÉE';
     return Opacity(
-      opacity: isOpacified ? 0.8 : 1.0,
+      opacity: isOpacified ? 0.85 : 1.0,
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 15,
-              offset: const Offset(0, 8),
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -292,13 +292,14 @@ class _DriverTripsPageState extends State<DriverTripsPage>
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(6),
+                      color: statusColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(FullRadius),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                     ),
                     child: Text(
                       status,
                       style: GoogleFonts.plusJakartaSans(
-                        color: Colors.white,
+                        color: statusColor,
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.0,
@@ -326,7 +327,7 @@ class _DriverTripsPageState extends State<DriverTripsPage>
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               Padding(
@@ -338,7 +339,7 @@ class _DriverTripsPageState extends State<DriverTripsPage>
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ],
@@ -424,3 +425,5 @@ class _DriverTripsPageState extends State<DriverTripsPage>
     );
   }
 }
+
+const double FullRadius = 99;

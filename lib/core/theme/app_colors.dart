@@ -3,47 +3,38 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Premium Dark Teal Palette (Optimized for Readability)
-  static const Color premiumDark = Color(0xFF021414); // Plus profond pour le contraste
-  static const Color premiumNavy = Color(0xFF05211E); // Surface
-  static const Color premiumSteel = Color(0xFF0D2D27); // Bordures
-  static const Color premiumTeal = Color(0xFF10B981); // Pour les actions (Emeraude/Teal)
-  static const Color premiumLightTeal = Color(0xFFD1FAE5); // Pour les textes secondaires/badges
+  // Palettes de référence (HTML)
+  static const Color primary = Color(0xFF1A3D75); // Deep Blue Navy
+  static const Color background = Color(0xFFF6F7F8); // Fond clair cassé
+  static const Color surface = Color(0xFFFFFFFF); // Blanc pur pour les cartes
+  static const Color onPrimary = Color(0xFFFFFFFF); 
+  static const Color textPrimary = Color(0xFF0F172A); // Slate 900
+  static const Color textSecondary = Color(0xFF475569); // Slate 600
+  static const Color textHint = Color(0xFF94A3B8); // Slate 400
+  static const Color border = Color(0xFFE2E8F0); // Slate 200
 
-  // Primaires
-  static const Color primary = premiumTeal; 
-  static const Color primaryDark = Color(0xFF064E3B);
-  static const Color primaryLight = premiumLightTeal;
+  // Accents & Statuts
+  static const Color accent = Color(0xFF059669); // Emerald 600
+  static const Color onAccent = Color(0xFFFFFFFF); // White for contrast
+  static const Color success = Color(0xFF10B981); // Emerald 500
+  static const Color error = Color(0xFFEF4444); // Red 500
+  static const Color warning = Color(0xFFF59E0B); // Amber 500
+  static const Color info = Color(0xFF3B82F6); // Blue 500
 
-  // Accents (Basé sur la référence pour les points d'attention)
-  static const Color accent = Color(0xFFF59E0B); // Orange Ambre pour "Suivant" / "Attention"
-  static const Color accentLight = Color(0xFFFEF3C7);
-
-  // Neutres
+  // Neutres & Surfaces
   static const Color white = Color(0xFFFFFFFF);
-  static const Color background = premiumDark;
-  static const Color surface = premiumNavy;
-  static const Color surfaceVariant = premiumSteel;
-  static const Color border = premiumSteel;
+  static const Color surfaceVariant = Color(0xFFF1F5F9);
+  static const Color shadow = Color(0x0D000000); // Ombre très légère (Tailwind shadow-sm)
 
-  // Textes (Contraste Maximum)
-  static const Color textPrimary = Color(0xFFF8FAFC); 
-  static const Color textSecondary = Color(0xFF94A3B8); // Slate 400 pour un look pro
-  static const Color textHint = Color(0xFF475569); 
-
-  // Alias pour compatibilité
-  static const Color onBackground = white;
-  static const Color onPrimary = white; // Texte Blanc sur Teal/Emeraude
-  static const Color onAccent = Color(0xFF021414); // Texte Sombre sur Orange
-  static const Color onSurface = white;
-  static const Color onSurfaceVariant = Color(0xFFCBD5E1);
-
-  // Couleurs sémantiques
-  static const Color success = Color(0xFF10B981);
-  static const Color error = Color(0xFFEF4444);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color info = Color(0xFF3B82F6);
-
-  // Ombre
-  static const Color shadow = Color(0x99000000); 
+  // Alias pour rétrocompatibilité
+  static const Color onBackground = textPrimary;
+  static const Color onSurface = textPrimary;
+  static const Color onSurfaceVariant = textSecondary;
+  static const Color premiumNavy = primary;
+  static const Color premiumGreen = success;
+  static const Color premiumLightGray = background;
+  static const Color premiumWhite = white;
+  static const Color premiumBorder = border;
+  static const Color primaryLight = Color(0xFF334155); // Pour compatibilité splash
+  static const Color primaryDark = Color(0xFF0F172A); // Pour compatibilité splash
 }

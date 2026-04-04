@@ -13,17 +13,18 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark, // Forcer le mode sombre global
+      brightness: Brightness.light, 
       textTheme: _textTheme,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
-        brightness: Brightness.dark,
+        brightness: Brightness.light,
         primary: AppColors.primary,
         onPrimary: AppColors.onPrimary,
         surface: AppColors.surface,
         onSurface: AppColors.onSurface,
         background: AppColors.background,
         onBackground: AppColors.onBackground,
+        outline: AppColors.border,
       ),
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: AppBarTheme(
@@ -31,9 +32,9 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.inter(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
       ),
@@ -41,25 +42,33 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
-          minimumSize: const Size(double.infinity, 56),
+          minimumSize: const Size(double.infinity, 54),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
           elevation: 0,
-          textStyle: GoogleFonts.inter(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.3,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+          side: const BorderSide(color: AppColors.border),
+          minimumSize: const Size(double.infinity, 54),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.border),
         ),
       ),
     );

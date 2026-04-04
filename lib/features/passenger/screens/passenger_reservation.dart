@@ -65,7 +65,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text('DATE & HEURE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-                      Text('24 Oct, 08:30', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
+                      Text('24 Oct, 08:30', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                     ],
                   ),
                 ],
@@ -242,7 +242,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
                   Text('$number', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w800, color: isSelected ? Colors.white : AppColors.primary)),
                 ],
               )
-            : Text('$number', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w800, color: isSelected ? Colors.white : (isOccupied ? Colors.white.withValues(alpha: 0.3) : Colors.white))),
+            : Text('$number', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w800, color: isSelected ? Colors.white : (isOccupied ? AppColors.textHint : AppColors.textPrimary))),
         ),
       ),
     );
@@ -311,7 +311,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('RÉCAPITULATIF', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+          Text('RÉCAPITULATIF', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           const SizedBox(height: 20),
           _buildPriceRow('Siège sélectionné ($selectedSeat)', '45,000 GNF'),
           const SizedBox(height: 12),
@@ -323,7 +323,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+              Text('Total', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               Text('47,500 GNF', style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.primary)),
             ],
           ),
@@ -337,7 +337,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-        Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
+        Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
       ],
     );
   }

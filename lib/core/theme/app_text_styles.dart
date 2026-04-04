@@ -9,8 +9,15 @@ class AppTextStyles {
         fontSize: 28,
         fontWeight: FontWeight.w800,
         color: AppColors.textPrimary,
-        height: 1.3,
+        height: 1.2,
         letterSpacing: -0.5,
+      );
+
+  static TextStyle get titleLarge => GoogleFonts.plusJakartaSans(
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textPrimary,
+        height: 1.3,
       );
 
   static TextStyle get headingLarge => GoogleFonts.plusJakartaSans(
@@ -18,13 +25,12 @@ class AppTextStyles {
         fontWeight: FontWeight.w700,
         color: AppColors.textPrimary,
         height: 1.3,
-        letterSpacing: -0.2,
       );
 
   static TextStyle get bodyLarge => GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: AppColors.textSecondary,
+        color: AppColors.textPrimary,
         height: 1.5,
       );
 
@@ -43,16 +49,15 @@ class AppTextStyles {
       );
 
   static TextStyle get label => GoogleFonts.plusJakartaSans(
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: FontWeight.w800,
         color: AppColors.textSecondary,
-        letterSpacing: 1.2,
+        letterSpacing: 1.1,
       );
 
   static TextStyle get buttonText => GoogleFonts.plusJakartaSans(
         fontSize: 16,
         fontWeight: FontWeight.w700,
         color: AppColors.onPrimary,
-        letterSpacing: 0.5,
       );
 }

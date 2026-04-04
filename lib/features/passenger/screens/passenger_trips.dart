@@ -153,7 +153,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
                       child: Divider(color: Colors.grey.withValues(alpha: 0.1)),
                     ),
                     _buildSearchInput(Icons.flag, 'Arrivée (Labe, Kankan...)',
-                        const Color(0xFF94A3B8), _arrivalController),
+                        AppColors.textHint, _arrivalController),
                   ],
                 ),
                 Positioned(
@@ -211,7 +211,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
               hintText: hint,
               hintStyle: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
-                color: const Color(0xFF94A3B8),
+                color: AppColors.textHint,
                 fontWeight: FontWeight.w500,
               ),
               border: InputBorder.none,
@@ -245,7 +245,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
               border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
             ),
             child: const Icon(Icons.calendar_month,
-                size: 20, color: Color(0xFF64748B)),
+                size: 20, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -275,7 +275,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
         style: GoogleFonts.plusJakartaSans(
           fontSize: 14,
           fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-          color: isActive ? Colors.white : const Color(0xFF64748B),
+          color: isActive ? Colors.white : AppColors.textSecondary,
         ),
       ),
     );
@@ -327,7 +327,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF1F5F9)),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -378,7 +378,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
                         (trip.vehicleType ?? 'Standard').toUpperCase(),
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
-                          color: const Color(0xFF94A3B8),
+                          color: AppColors.textHint,
                           letterSpacing: 0.5,
                           fontWeight: FontWeight.bold,
                         ),
@@ -402,7 +402,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
                     'par passager',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
-                      color: const Color(0xFF94A3B8),
+                      color: AppColors.textHint,
                     ),
                   ),
                 ],
@@ -424,7 +424,7 @@ class _PassengerTripsState extends State<PassengerTrips> {
                     children: [
                       CustomPaint(
                         size: const Size(0, 1),
-                        painter: DashedLinePainter(color: const Color(0xFFCBD5E1)),
+                        painter: DashedLinePainter(color: AppColors.border),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -503,12 +503,12 @@ class _PassengerTripsState extends State<PassengerTrips> {
         Text(
           time,
           style: GoogleFonts.plusJakartaSans(
-              fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF0F172A)),
+              fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
         ),
         Text(
           station,
           style: GoogleFonts.plusJakartaSans(
-              fontSize: 11, color: const Color(0xFF94A3B8), fontWeight: FontWeight.w500),
+              fontSize: 11, color: AppColors.textHint, fontWeight: FontWeight.w500),
         ),
       ],
     );

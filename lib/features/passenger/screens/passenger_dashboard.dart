@@ -15,20 +15,22 @@ import '../../../core/constants/app_assets.dart';
 
 class PassengerDashboard extends StatefulWidget {
   final UserProfile? profile;
-  const PassengerDashboard({super.key, this.profile});
+  final int initialIndex;
+  const PassengerDashboard({super.key, this.profile, this.initialIndex = 0});
 
   @override
   State<PassengerDashboard> createState() => _PassengerDashboardState();
 }
 
 class _PassengerDashboardState extends State<PassengerDashboard> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
   UserProfile? _profile;
   bool _isLoadingProfile = true;
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
     if (widget.profile != null) {
       _profile = widget.profile;
       _isLoadingProfile = false;
@@ -115,18 +117,18 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
           padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
-              decoration: const BoxDecoration(color: AppColors.premiumDark),
+              decoration: const BoxDecoration(color: AppColors.textPrimary),
               accountName: Text(_profile?.fullName ?? 'Passager',
-                  style: AppTextStyles.headingLarge.copyWith(color: AppColors.textPrimary, fontSize: 16)),
+                  style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               accountEmail: Text(_profile?.role ?? 'passenger',
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
+                  style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 14)),
               currentAccountPicture: const CircleAvatar(
                 backgroundImage: NetworkImage(AppAssets.stationPreview),
               ),
             ),
             ListTile(
               leading: const Icon(Icons.person, color: AppColors.primary),
-              title: const Text('Mon Profil', style: TextStyle(color: Colors.white)),
+              title: const Text('Mon Profil', style: TextStyle(color: AppColors.textPrimary)),
               onTap: () {
                 Navigator.pop(context);
                 setState(() {
@@ -420,12 +422,12 @@ class PassengerHomeContent extends StatelessWidget {
                           children: [
                             RichText(
                               text: TextSpan(
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: const Color(0xFF475569),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.5,
-                                ),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.5,
+                                  ),
                                 children: [
                                   const TextSpan(text: 'Besoin d\'aide pour trouver un bus rapide pour '),
                                   TextSpan(
@@ -604,8 +606,8 @@ class PassengerHomeContent extends StatelessWidget {
                   value,
                   style: GoogleFonts.plusJakartaSans(
                     color: isHint
-                        ? AppColors.textSecondary
-                        : Colors.white,
+                        ? AppColors.textHint
+                        : AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                   ),
@@ -687,7 +689,7 @@ class PassengerHomeContent extends StatelessWidget {
                 Text(
                   title,
                   style: GoogleFonts.plusJakartaSans(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w800),
                 ),
@@ -710,7 +712,7 @@ class PassengerHomeContent extends StatelessWidget {
                       price,
                       style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w800),
                     ),
                   ],
@@ -774,7 +776,7 @@ class PassengerHomeContent extends StatelessWidget {
                 title,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w800,
                 ),
               ),

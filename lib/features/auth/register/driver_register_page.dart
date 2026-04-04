@@ -65,6 +65,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       try {
         final stations = await LocationService.getStationsByCity(city.id);
         setState(() => _stations = stations);
+        debugPrint('[DriverRegister] Loaded ${stations.length} stations for city ${city.name}');
       } catch (e) {
         debugPrint('Error loading stations: $e');
       }
@@ -78,17 +79,16 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       _routes = [];
     });
     if (station != null) {
-      debugPrint('Loading routes for station: ${station.id}');
+      debugPrint('[DriverRegister] Station changed: ${station.name} (${station.id})');
       try {
         final routes = await LocationService.getRoutesByStation(station.id);
         setState(() {
           _routes = routes;
-          // Automatiquement sélectionner s'il n'y a qu'un seul trajet
           if (routes.length == 1) {
             _selectedRoute = routes.first;
           }
         });
-        debugPrint('Loaded ${routes.length} routes');
+        debugPrint('[DriverRegister] Loaded ${routes.length} route(s) for station ${station.name}');
       } catch (e) {
         debugPrint('Error loading routes: $e');
       }
@@ -144,32 +144,6 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                 ),
               ),
 
-              const SizedBox(height: 32),
-
-              // Progress Indicator (Visual only)
-              Row(
-                children: [
-                   Expanded(
-                    child: Container(
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.border,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 32),
 
               // Form Fields
@@ -486,8 +460,14 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       label: 'TRAJET UNIQUE',
       value: _selectedRoute,
       items: _routes,
-      itemLabel: (route) => route.displayName,
-      onChanged: (v) => setState(() => _selectedRoute = v),
+      itemLabel: (route) => route.arrivalCityName != null 
+          ? 'Vers ${route.arrivalCityName}' 
+          : 'Vers ${route.arrivalStationName ?? "Inconnu"}',
+      onChanged: (RouteModel? route) {
+        setState(() {
+          _selectedRoute = route;
+        });
+      },
       enabled: _selectedStation != null,
     );
   }
@@ -533,7 +513,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                           itemLabel(e),
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.premiumDark, // Forcer le texte sombre sur fond blanc
+                            color: AppColors.textPrimary, // Forcer le texte sombre sur fond blanc
                           ),
                         ),
                       ))
@@ -600,7 +580,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
               primary: AppColors.primary,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: AppColors.premiumDark,
+              onSurface: AppColors.textPrimary,
             ),
             dialogBackgroundColor: Colors.white,
           ),
@@ -655,7 +635,9 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
     }
 
     if (_selectedRoute == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner un trajet')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner votre trajet unique.')),
+      );
       return;
     }
 

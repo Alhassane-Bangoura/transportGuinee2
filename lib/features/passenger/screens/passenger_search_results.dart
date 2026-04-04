@@ -65,7 +65,7 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -76,7 +76,7 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.textPrimary,
               ),
             ),
             Text(
@@ -143,7 +143,7 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
                 Text(
                   'J\'ai trouvé ${_results.length} trajets pour vous. Le bus de 8:00 est presque plein !',
                   style: GoogleFonts.plusJakartaSans(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -185,8 +185,8 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bientôt disponible')));
           },
-          icon: const Icon(Icons.filter_list, size: 18, color: Colors.white),
-          label: const Text('Filtrer', style: TextStyle(color: Colors.white)),
+          icon: const Icon(Icons.filter_list, size: 18, color: AppColors.textPrimary),
+          label: const Text('Filtrer', style: TextStyle(color: AppColors.textPrimary)),
           style: TextButton.styleFrom(
             backgroundColor: AppColors.surface,
             textStyle: GoogleFonts.plusJakartaSans(
@@ -273,7 +273,7 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
                               Text(
                                 trip.syndicateName ?? 'Compagnie Express',
                                 style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
@@ -302,7 +302,7 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
                             Text(
                               '${trip.price.toStringAsFixed(0)} FG',
                               style: GoogleFonts.plusJakartaSans(
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 20,
                                 letterSpacing: -0.5,
@@ -408,7 +408,7 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
         Text(
           time,
           style: GoogleFonts.plusJakartaSans(
-            color: Colors.white,
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.w900,
             fontSize: 18,
           ),
@@ -466,7 +466,7 @@ class _PassengerSearchResultsState extends State<PassengerSearchResults> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),

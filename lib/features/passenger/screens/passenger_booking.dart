@@ -50,10 +50,10 @@ class _PassengerBookingState extends State<PassengerBooking> {
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       title: Text('Choix du siège', 
-        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 18, color: Colors.white)),
+        style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.textPrimary)),
       backgroundColor: AppColors.surface.withOpacity(0.9),
       elevation: 0,
-      iconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: const IconThemeData(color: AppColors.textPrimary),
       centerTitle: false,
     );
   }
@@ -168,7 +168,7 @@ class _PassengerBookingState extends State<PassengerBooking> {
               children: [
                 const Icon(Icons.drive_eta, color: AppColors.textSecondary, size: 18),
                 const SizedBox(width: 8),
-                Text('AVANT DU VÉHICULE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2, color: AppColors.textSecondary)),
+                Text('AVANT DU VÉHICULE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2, color: AppColors.primary)),
               ],
             ),
           ),
@@ -193,7 +193,7 @@ class _PassengerBookingState extends State<PassengerBooking> {
                     Expanded(
                       flex: 2,
                       child: Center(
-                        child: Text('SORTIE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.textHint)),
+                        child: Text('SORTIE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.primary)),
                       ),
                     ),
                     const Expanded(flex: 1, child: SizedBox()), // Aisle
@@ -215,7 +215,7 @@ class _PassengerBookingState extends State<PassengerBooking> {
               border: Border(top: BorderSide(color: AppColors.border)),
             ),
             alignment: Alignment.center,
-            child: Text('ARRIÈRE DU VÉHICULE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2, color: AppColors.textHint)),
+            child: Text('ARRIÈRE DU VÉHICULE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2, color: AppColors.primary)),
           ),
         ],
       ),

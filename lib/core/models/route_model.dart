@@ -5,6 +5,7 @@ class RouteModel {
   final String? departureStationName; // From joins
   final String? arrivalStationName; // From joins
   final String? arrivalCityName; // From joins
+  final String? arrivalCityId; // The ID of the destination city
   final String? syndicateId; // The syndicate managing this route (UUID)
 
   RouteModel({
@@ -14,6 +15,7 @@ class RouteModel {
     this.departureStationName,
     this.arrivalStationName,
     this.arrivalCityName,
+    this.arrivalCityId,
     this.syndicateId,
   });
 
@@ -25,6 +27,7 @@ class RouteModel {
       departureStationName: json['departure_station_name'] as String?,
       arrivalStationName: json['arrival_station_name'] as String?,
       arrivalCityName: json['arrival_city_name'] as String?,
+      arrivalCityId: json['arrival_city_id'] as String?,
       syndicateId: json['syndicate_id'] as String?,
     );
   }

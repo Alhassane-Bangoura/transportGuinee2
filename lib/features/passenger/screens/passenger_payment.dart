@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/models/trip.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../core/constants/app_assets.dart';
+import 'passenger_dashboard.dart';
 
 /// Écran de Paiement pour le Passager
 /// Correspond à paiement_passager.html
@@ -62,7 +62,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
             // Payment Methods
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('Mode de paiement', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+              child: Text('Mode de paiement', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
             ),
             const SizedBox(height: 16),
             _buildPaymentMethod('orange', 'Orange Money', 'Paiement instantané via code USSD', const Color(0xFFFF7900), 'ORANGE'),
@@ -127,7 +127,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Résumé du trajet', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+              Text('Résumé du trajet', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(100), border: Border.all(color: Colors.green.withValues(alpha: 0.2))),
@@ -144,18 +144,21 @@ class _PassengerPaymentState extends State<PassengerPayment> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.event_available, color: AppColors.textSecondary, size: 18),
-                  const SizedBox(width: 8),
-                  Text('24 Oct 2023', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.person_outline, color: AppColors.textSecondary, size: 18),
-                  const SizedBox(width: 4),
-                  Text('1 Adulte', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Icons.event_available, color: AppColors.textSecondary, size: 18),
+                    const SizedBox(width: 8),
+                    Text('24 Oct 2023', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                    const SizedBox(width: 16),
+                    const Icon(Icons.person_outline, color: AppColors.textSecondary, size: 18),
+                    const SizedBox(width: 4),
+                    Text('1 Adulte', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                  ],
+                ),
               ),
-              Text('150,000 GNF', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)),
+              Text('${widget.trip.price.toStringAsFixed(0)} GNF', 
+                style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
             ],
           ),
         ],
@@ -191,7 +194,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('${isStart ? "DÉPART" : "ARRIVÉE"} • $time', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-            Text(loc, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
+            Text(loc, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           ],
         ),
       ],
@@ -225,7 +228,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                  Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   Text(subtitle, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                 ],
               ),
@@ -251,9 +254,9 @@ class _PassengerPaymentState extends State<PassengerPayment> {
   Widget _buildBadge(IconData icon, String label) {
     return Column(
       children: [
-        Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.5), size: 20),
+        Icon(icon, color: AppColors.primary, size: 20),
         const SizedBox(height: 6),
-        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.textSecondary.withValues(alpha: 0.5), letterSpacing: 1)),
+        Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: 1)),
       ],
     );
   }
@@ -354,7 +357,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
                   child: const Icon(Icons.check_circle, color: Colors.green, size: 64),
                 ),
                 const SizedBox(height: 24),
-                Text('Paiement Réussi !', style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white)),
+                Text('Paiement Réussi !', style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                 const SizedBox(height: 12),
                 Text(
                   'Votre billet a été généré avec succès. Vous le trouverez dans votre historique de voyage.',
@@ -367,9 +370,12 @@ class _PassengerPaymentState extends State<PassengerPayment> {
                   height: 56,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop(); // Close dialog
-                      Navigator.of(context).pop(); // Go back from payment
-                      Navigator.of(context).pop(); // Go back from reservation
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const PassengerDashboard(initialIndex: 2),
+                        ),
+                        (route) => false,
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -377,6 +383,33 @@ class _PassengerPaymentState extends State<PassengerPayment> {
                       elevation: 0,
                     ),
                     child: Text('VOIR MES BILLETS', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Billet téléchargé avec succès ! (Format PDF)'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.download, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Text('TÉLÉCHARGER LE TICKET', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, color: AppColors.primary)),
+                      ],
+                    ),
                   ),
                 ),
               ],

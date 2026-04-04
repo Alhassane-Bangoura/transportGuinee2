@@ -124,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
               const Text(
                 'GuinéeTransport',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
@@ -315,20 +315,20 @@ class _LoginPageState extends State<LoginPage> {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          style: TextStyle(color: (iconData != null || iconText != null) ? primaryMint : Colors.white, fontSize: 16),
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 16),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(color: inputBorder, fontSize: 16),
+            hintStyle: TextStyle(color: AppColors.textHint, fontSize: 16),
             prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             prefixIcon: Padding(
               padding: const EdgeInsets.only(right: 12),
               child: iconText != null
                   ? Text(
                       iconText,
-                      style: TextStyle(color: mutedText, fontSize: 20),
+                      style: TextStyle(color: AppColors.primary, fontSize: 20, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     )
-                  : Icon(iconData, color: mutedText, size: 20),
+                  : Icon(iconData, color: AppColors.primary, size: 20),
             ),
             suffixIcon: isPassword
                 ? IconButton(

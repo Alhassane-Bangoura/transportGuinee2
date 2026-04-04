@@ -64,7 +64,7 @@ class _PassengerProfileState extends State<PassengerProfile> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Choisir la langue', style: GoogleFonts.plusJakartaSans(color: Colors.white)),
+        title: Text('Choisir la langue', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -73,7 +73,7 @@ class _PassengerProfileState extends State<PassengerProfile> {
               trailing: Icon(Icons.check, color: AppColors.primary),
             ),
             ListTile(
-              title: Text('English', style: TextStyle(color: Colors.white)),
+              title: Text('English', style: TextStyle(color: AppColors.textPrimary)),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Traduction en cours de développement.')));
@@ -91,12 +91,12 @@ class _PassengerProfileState extends State<PassengerProfile> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Mot de passe', style: GoogleFonts.plusJakartaSans(color: Colors.white)),
+        title: Text('Mot de passe', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary)),
         content: TextField(
           controller: tc,
           obscureText: true,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(hintText: 'Nouveau mot de passe', hintStyle: TextStyle(color: Colors.grey)),
+          style: const TextStyle(color: AppColors.textPrimary),
+          decoration: const InputDecoration(hintText: 'Nouveau mot de passe', hintStyle: TextStyle(color: AppColors.textSecondary)),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
@@ -129,8 +129,8 @@ class _PassengerProfileState extends State<PassengerProfile> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Recharger (Simulation)', style: GoogleFonts.plusJakartaSans(color: Colors.white)),
-        content: const Text('Le rechargement via Orange Money/MTN MoMo est désactivé en mode simulation.', style: TextStyle(color: Colors.white)),
+        title: Text('Recharger (Simulation)', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary)),
+        content: const Text('Le rechargement via Orange Money/MTN MoMo est désactivé en mode simulation.', style: TextStyle(color: AppColors.textSecondary)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Compris')),
         ],
@@ -200,7 +200,7 @@ class _PassengerProfileState extends State<PassengerProfile> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
+                                  Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
                                   const SizedBox(height: 24),
                                   Container(
                                     padding: const EdgeInsets.all(20),
@@ -208,7 +208,7 @@ class _PassengerProfileState extends State<PassengerProfile> {
                                     child: const Icon(Icons.notifications_off_outlined, color: Color(0xFFF59E0B), size: 48),
                                   ),
                                   const SizedBox(height: 24),
-                                  Text('Aucune notification', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                                  Text('Aucune notification', style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                                   const SizedBox(height: 12),
                                   Text(
                                     'Vous êtes à jour ! Vos alertes de trajets, paiements et messages de votre gare s\'afficheront ici.',
@@ -288,8 +288,8 @@ class _PassengerProfileState extends State<PassengerProfile> {
                             context: context,
                             builder: (context) => AlertDialog(
                               backgroundColor: AppColors.surface,
-                              title: const Text('Centre d\'aide', style: TextStyle(color: Colors.white)),
-                              content: const Text('Notre centre d\'aide est actuellement disponible au +224 600 00 00 00.', style: TextStyle(color: Colors.white70)),
+                              title: const Text('Centre d\'aide', style: TextStyle(color: AppColors.textPrimary)),
+                              content: const Text('Notre centre d\'aide est actuellement disponible au +224 600 00 00 00.', style: TextStyle(color: AppColors.textSecondary)),
                               actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fermer'))],
                             ),
                           );
@@ -304,8 +304,8 @@ class _PassengerProfileState extends State<PassengerProfile> {
                             context: context,
                             builder: (context) => AlertDialog(
                               backgroundColor: AppColors.surface,
-                              title: const Text('Conditions d\'utilisation', style: TextStyle(color: Colors.white)),
-                              content: const Text('Vos conditions d\'utilisation sont en cours de rédaction juridique.', style: TextStyle(color: Colors.white70)),
+                              title: const Text('Conditions d\'utilisation', style: TextStyle(color: AppColors.textPrimary)),
+                              content: const Text('Vos conditions d\'utilisation sont en cours de rédaction juridique.', style: TextStyle(color: AppColors.textSecondary)),
                               actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fermer'))],
                             ),
                           );

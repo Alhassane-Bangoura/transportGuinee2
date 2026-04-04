@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-
 import '../../../core/services/booking_service.dart';
 import '../../../core/utils/app_response.dart';
 
-/// Écran de la Liste des Passagers pour le Chauffeur
-/// Correspond à liste_passager_chauffeur.html
 class DriverPassengerList extends StatefulWidget {
   final String tripId;
   const DriverPassengerList({super.key, required this.tripId});
@@ -25,7 +22,7 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
@@ -57,9 +54,9 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
           // Trip Info Summary
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.05),
-              border: const Border(bottom: BorderSide(color: AppColors.border)),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: Column(
               children: [
@@ -69,27 +66,27 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('TRAJET', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        Text('Conakry → Mamou', style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text('TRAJET', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        Text('Conakry → Mamou', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('DATE', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-                        const SizedBox(height: 4),
-                        Text('24 Oct. 2023', style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text('DATE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                        const SizedBox(height: 6),
+                        Text('24 Oct. 2023', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Row(
                   children: [
-                    _buildSummaryBadge('BUS G-204', AppColors.primary, Colors.white),
-                    const SizedBox(width: 8),
-                    _buildSummaryBadge('14/20 CONFIRMÉS', Colors.teal.withValues(alpha: 0.2), Colors.teal),
+                    _buildSummaryBadge('BUS G-204', AppColors.primary.withValues(alpha: 0.1), AppColors.primary),
+                    const SizedBox(width: 10),
+                    _buildSummaryBadge('14/20 CONFIRMÉS', AppColors.success.withValues(alpha: 0.1), AppColors.success),
                   ],
                 ),
               ],
@@ -108,32 +105,38 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                 final response = snapshot.data;
                 if (response == null || !response.isSuccess || response.data == null || response.data!.isEmpty) {
                   return Center(
-                    child: Text('Aucun passager pour le moment.',
-                      style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.group_off_rounded, size: 48, color: AppColors.textSecondary.withValues(alpha: 0.3)),
+                        const SizedBox(height: 16),
+                        Text('Aucun passager pour le moment.',
+                          style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
                   );
                 }
 
                 final bookings = response.data!;
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                  itemCount: bookings.length + 1, // +1 for the button at the bottom
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                  itemCount: bookings.length + 1,
                   itemBuilder: (context, index) {
                     if (index == bookings.length) {
                       return Padding(
-                        padding: const EdgeInsets.only(top: 32, bottom: 20),
+                        padding: const EdgeInsets.only(top: 24),
                         child: ElevatedButton.icon(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ouverture SMS...')));
                           },
-                          icon: const Icon(Icons.group, size: 20),
+                          icon: const Icon(Icons.chat_bubble_rounded, size: 18),
                           label: const Text('Contacter tous les passagers'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: AppColors.textPrimary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 18),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            elevation: 10,
-                            shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                            elevation: 0,
                           ),
                         ),
                       );
@@ -145,26 +148,21 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                     final ticket = tickets.isNotEmpty ? tickets.first : null;
                     final bool isConfirmed = ticket != null && ticket['status'] == 'used';
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _buildPassengerCard(
-                        name: profile != null ? profile['full_name'] : 'Inconnu',
-                        seat: '${booking['seats']} Place(s)',
-                        phone: profile != null ? profile['phone'] ?? 'Non renseigné' : '',
-                        imgUrl: 'https://cdn-icons-png.flaticon.com/512/149/149071.png', // Default icon
-                        isConfirmed: isConfirmed,
-                        onConfirm: () async {
-                          if (ticket != null) {
-                            final res = await BookingService.validateTicket(ticket['id']);
-                            if (res.isSuccess) {
-                              setState(() {}); // refresh the UI locally easily
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Présence confirmée !')));
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pas de ticket valide.')));
+                    return _buildPassengerCard(
+                      name: profile != null ? profile['full_name'] : 'Passager Inconnu',
+                      seat: '${booking['seats']} Place(s)',
+                      phone: profile != null ? profile['phone'] ?? 'Non renseigné' : '',
+                      imgUrl: 'https://ui-avatars.com/api/?name=${profile != null ? profile['full_name'] : 'P'}&background=random',
+                      isConfirmed: isConfirmed,
+                      onConfirm: () async {
+                        if (ticket != null) {
+                          final res = await BookingService.validateTicket(ticket['id']);
+                          if (res.isSuccess) {
+                            setState(() {}); 
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Présence confirmée !')));
                           }
                         }
-                      ),
+                      }
                     );
                   },
                 );
@@ -173,15 +171,14 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
   Widget _buildSummaryBadge(String label, Color bgColor, Color textColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(100)),
-      child: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, color: textColor, letterSpacing: 0.5)),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+      child: Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w800, color: textColor, letterSpacing: 0.5)),
     );
   }
 
@@ -194,17 +191,31 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
     VoidCallback? onConfirm,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isConfirmed ? Colors.teal.withValues(alpha: 0.03) : AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isConfirmed ? Colors.teal.withValues(alpha: 0.2) : AppColors.border),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Row(
             children: [
-              CircleAvatar(radius: 28, backgroundImage: NetworkImage(imgUrl)),
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
+                ),
+                child: CircleAvatar(radius: 28, backgroundImage: NetworkImage(imgUrl), backgroundColor: AppColors.background),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -213,20 +224,31 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(name, style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white)),
+                        Text(name, 
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16, 
+                            fontWeight: FontWeight.w800, 
+                            color: AppColors.textPrimary,
+                            letterSpacing: -0.2,
+                          )
+                        ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(6)),
-                          child: Text(seat, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+                          ),
+                          child: Text(seat, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w900, color: AppColors.primary)),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.call, size: 14, color: AppColors.textSecondary),
+                        const Icon(Icons.phone_rounded, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 6),
-                        Text(phone, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                        Text(phone, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                       ],
                     ),
                   ],
@@ -240,29 +262,29 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
               Expanded(
                 child: isConfirmed 
                   ? Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: Colors.teal.withValues(alpha: 0.1),
-                        border: Border.all(color: Colors.teal.withValues(alpha: 0.2)),
+                        color: AppColors.success.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.verified, color: Colors.teal, size: 18),
+                          const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 18),
                           const SizedBox(width: 8),
-                          Text('Déjà présent', style: GoogleFonts.plusJakartaSans(color: Colors.teal, fontWeight: FontWeight.w800, fontSize: 13)),
+                          Text('Déjà présent', style: GoogleFonts.plusJakartaSans(color: AppColors.success, fontWeight: FontWeight.w800, fontSize: 13)),
                         ],
                       ),
                     )
                   : ElevatedButton.icon(
                       onPressed: onConfirm,
-                      icon: const Icon(Icons.check_circle, size: 18),
+                      icon: const Icon(Icons.verified_rounded, size: 18),
                       label: const Text('Confirmer présence'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
@@ -271,12 +293,12 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
               const SizedBox(width: 12),
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: AppColors.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.chat_bubble_outline, color: AppColors.primary, size: 20),
+                  icon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.textSecondary, size: 20),
                 ),
               ),
             ],
@@ -285,43 +307,6 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
       ),
     );
   }
-
-  Widget _buildBottomNav() {
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.home_outlined, 'Accueil', false),
-          _buildNavItem(Icons.route_outlined, 'Trajets', false),
-          _buildNavItem(Icons.group, 'Passagers', true),
-          _buildNavItem(Icons.person_outline, 'Profil', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: isActive ? AppColors.primary : AppColors.textSecondary, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          label.toUpperCase(),
-          style: GoogleFonts.plusJakartaSans(
-            color: isActive ? AppColors.primary : AppColors.textSecondary,
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
 }
+
+const double FullRadius = 99;

@@ -87,8 +87,16 @@ class AuthService {
     Map<String, dynamic>? metadata,
   }) async {
     try {
+      // Préfixe pour le rôle (visible dans le dashboard Supabase Auth)
+      final String rolePrefix = {
+        'driver': '[CHAUFFEUR] ',
+        'passenger': '[PASSAGER] ',
+        'syndicate': '[SYNDICAT] ',
+        'station_admin': '[ADMIN] ',
+      }[roleKey] ?? '';
+
       final Map<String, dynamic> userMetadata = {
-        'full_name': fullName,
+        'full_name': '$rolePrefix$fullName',
         'phone': phone,
         'role_key': roleKey,
         if (stationId != null) 'station_id': stationId,

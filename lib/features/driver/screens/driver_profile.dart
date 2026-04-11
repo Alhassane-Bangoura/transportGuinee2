@@ -5,7 +5,10 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/services/biometric_service.dart';
 import '../../../core/services/auth_service.dart';
-import '../../auth/login_page.dart';
+import '../../../core/services/trip_service.dart';
+import 'driver_documents_screen.dart';
+import 'driver_security_screen.dart';
+import 'driver_help_center_screen.dart';
 
 class DriverProfilePage extends StatefulWidget {
   final UserProfile? profile;
@@ -19,11 +22,27 @@ class DriverProfilePage extends StatefulWidget {
 class _DriverProfilePageState extends State<DriverProfilePage> {
   bool _isBiometricEnabled = false;
   bool _isBiometricAvailable = false;
+  Map<String, dynamic>? _routeDetails;
+  bool _isLoadingRoute = false;
 
   @override
   void initState() {
     super.initState();
     _loadBiometricSettings();
+    _loadRouteDetails();
+  }
+
+  Future<void> _loadRouteDetails() async {
+    if (widget.profile?.routeId != null) {
+      if (mounted) setState(() => _isLoadingRoute = true);
+      final response = await TripService.getRouteById(widget.profile!.routeId!);
+      if (mounted) {
+        setState(() {
+          _routeDetails = response.data;
+          _isLoadingRoute = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadBiometricSettings() async {
@@ -99,6 +118,10 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
             const SizedBox(height: 16),
             _buildPersonalInfoList(),
             const SizedBox(height: 32),
+            _buildSectionHeader('Mon Itinéraire Assigné'),
+            const SizedBox(height: 16),
+            _buildRouteCard(),
+            const SizedBox(height: 32),
             _buildSectionHeader('Mon Véhicule'),
             const SizedBox(height: 16),
             _buildVehicleCard(),
@@ -145,12 +168,12 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
         ),
         const SizedBox(height: 16),
         Text(
-          widget.profile?.fullName ?? 'Moussa Camara',
+          widget.profile?.fullName.replaceAll(RegExp(r'\[.*?\]\s*'), '') ?? 'Utilisateur',
           style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
         ),
         const SizedBox(height: 6),
         Text(
-          'Chauffeur Principal • Station Conakry',
+          'Chauffeur Principal • ${widget.profile?.metadata?['station_name'] ?? 'Station de rattachement'}',
           style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
         ),
       ],
@@ -160,11 +183,11 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
   Widget _buildStatsGrid() {
     return Row(
       children: [
-        _buildStatItem('Trajets', '1,284', Icons.route_rounded),
+        _buildStatItem('Trajets', widget.profile?.metadata?['trips_count']?.toString() ?? '12', Icons.route_rounded),
         const SizedBox(width: 12),
-        _buildStatItem('Note', '4.9', Icons.star_rounded, iconColor: Colors.amber),
+        _buildStatItem('Note', widget.profile?.metadata?['rating']?.toString() ?? '4.8', Icons.star_rounded, iconColor: Colors.amber),
         const SizedBox(width: 12),
-        _buildStatItem('Exp.', '5 ans', Icons.emoji_events_rounded, iconColor: AppColors.success),
+        _buildStatItem('Exp.', '${widget.profile?.metadata?['experience'] ?? '3'} ans', Icons.emoji_events_rounded, iconColor: AppColors.success),
       ],
     );
   }
@@ -221,9 +244,9 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
       ),
       child: Column(
         children: [
-          _buildInfoItem(Icons.phone_outlined, 'Téléphone', widget.profile?.phone ?? '+224 000 00 00 00'),
+          _buildInfoItem(Icons.phone_outlined, 'Téléphone', widget.profile?.phone ?? 'Non renseigné'),
           const Divider(height: 1, indent: 60, color: AppColors.border),
-          _buildInfoItem(Icons.email_outlined, 'Email', widget.profile?.email ?? 'chauffeur@transport.gn'),
+          _buildInfoItem(Icons.email_outlined, 'Email', widget.profile?.email ?? 'Non renseigné'),
           const Divider(height: 1, indent: 60, color: AppColors.border),
           _buildInfoItem(Icons.badge_outlined, 'Permis', widget.profile?.metadata?['license_number'] ?? 'G-PRM-XXXXXX'),
         ],
@@ -257,6 +280,58 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
     );
   }
 
+  Widget _buildRouteCard() {
+    if (_isLoadingRoute) {
+      return const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator(strokeWidth: 2)));
+    }
+
+    final hasRoute = widget.profile?.routeId != null;
+    final depCity = _routeDetails?['departure_city']?['name'] ?? '...';
+    final arrCity = _routeDetails?['arrival_city']?['name'] ?? '...';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                child: const Icon(Icons.map_rounded, color: AppColors.primary, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasRoute ? '$depCity ➔ $arrCity' : 'Aucun itinéraire assigné',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: hasRoute ? AppColors.textPrimary : AppColors.error,
+                      ),
+                    ),
+                    Text(
+                      hasRoute ? 'Trajet fixe enregistré' : 'Contactez votre responsable',
+                      style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildVehicleCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -283,13 +358,22 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Mercedes Sprinter', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                Text('Bus VIP • 18 places', style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                Text(
+                  '${widget.profile?.metadata?['vehicle_brand'] ?? 'Véhicule'} ${widget.profile?.metadata?['vehicle_model'] ?? ''}', 
+                  style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)
+                ),
+                Text(
+                  '${widget.profile?.metadata?['vehicle_seats'] ?? '--'} places', 
+                  style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)
+                ),
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                  child: Text('RC-1294-B', style: GoogleFonts.robotoMono(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1)),
+                  child: Text(
+                    widget.profile?.metadata?['vehicle_plate'] ?? 'SANS PLAQUE', 
+                    style: GoogleFonts.robotoMono(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1)
+                  ),
                 ),
               ],
             ),
@@ -300,6 +384,7 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
   }
 
   Widget _buildDocumentsList() {
+    final meta = widget.profile?.metadata;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface, 
@@ -308,30 +393,54 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
       ),
       child: Column(
         children: [
-          _buildDocItem(Icons.assignment_ind_rounded, 'Permis de conduire', 'VALIDE', AppColors.success),
+          _buildDocItem(
+            Icons.assignment_ind_rounded, 
+            'Permis de conduire', 
+            meta?['license_status'] ?? 'VALIDE', 
+            (meta?['license_status']?.toString().toUpperCase() == 'À RENOUVELER') ? Colors.orange : AppColors.success,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta))),
+          ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
-          _buildDocItem(Icons.verified_user_rounded, 'Assurance véhicule', 'À RENOUVELER', Colors.orange),
+          _buildDocItem(
+            Icons.verified_user_rounded, 
+            'Assurance véhicule', 
+            meta?['insurance_status'] ?? 'À RENOUVELER', 
+            (meta?['insurance_status']?.toString().toUpperCase() == 'VALIDE') ? AppColors.success : Colors.orange,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta))),
+          ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
-          _buildDocItem(Icons.description_rounded, 'Carte grise', 'VALIDE', AppColors.success),
+          _buildDocItem(
+            Icons.description_rounded, 
+            'Carte grise', 
+            meta?['registration_status'] ?? 'VALIDE', 
+            (meta?['registration_status']?.toString().toUpperCase() == 'À RENOUVELER') ? Colors.orange : AppColors.success,
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta))),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDocItem(IconData icon, String title, String status, Color statusColor) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.5), size: 24),
-          const SizedBox(width: 16),
-          Expanded(child: Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-            child: Text(status, style: GoogleFonts.plusJakartaSans(color: statusColor, fontSize: 9, fontWeight: FontWeight.w900)),
-          ),
-        ],
+  Widget _buildDocItem(IconData icon, String title, String status, Color statusColor, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.5), size: 24),
+            const SizedBox(width: 16),
+            Expanded(child: Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              child: Text(status.toUpperCase(), style: GoogleFonts.plusJakartaSans(color: statusColor, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondary),
+          ],
+        ),
       ),
     );
   }
@@ -345,7 +454,11 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
       ),
       child: Column(
         children: [
-          _buildSettingsItem(Icons.lock_rounded, 'Sécurité du compte'),
+          _buildSettingsItem(
+            Icons.lock_rounded, 
+            'Sécurité du compte',
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverSecurityScreen())),
+          ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
           if (_isBiometricAvailable) ...[
             Padding(
@@ -361,23 +474,28 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
             ),
             const Divider(height: 1, indent: 60, color: AppColors.border),
           ],
-          _buildSettingsItem(Icons.help_outline_rounded, 'Centre d\'aide'),
+          _buildSettingsItem(
+            Icons.help_outline_rounded, 
+            'Centre d\'aide',
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverHelpCenterScreen())),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSettingsItem(IconData icon, String title) {
+  Widget _buildSettingsItem(IconData icon, String title, {VoidCallback? onTap}) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.5), size: 24),
+            Icon(icon, color: AppColors.textSecondary, size: 24),
             const SizedBox(width: 16),
             Expanded(child: Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
-            Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary.withValues(alpha: 0.3)),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
           ],
         ),
       ),
@@ -397,7 +515,9 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
         onPressed: () async {
           await AuthService.signOut();
           if (mounted && context.mounted) {
-            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()), (route) => false);
+            // Use popUntil to go back to the first screen (SplashScreen/Login)
+            // This avoids direct import of LoginPage and breaks the circle
+            Navigator.of(context).popUntil((route) => route.isFirst);
           }
         },
         child: Row(

@@ -70,6 +70,41 @@ class NotificationService {
         .eq('id', notificationId);
   }
 
+  /// Notifie tous les passagers de la publication d'un nouveau trajet
+  Future<void> notifyPassengersOfNewTrip({
+    required String tripId,
+    required String departureCity,
+    required String arrivalCity,
+    required String departureTime,
+  }) async {
+    try {
+      // 1. Récupérer tous les passagers
+      final passengersRes = await _supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'PASSENGER');
+
+      final List<dynamic> passengers = passengersRes as List;
+      if (passengers.isEmpty) return;
+
+      // 2. Préparer les notifications par lot
+      final List<Map<String, dynamic>> notifications = passengers.map((p) => {
+        'user_id': p['id'],
+        'title': 'Nouveau Trajet ! 🚌',
+        'message': 'Un nouveau départ de $departureCity vers $arrivalCity est prévu à $departureTime.',
+        'type': 'new_trip',
+        'metadata': {'trip_id': tripId},
+        'is_read': false,
+        'created_at': DateTime.now().toIso8601String(),
+      }).toList();
+
+      // 3. Insertion par lot (batch insert)
+      await _supabase.from('notifications').insert(notifications);
+    } catch (e) {
+      print('Erreur lors de la notification des passagers: $e');
+    }
+  }
+
   /// Nettoyage
   void dispose() {
     _channel?.unsubscribe();

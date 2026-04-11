@@ -3,7 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/services/booking_service.dart';
+import '../../../core/services/trip_service.dart';
 import '../../../core/utils/app_response.dart';
+import '../../../core/models/trip.dart';
+import 'package:intl/intl.dart';
 
 class DriverPassengerList extends StatefulWidget {
   final String tripId;
@@ -14,8 +17,31 @@ class DriverPassengerList extends StatefulWidget {
 }
 
 class _DriverPassengerListState extends State<DriverPassengerList> {
+  Trip? _trip;
+  bool _isLoadingTrip = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTrip();
+  }
+
+  Future<void> _loadTrip() async {
+    final response = await TripService.getTripById(widget.tripId);
+    if (mounted) {
+      setState(() {
+        _trip = response.data;
+        _isLoadingTrip = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingTrip) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -68,7 +94,8 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                       children: [
                         Text('TRAJET', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.5)),
                         const SizedBox(height: 6),
-                        Text('Conakry → Mamou', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        Text('${_trip?.departureCityName ?? "..." } → ${_trip?.arrivalCityName ?? "..." }', 
+                          style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       ],
                     ),
                     Column(
@@ -76,7 +103,8 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                       children: [
                         Text('DATE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.5)),
                         const SizedBox(height: 6),
-                        Text('24 Oct. 2023', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                        Text(_trip != null ? DateFormat('dd MMM. yyyy').format(_trip!.departureTime) : '...', 
+                          style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       ],
                     ),
                   ],
@@ -84,9 +112,9 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    _buildSummaryBadge('BUS G-204', AppColors.primary.withValues(alpha: 0.1), AppColors.primary),
+                    _buildSummaryBadge('BUS ${_trip?.licensePlate ?? "G-224"}', AppColors.primary.withValues(alpha: 0.1), AppColors.primary),
                     const SizedBox(width: 10),
-                    _buildSummaryBadge('14/20 CONFIRMÉS', AppColors.success.withValues(alpha: 0.1), AppColors.success),
+                    _buildSummaryBadge('${_trip?.totalSeats != null ? (_trip!.totalSeats! - (_trip!.availableSeats)) : 0}/${_trip?.totalSeats ?? "?"} RÉSERVÉS', AppColors.success.withValues(alpha: 0.1), AppColors.success),
                   ],
                 ),
               ],
@@ -144,23 +172,18 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
 
                     final booking = bookings[index];
                     final profile = booking['profiles'];
-                    final tickets = booking['tickets'] as List<dynamic>? ?? [];
-                    final ticket = tickets.isNotEmpty ? tickets.first : null;
-                    final bool isConfirmed = ticket != null && ticket['status'] == 'used';
 
                     return _buildPassengerCard(
                       name: profile != null ? profile['full_name'] : 'Passager Inconnu',
                       seat: '${booking['seats']} Place(s)',
                       phone: profile != null ? profile['phone'] ?? 'Non renseigné' : '',
                       imgUrl: 'https://ui-avatars.com/api/?name=${profile != null ? profile['full_name'] : 'P'}&background=random',
-                      isConfirmed: isConfirmed,
+                      isConfirmed: booking['status'] == 'confirmed' || booking['status'] == 'used',
                       onConfirm: () async {
-                        if (ticket != null) {
-                          final res = await BookingService.validateTicket(ticket['id']);
-                          if (res.isSuccess) {
-                            setState(() {}); 
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Présence confirmée !')));
-                          }
+                        final res = await BookingService.confirmPassengerPresence(booking['id']);
+                        if (res.isSuccess) {
+                          setState(() {}); 
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Présence confirmée !')));
                         }
                       }
                     );

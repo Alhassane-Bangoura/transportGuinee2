@@ -24,9 +24,9 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) throw new Error('Unauthorized')
 
-    // Role identification from user metadata
-    const userRole = user.user_metadata?.role?.toUpperCase() || 'PASSAGER'
+    const userRole = (user.user_metadata?.role || user.user_metadata?.role_key || 'PASSAGER').toUpperCase()
     const body = await req.json().catch(() => ({}));
+    console.log(`Assistant Query for User: ${user.id} [${userRole}] - Query: ${body.query?.substring(0, 50)}...`)
     const query = body.query ?? '';
     const history = body.history ?? [];
 

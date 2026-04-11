@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/models/trip.dart';
+import '../../../core/services/trip_service.dart';
+import '../../../core/services/auth_service.dart';
+import '../../../core/models/user_profile.dart';
+import 'package:intl/intl.dart';
+import 'driver_passenger_list.dart';
 
 class DriverMyTrips extends StatefulWidget {
   const DriverMyTrips({super.key});
@@ -11,113 +17,181 @@ class DriverMyTrips extends StatefulWidget {
 }
 
 class _DriverMyTripsState extends State<DriverMyTrips> {
+  UserProfile? _profile;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final response = await AuthService.getCurrentProfile();
+    if (mounted) {
+      setState(() {
+        _profile = response.data;
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
-          onPressed: () {},
-        ),
-        title: Column(
-          children: [
-            Text(
-              'GUINEE TRANSPORT',
-              style: GoogleFonts.plusJakartaSans(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w900,
-                fontSize: 16,
-                letterSpacing: -0.5,
+    if (_isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.surface,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
+            onPressed: () {},
+          ),
+          title: Column(
+            children: [
+              Text(
+                'GUINEE TRANSPORT',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            Text(
-              'SUIVEZ VOS TRAJETS',
-              style: GoogleFonts.plusJakartaSans(
-                color: AppColors.textSecondary,
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
+              Text(
+                'SUIVEZ VOS TRAJETS',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.textSecondary,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                ),
               ),
-            ),
+            ],
+          ),
+          actions: [
+            _buildNotificationIcon(),
+            const SizedBox(width: 8),
           ],
+          bottom: TabBar(
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textSecondary,
+            labelStyle: GoogleFonts.plusJakartaSans(
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              letterSpacing: 0.5,
+            ),
+            tabs: const [
+              Tab(text: 'AUJOURD\'HUI'),
+              Tab(text: 'PROCHAINS'),
+              Tab(text: 'HISTORIQUE'),
+            ],
+          ),
         ),
-        actions: [
-          _buildNotificationIcon(),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        body: StreamBuilder<List<Trip>>(
+          stream: _profile != null ? TripService.getDriverTripsStream(_profile!.id) : const Stream.empty(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final allTrips = snapshot.data ?? [];
+            final now = DateTime.now();
+            final today = DateTime(now.year, now.month, now.day);
+
+            final todayTrips = allTrips.where((t) {
+              final depDate = t.departureTime;
+              return depDate.year == today.year && 
+                     depDate.month == today.month && 
+                     depDate.day == today.day && 
+                     t.status != 'completed';
+            }).toList();
+
+            final nextTrips = allTrips.where((t) {
+              final depDate = t.departureTime;
+              final isToday = depDate.year == today.year && 
+                             depDate.month == today.month && 
+                             depDate.day == today.day;
+              return depDate.isAfter(now) && !isToday;
+            }).toList();
+
+            final historyTrips = allTrips.where((t) => t.status == 'completed' || t.departureTime.isBefore(now)).toList();
+
+            return TabBarView(
               children: [
-                Text(
-                  'Mes Trajets du jour',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '4 trajets',
-                    style: GoogleFonts.plusJakartaSans(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
+                _buildTripList(todayTrips, 'Aujourd\'hui'),
+                _buildTripList(nextTrips, 'Prochains'),
+                _buildTripList(historyTrips, 'Historique'),
               ],
-            ),
-            const SizedBox(height: 24),
-            _buildTripCard(
-              route: 'Conakry → Kindia',
-              time: '07:00 AM',
-              type: 'Bus VIP',
-              passengers: 24,
-              imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDaVAZX1jnwQpN4eOKAgkZWnRXVeSU56lbc-SMAQoyB76qyTCKs_MlkGGn5kBFdl-h8ymWPOiPEkuRjRQ11fdxY3yO1S1yX42IAlP4lozc_irBi7WgY4y7h5ottQ_Z0KsJXA_k_MiZzvBYgdm6C9OPvE2wXqjKRI_PGh7Bi45yx0kyLVPyG4XqkWtyYHb3V0rXv9xJwB2g1QKyUE3bit3NKsSeO4bqOrnqBNzFz7_kEV3wfLohCsElBNI9tXfiJj9J7e_avaTpZ-18M',
-              status: 'EN COURS',
-              statusColor: AppColors.primary,
-            ),
-            const SizedBox(height: 16),
-            _buildTripCard(
-              route: 'Kindia → Conakry',
-              time: '02:00 PM',
-              type: 'Bus VIP',
-              passengers: 20,
-              imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDq4VDL0470zXGpT9sBH46HEhda1MKiPevxYjKkGHKV9xOwDi50LzQ_bOCAsC5_Uc1lL_NjSNZjxqHT-4OxORMfwR3ESsHrP7KM6Jo1PZsSoyCCLHX9aLvylnGXQ_osISeZaFs7wYUNK-9P4whVtg8dgLDsbQEjUMevurGp0zoUI5CjoX9Nannoz0Gm2ztg5o44sdzYwKlOmBbmYL8Byq0Dqu67ZQbccjNA_OauIcq9W4N56ScLDB5e-FcNDVjFjlv7wVZbnUIAQWdk',
-              status: 'PROGRAMMÉE',
-              statusColor: AppColors.textSecondary,
-              opacity: 0.9,
-            ),
-            const SizedBox(height: 16),
-            _buildTripCard(
-              route: 'Conakry → Mamou',
-              time: '04:30 PM',
-              type: 'Bus Standard',
-              passengers: 15,
-              imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCX_jfIBjaFFHKQjgUSV82V7-96bSfX0n0SuXLMNqsulJc3TyjJWCNpOI-rJo6jNNfWY-NXpMwSUlq7IX07JeMGqTCTe_lqjdIaDr0Nb4MWrc8oi60XTlO3rMS46sOGgT9CRXWgRIWYmsRqeOGfkqV6RusVSJKQsmPPqN3FJwHsqI1TlFzvbTmTSziXfvJf9uXbld5Lc6BtjS1RogX0rs5_UyaxByOg9xpA-q6gGKLWiKGcnvLKhQtNve2y_qWknzsmLXYrgpKQF8nP',
-              status: 'PROGRAMMÉE',
-              statusColor: AppColors.textSecondary,
-              opacity: 0.9,
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
+  }
+
+  Widget _buildTripList(List<Trip> trips, String type) {
+    if (trips.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.route_outlined, size: 64, color: AppColors.textHint.withValues(alpha: 0.3)),
+            const SizedBox(height: 16),
+            Text(
+              'Aucun trajet dans $type',
+              style: GoogleFonts.plusJakartaSans(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: trips.length,
+      itemBuilder: (context, index) {
+        final trip = trips[index];
+        return _buildTripCard(
+          trip: trip,
+          status: _getDisplayStatus(trip.status),
+          statusColor: _getStatusColor(trip.status),
+        );
+      },
+    );
+  }
+
+  String _getDisplayStatus(String status) {
+    switch (status) {
+      case 'scheduled': return 'PROGRAMMÉE';
+      case 'boarding': return 'EN COURS';
+      case 'in_transit': return 'EN ROUTE';
+      case 'completed': return 'TERMINÉ';
+      case 'cancelled': return 'ANNULÉ';
+      default: return status.toUpperCase();
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'scheduled': return AppColors.textSecondary;
+      case 'boarding': return AppColors.primary;
+      case 'in_transit': return AppColors.success;
+      case 'completed': return Colors.grey;
+      case 'cancelled': return AppColors.error;
+      default: return AppColors.primary;
+    }
   }
 
   Widget _buildNotificationIcon() {
@@ -145,15 +219,15 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
   }
 
   Widget _buildTripCard({
-    required String route,
-    required String time,
-    required String type,
-    required int passengers,
-    required String imgUrl,
+    required Trip trip,
     required String status,
     required Color statusColor,
     double opacity = 1.0,
   }) {
+    final dateFormat = DateFormat('hh:mm a');
+    final time = dateFormat.format(trip.departureTime);
+    final route = '${trip.departureCityName} → ${trip.arrivalCityName}';
+    
     return Opacity(
       opacity: opacity,
       child: Container(
@@ -170,7 +244,16 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  child: Image.network(imgUrl, height: 140, width: double.infinity, fit: BoxFit.cover),
+                  child: Container(
+                    height: 140,
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/bus_mock.png'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
                 ),
                 Container(
                   height: 140,
@@ -229,7 +312,7 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                               const Icon(Icons.schedule_rounded, size: 16, color: AppColors.textSecondary),
                               const SizedBox(width: 6),
                               Text(
-                                '$time • $type',
+                                '$time • Bus VIP',
                                 style: GoogleFonts.inter(
                                   color: AppColors.textSecondary,
                                   fontSize: 13,
@@ -244,7 +327,7 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '$passengers',
+                            '${trip.totalSeats ?? 0}',
                             style: GoogleFonts.plusJakartaSans(
                               color: AppColors.primary,
                               fontSize: 22,
@@ -269,10 +352,15 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => DriverPassengerList(tripId: trip.id)),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: status == 'EN COURS' ? AppColors.primary : AppColors.surfaceVariant,
-                            foregroundColor: status == 'EN COURS' ? Colors.white : AppColors.textPrimary,
+                            backgroundColor: status == 'EN COURS' || status == 'EN ROUTE' ? AppColors.primary : AppColors.surfaceVariant,
+                            foregroundColor: status == 'EN COURS' || status == 'EN ROUTE' ? Colors.white : AppColors.textPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,

@@ -19,6 +19,7 @@ class DriverRegisterPage extends StatefulWidget {
 
 class _DriverRegisterPageState extends State<DriverRegisterPage> {
   bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   bool _acceptTerms = false;
   bool _isLoading = false;
 
@@ -26,8 +27,15 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _licenseController = TextEditingController();
   final _expiryController = TextEditingController();
+  
+  // Nouveaux contrôleurs pour le véhicule
+  final _vehicleBrandController = TextEditingController();
+  final _vehicleModelController = TextEditingController();
+  final _vehiclePlateController = TextEditingController();
+  final _vehicleSeatsController = TextEditingController();
 
   List<City> _cities = [];
   List<Station> _stations = [];
@@ -62,12 +70,19 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       _routes = [];
     });
     if (city != null) {
+      debugPrint('[DriverRegister] City selected: ${city.name}');
       try {
         final stations = await LocationService.getStationsByCity(city.id);
-        setState(() => _stations = stations);
-        debugPrint('[DriverRegister] Loaded ${stations.length} stations for city ${city.name}');
+        setState(() {
+          _stations = stations;
+          // Automatiquement sélectionner si une seule gare exists
+          if (stations.length == 1) {
+            _selectedStation = stations.first;
+            _onStationChanged(stations.first);
+          }
+        });
       } catch (e) {
-        debugPrint('Error loading stations: $e');
+        debugPrint('[DriverRegister] Station Load Error: $e');
       }
     }
   }
@@ -79,7 +94,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       _routes = [];
     });
     if (station != null) {
-      debugPrint('[DriverRegister] Station changed: ${station.name} (${station.id})');
+      debugPrint('[DriverRegister] Station: ${station.name} -> Fetching Real Routes');
       try {
         final routes = await LocationService.getRoutesByStation(station.id);
         setState(() {
@@ -88,9 +103,8 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
             _selectedRoute = routes.first;
           }
         });
-        debugPrint('[DriverRegister] Loaded ${routes.length} route(s) for station ${station.name}');
       } catch (e) {
-        debugPrint('Error loading routes: $e');
+        debugPrint('[DriverRegister] Route Load Error: $e');
       }
     }
   }
@@ -101,8 +115,13 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _licenseController.dispose();
     _expiryController.dispose();
+    _vehicleBrandController.dispose();
+    _vehicleModelController.dispose();
+    _vehiclePlateController.dispose();
+    _vehicleSeatsController.dispose();
     super.dispose();
   }
 
@@ -182,6 +201,17 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                 obscureText: !_isPasswordVisible,
                 onToggleVisibility: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
               ),
+              const SizedBox(height: 24),
+
+              _buildInputField(
+                label: 'CONFIRMER MOT DE PASSE',
+                controller: _confirmPasswordController,
+                hint: '••••••••',
+                icon: Icons.lock_reset_rounded,
+                isPassword: true,
+                obscureText: !_isConfirmPasswordVisible,
+                onToggleVisibility: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+              ),
 
               const SizedBox(height: 40),
 
@@ -245,6 +275,60 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                     _buildStationDropdown(),
                     const SizedBox(height: 20),
                     _buildRouteDropdown(),
+                    const SizedBox(height: 32),
+                    
+                    // Détails du Véhicule
+                    Row(
+                      children: [
+                        const Icon(Icons.directions_car_rounded, color: AppColors.primary, size: 24),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Détails du Véhicule',
+                          style: AppTextStyles.headingLarge.copyWith(fontSize: 18, color: AppColors.primary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    _buildInputField(
+                      label: 'MARQUE DU VÉHICULE',
+                      controller: _vehicleBrandController,
+                      hint: 'Ex: Mercedes',
+                      icon: Icons.factory_rounded,
+                      isSmall: true,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildInputField(
+                      label: 'MODÈLE DU VÉHICULE',
+                      controller: _vehicleModelController,
+                      hint: 'Ex: Sprinter',
+                      icon: Icons.model_training_rounded,
+                      isSmall: true,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildInputField(
+                            label: 'PLAQUE D\'IMMAT.',
+                            controller: _vehiclePlateController,
+                            hint: 'RC-XXXX-X',
+                            icon: Icons.confirmation_number_rounded,
+                            isSmall: true,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildInputField(
+                            label: 'NB. PLACES',
+                            controller: _vehicleSeatsController,
+                            hint: '15',
+                            icon: Icons.airline_seat_recline_extra_rounded,
+                            isSmall: true,
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -468,7 +552,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
           _selectedRoute = route;
         });
       },
-      enabled: _selectedStation != null,
+      enabled: _selectedStation != null || _stations.isNotEmpty,
     );
   }
 
@@ -629,15 +713,19 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       return;
     }
 
+    final confirmPassword = _confirmPasswordController.text;
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Les mots de passe ne correspondent pas')));
+      return;
+    }
+
     if (_selectedStation == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner une gare')));
       return;
     }
 
     if (_selectedRoute == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner votre trajet unique.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez sélectionner votre trajet unique')));
       return;
     }
 
@@ -656,6 +744,10 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
           'license_number': _licenseController.text.trim(),
           'expiry_date': _expiryController.text.trim(),
           'experience': _selectedExperience,
+          'vehicle_brand': _vehicleBrandController.text.trim(),
+          'vehicle_model': _vehicleModelController.text.trim(),
+          'vehicle_plate': _vehiclePlateController.text.trim(),
+          'vehicle_seats': int.tryParse(_vehicleSeatsController.text.trim()) ?? 15,
         },
       );
 

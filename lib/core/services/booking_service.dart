@@ -119,6 +119,22 @@ class BookingService {
 
   // ─── Commandes Chauffeur ────────────────────────────────────────────────
 
+  /// Écoute les nouvelles réservations pour les trajets d'un chauffeur (Temps réel)
+  static Stream<List<Map<String, dynamic>>> getDriverBookingsStream(String driverId) {
+    return _supabase
+        .from('bookings')
+        .stream(primaryKey: ['id'])
+        .asyncMap((_) async {
+          // On récupère les réservations liées aux trajets du chauffeur
+          final response = await _supabase
+              .from('bookings')
+              .select('*, trips:trip_id(driver_id, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name)), profiles:user_id(full_name)')
+              .eq('trips.driver_id', driverId)
+              .order('created_at', ascending: false);
+          return List<Map<String, dynamic>>.from(response);
+        });
+  }
+
   /// Récupère la liste des passagers pour un trajet donné
   static Future<AppResponse<List<Map<String, dynamic>>>> getTripPassengers(String tripId) async {
     try {
@@ -126,11 +142,25 @@ class BookingService {
           .from('bookings')
           .select('*, profiles:user_id(full_name, phone), tickets(*)')
           .eq('trip_id', tripId)
-          .eq('status', 'confirmed');
+          .neq('status', 'cancelled');
       return AppResponse.success(List<Map<String, dynamic>>.from(data));
     } catch (e) {
       debugPrint('Error getting trip passengers: $e');
       return AppResponse.failure('Impossible de charger les passagers.');
+    }
+  }
+
+  /// Confirme ou valide la présence d'un passager
+  static Future<AppResponse<void>> confirmPassengerPresence(String bookingId) async {
+    try {
+      await _supabase.from('bookings').update({
+        'status': 'confirmed',
+        'updated_at': DateTime.now().toIso8601String()
+      }).eq('id', bookingId);
+      return AppResponse.success(null, message: 'Passager confirmé !');
+    } catch (e) {
+      debugPrint('Error confirming passenger: $e');
+      return AppResponse.failure('Échec de la confirmation.');
     }
   }
 

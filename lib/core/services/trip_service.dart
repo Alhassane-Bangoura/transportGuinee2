@@ -92,19 +92,51 @@ class TripService {
     }
   }
 
-  // ─── Mise à jour de trajet ──────────────────────────────────────────────
+  // ─── Création de trajet ──────────────────────────────────────────────────
 
-  /// Met à jour le statut d'un trajet (Normal ou Relais Admin)
-  static Future<AppResponse<void>> updateTripStatus(String tripId, String newStatus) async {
+  /// Publie un nouveau trajet
+  static Future<AppResponse<void>> publishTrip(Map<String, dynamic> tripData) async {
     try {
-      await _supabase
-          .from('trips')
-          .update({'status': newStatus, 'updated_at': DateTime.now().toIso8601String()})
-          .eq('id', tripId);
+      debugPrint('[TripService] Publishing trip data: $tripData');
+      
+      // Nettoyage préventif des données numériques
+      final cleanData = {
+        ...tripData,
+        'available_seats': (tripData['available_seats'] as num).toInt(),
+        'price': (tripData['price'] as num).toDouble(),
+        'status': 'scheduled',
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      await _supabase.from('trips').insert(cleanData);
       return AppResponse.success(null);
+    } on PostgrestException catch (e) {
+      debugPrint('[TripService] CRITICAL EXCEPTION: ${e.message}');
+      debugPrint('[TripService] CODE: ${e.code}');
+      debugPrint('[TripService] DETAILS: ${e.details}');
+      debugPrint('[TripService] HINT: ${e.hint}');
+      return AppResponse.failure('Erreur de base de données : ${e.message} (${e.code})');
     } catch (e) {
-      debugPrint('Error updating trip status: $e');
-      return AppResponse.failure('Échec de la mise à jour du statut du trajet.');
+      debugPrint('[TripService] Unexpected error: $e');
+      return AppResponse.failure(e.toString());
+    }
+  }
+
+  // ─── Routes ──────────────────────────────────────────────────────────────
+
+  /// Récupère les détails d'une route par son ID
+  static Future<AppResponse<Map<String, dynamic>>> getRouteById(String routeId) async {
+    try {
+      final data = await _supabase
+          .from('routes')
+          .select('id, name, departure_city:departure_city_id(id, name), arrival_city:arrival_city_id(id, name)')
+          .eq('id', routeId)
+          .single();
+      return AppResponse.success(data);
+    } catch (e) {
+      debugPrint('Error getting route: $e');
+      return AppResponse.failure(e.toString());
     }
   }
 }

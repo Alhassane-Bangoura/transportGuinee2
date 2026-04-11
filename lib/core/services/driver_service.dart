@@ -77,4 +77,18 @@ class DriverService {
       return [];
     }
   }
+  /// Récupère le véhicule assigné à un chauffeur
+  static Future<Map<String, dynamic>?> getDriverVehicle(String driverId) async {
+    try {
+      final response = await _supabase
+          .from('vehicles')
+          .select()
+          .eq('driver_id', driverId)
+          .maybeSingle();
+      return response;
+    } catch (e) {
+      print('Error fetching driver vehicle: $e');
+      return null;
+    }
+  }
 }

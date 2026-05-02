@@ -413,6 +413,85 @@ class _DriverDashboardState extends State<DriverDashboard>
             ),
             const SizedBox(height: 24),
 
+            // Évolution des réservations (Nouveau)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('ÉVOLUTION DES RÉSERVATIONS', style: AppTextStyles.label),
+                TextButton(
+                  onPressed: () => setState(() => _currentIndex = 2),
+                  child: Text('Voir passagers', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            StreamBuilder<List<Trip>>(
+              stream: _profile != null ? TripService.getDriverTripsStream(_profile!.id) : const Stream.empty(),
+              builder: (context, snapshot) {
+                final trips = snapshot.data ?? [];
+                final activeTrips = trips.where((t) => t.status.toLowerCase() != 'completed' && t.status.toLowerCase() != 'cancelled').toList();
+                
+                if (activeTrips.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
+                    child: Center(child: Text('Aucun trajet en cours de réservation', style: GoogleFonts.plusJakartaSans(color: AppColors.textHint, fontSize: 13))),
+                  );
+                }
+
+                return Column(
+                  children: activeTrips.map((trip) {
+                    final reservedSeats = (trip.totalSeats ?? 0) - trip.availableSeats;
+                    final progress = (trip.totalSeats ?? 0) > 0 ? reservedSeats / trip.totalSeats! : 0.0;
+                    
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('${trip.departureCityName} → ${trip.arrivalCityName}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 14)),
+                                    Text(DateFormat('dd MMM. • HH:mm').format(trip.departureTime), style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 11)),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                                child: Text('$reservedSeats/${trip.totalSeats ?? "?"} PLACES', style: GoogleFonts.plusJakartaSans(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 11)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: AppColors.border,
+                              color: AppColors.primary,
+                              minHeight: 6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
             // Quick Info Section (Rappel)
             Container(
               padding: const EdgeInsets.all(20),
@@ -427,7 +506,7 @@ class _DriverDashboardState extends State<DriverDashboard>
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      'Rappel: Vérifiez l\'état des pneus avant le départ vers Labé.',
+                      'Rappel: Vérifiez l\'état des pneus avant le départ.',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

@@ -75,7 +75,7 @@ class BookingService {
       debugPrint('[BookingService] FETCHING BOOKINGS FROM DB for user ${userId}...');
       final data = await _supabase
           .from('bookings')
-          .select('*, trips:trip_id(*, driver:profiles!driver_id(full_name, phone, avatar_url), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
+          .select('*, profiles:profiles!user_id(full_name, phone, avatar_url), trips:trip_id(*, driver:profiles!driver_id(full_name, phone, avatar_url), vehicles:vehicle_id(type, license_plate), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
           .eq('user_id', userId)
           .order('created_at', ascending: false);
           
@@ -85,6 +85,22 @@ class BookingService {
     } catch (e) {
       debugPrint('Error getting bookings: $e');
       return AppResponse.failure('Impossible de charger vos réservations.');
+    }
+  }
+
+  /// Récupère une réservation par son ID avec tous les détails
+  static Future<AppResponse<Booking>> getBookingById(String bookingId) async {
+    try {
+      final data = await _supabase
+          .from('bookings')
+          .select('*, profiles:profiles!user_id(full_name, phone, avatar_url), trips:trip_id(*, driver:profiles!driver_id(full_name, phone, avatar_url), vehicles:vehicle_id(type, license_plate), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
+          .eq('id', bookingId)
+          .single();
+          
+      return AppResponse.success(Booking.fromJson(data));
+    } catch (e) {
+      debugPrint('Error getting booking by id: $e');
+      return AppResponse.failure('Réservation introuvable.');
     }
   }
 
@@ -112,7 +128,9 @@ class BookingService {
         'user_id': userId,
         'seats': seats,
         'total_price': totalPrice,
-        'status': 'pending',
+        'status': paymentMethod == 'at_station' ? 'pending' : 'confirmed',
+        'payment_method': paymentMethod,
+        'idempotency_key': actualIdempotencyKey,
       };
 
       // 1. Insérer la réservation
@@ -132,7 +150,23 @@ class BookingService {
       // 3. Récupération des détails complets
       final finalData = await _supabase
           .from('bookings')
-          .select('*, trips:trip_id(*, driver:profiles!driver_id(full_name, phone, avatar_url), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
+          .select('''
+            *,
+            profiles!user_id (full_name, phone, avatar_url),
+            trips!trip_id (
+              *,
+              driver:profiles!driver_id (full_name, phone, avatar_url),
+              vehicles!vehicle_id (type, license_plate),
+              routes!route_id (
+                *,
+                departure_city:cities!departure_city_id(name),
+                arrival_city:cities!arrival_city_id(name),
+                departure_station:stations!departure_station_id(name),
+                arrival_station:stations!arrival_station_id(name)
+              )
+            ),
+            tickets (*)
+          ''')
           .eq('id', bookingId)
           .single();
 
@@ -147,7 +181,9 @@ class BookingService {
       FieldTestLogger.logError('CREATE_BOOKING_DB', e);
       debugPrint('🚨 [FIELD_TEST] Database Error: ${e.message} (Code: ${e.code})');
       
-      if (e.message.contains('Not enough seats') || e.message.contains('Pas assez de sièges')) {
+      if (e.message.contains('Not enough seats') || 
+          e.message.contains('Pas assez de sièges') || 
+          e.message.contains('trips_available_seats_check')) {
         return AppResponse.failure('Désolé, il n\'y a plus assez de places disponibles pour ce trajet.');
       }
       return AppResponse.failure('Erreur technique : ${e.message}');
@@ -195,7 +231,7 @@ class BookingService {
           try {
             final response = await _supabase
                 .from('bookings')
-                .select('*, trips:trip_id(driver_id, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name)), profiles:profiles!user_id(full_name)')
+                .select('*, trips!inner(driver_id, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name)), profiles:profiles!user_id(full_name)')
                 .eq('trips.driver_id', driverId)
                 .order('created_at', ascending: false);
             _cachedDriverBookings = List<Map<String, dynamic>>.from(response);
@@ -255,7 +291,7 @@ class BookingService {
     try {
       final data = await _supabase
           .from('bookings')
-          .select('*, profiles:profiles!user_id(full_name, phone), tickets(*)')
+          .select('*, profiles!user_id(full_name, phone, avatar_url), tickets(*)')
           .eq('trip_id', tripId)
           .neq('status', 'cancelled');
       return AppResponse.success(List<Map<String, dynamic>>.from(data));

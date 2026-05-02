@@ -51,10 +51,18 @@ class Booking {
   final String? departureStationName;
   final String? arrivalStationName;
   final DateTime? departureTime;
+  final String? passengerName;
+  final String? passengerPhone;
+  final String? passengerAvatarUrl;
   final String? driverName;
   final String? driverPhone;
   final String? driverAvatarUrl;
+  final String? vehicleModel;
+  final String? vehiclePlate;
+  final String? vehiclePhotoUrl;
 
+  final String? paymentMethod;
+ 
   // Billet associé (join)
   final Ticket? ticket;
 
@@ -71,9 +79,16 @@ class Booking {
     this.departureStationName,
     this.arrivalStationName,
     this.departureTime,
+    this.passengerName,
+    this.passengerPhone,
+    this.passengerAvatarUrl,
     this.driverName,
     this.driverPhone,
     this.driverAvatarUrl,
+    this.vehicleModel,
+    this.vehiclePlate,
+    this.vehiclePhotoUrl,
+    this.paymentMethod,
     this.ticket,
   });
 
@@ -81,7 +96,9 @@ class Booking {
     // Le join Supabase retourne les trips et tickets imbriqués
     final tripData = json['trips'] as Map<String, dynamic>?;
     final routeData = tripData?['routes'] as Map<String, dynamic>?;
+    final vehicleData = tripData?['vehicles'] as Map<String, dynamic>?;
     final ticketList = json['tickets'] as List<dynamic>?;
+    final profileData = json['profiles'] as Map<String, dynamic>?;
 
     return Booking(
       id: json['id'] as String,
@@ -98,9 +115,16 @@ class Booking {
       departureTime: tripData?['departure_time'] != null
           ? DateTime.parse(tripData!['departure_time'] as String)
           : null,
+      passengerName: profileData?['full_name'] as String?,
+      passengerPhone: profileData?['phone'] as String?,
+      passengerAvatarUrl: profileData?['avatar_url'] as String?,
       driverName: tripData?['driver']?['full_name'] as String?,
       driverPhone: tripData?['driver']?['phone'] as String?,
       driverAvatarUrl: tripData?['driver']?['avatar_url'] as String?,
+      vehicleModel: vehicleData?['type'] as String?,
+      vehiclePlate: vehicleData?['license_plate'] as String?,
+      vehiclePhotoUrl: vehicleData?['photo_url'] as String?, // Si dispo
+      paymentMethod: json['payment_method'] as String?,
       ticket: ticketList != null && ticketList.isNotEmpty
           ? Ticket.fromJson(ticketList.first as Map<String, dynamic>)
           : null,
@@ -120,6 +144,12 @@ class Booking {
       'total_price': totalPrice,
       'status': status,
       'created_at': createdAt.toIso8601String(),
+      'passenger_name': passengerName,
+      'passenger_phone': passengerPhone,
+      'passenger_avatar': passengerAvatarUrl,
+      'driver_name': driverName,
+      'vehicle_model': vehicleModel,
+      'vehicle_plate': vehiclePlate,
       if (departureCityName != null || arrivalCityName != null || departureStationName != null || arrivalStationName != null)
         'trips': {
           if (departureTime != null) 'departure_time': departureTime!.toIso8601String(),
@@ -128,9 +158,14 @@ class Booking {
             if (arrivalCityName != null) 'arrival_city': {'name': arrivalCityName},
             if (departureStationName != null) 'departure_station': {'name': departureStationName},
             if (arrivalStationName != null) 'arrival_station': {'name': arrivalStationName},
+          },
+          'vehicles': {
+            'type': vehicleModel,
+            'license_plate': vehiclePlate,
           }
         },
       if (ticket != null) 'tickets': [ticket!.toJson()],
     };
   }
 }
+

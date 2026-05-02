@@ -13,6 +13,7 @@ import 'syndicate_profile.dart';
 import 'syndicate_driver_management.dart';
 import 'syndicate_activity.dart';
 import 'syndicate_vehicle_filling.dart';
+import '../../driver/screens/ticket_verification_screen.dart';
 import '../../assistant/screens/assistant_screen.dart';
 import '../../../core/widgets/premium_bottom_nav_bar.dart';
 
@@ -272,6 +273,8 @@ class _SyndicateDashboardState extends State<SyndicateDashboard> {
                     ),
                     Row(
                       children: [
+                        _buildHeaderButton(Icons.qr_code_scanner_rounded, isScanner: true),
+                        const SizedBox(width: 12),
                         _buildHeaderButton(Icons.notifications_outlined),
                         const SizedBox(width: 12),
                         GestureDetector(
@@ -301,18 +304,64 @@ class _SyndicateDashboardState extends State<SyndicateDashboard> {
     );
   }
 
-  Widget _buildHeaderButton(IconData icon) {
+  Widget _buildHeaderButton(IconData icon, {bool isScanner = false}) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.08),
+        color: isScanner ? AppColors.accent.withOpacity(0.1) : AppColors.primary.withOpacity(0.08),
         shape: BoxShape.circle,
       ),
       child: IconButton(
-        onPressed: () {},
-        icon: Icon(icon, color: AppColors.primary, size: 22),
+        onPressed: () {
+          if (isScanner) {
+            _showScanSimulator();
+          }
+        },
+        icon: Icon(icon, color: isScanner ? AppColors.accent : AppColors.primary, size: 22),
         style: IconButton.styleFrom(
           padding: const EdgeInsets.all(12),
         ),
+      ),
+    );
+  }
+
+  void _showScanSimulator() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Vérification Syndicate', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Saisissez l\'ID du ticket pour vérification officielle.', style: GoogleFonts.plusJakartaSans(fontSize: 12)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'ID de réservation',
+                border: OutlineInputBorder(),
+                hintText: 'ID du ticket...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('ANNULER')),
+          ElevatedButton(
+            onPressed: () {
+              final id = controller.text.trim();
+              if (id.isNotEmpty) {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TicketVerificationScreen(bookingId: id)),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
+            child: const Text('VÉRIFIER'),
+          ),
+        ],
       ),
     );
   }

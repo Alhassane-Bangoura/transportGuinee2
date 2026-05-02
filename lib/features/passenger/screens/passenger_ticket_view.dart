@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -7,7 +8,11 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:screenshot/screenshot.dart';
 import 'dart:io';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/models/booking.dart';
 
@@ -21,21 +26,56 @@ class PassengerTicket extends StatefulWidget {
 }
 
 class _PassengerTicketState extends State<PassengerTicket> {
-  final GlobalKey _ticketKey = GlobalKey();
+  final ScreenshotController _screenshotController = ScreenshotController();
   bool _isSaving = false;
 
-  // Capture le widget ticket en image PNG
+  // Capture le widget ticket en image PNG via le package screenshot
   Future<Uint8List?> _captureTicket() async {
     try {
-      final RenderRepaintBoundary boundary =
-          _ticketKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
+      // Attendre un peu que le rendu soit stable
+      await Future.delayed(const Duration(milliseconds: 100));
+      return await _screenshotController.capture(pixelRatio: 3.0);
     } catch (e) {
       debugPrint('Error capturing ticket: $e');
       return null;
+    }
+  }
+
+  // Génère et partage le ticket en PDF
+  Future<void> _downloadPdf() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      final Uint8List? imageBytes = await _captureTicket();
+      if (imageBytes == null) throw Exception('Capture échouée');
+
+      final doc = pw.Document();
+      final image = pw.MemoryImage(imageBytes);
+
+      doc.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(0),
+          build: (pw.Context context) {
+            return pw.Center(
+              child: pw.Image(image, fit: pw.BoxFit.contain),
+            );
+          },
+        ),
+      );
+
+      final String shortId = widget.booking.id.length >= 8 ? widget.booking.id.substring(0, 8) : widget.booking.id;
+      await Printing.sharePdf(bytes: await doc.save(), filename: 'ticket_${shortId.toUpperCase()}.pdf');
+    } catch (e) {
+      debugPrint('PDF Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erreur PDF: ${e.toString()}'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -45,30 +85,23 @@ class _PassengerTicketState extends State<PassengerTicket> {
     setState(() => _isSaving = true);
     try {
       final Uint8List? imageBytes = await _captureTicket();
-      if (imageBytes == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Erreur lors de la capture du ticket.')),
-          );
-        }
-        return;
-      }
-
+      if (imageBytes == null) throw Exception('Capture échouée');
+      final String shortId = widget.booking.id.length >= 8 
+          ? widget.booking.id.substring(0, 8).toUpperCase() 
+          : widget.booking.id.toUpperCase();
+      final String fileName = 'ticket_$shortId.png';
       final Directory tempDir = await getTemporaryDirectory();
-      final String fileName =
-          'ticket_${widget.booking.id.substring(0, 8).toUpperCase()}.png';
       final File file = File('${tempDir.path}/$fileName');
       await file.writeAsBytes(imageBytes);
 
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'image/png')],
-        text: 'Mon ticket GuinéeTransport — ${widget.booking.departureCityName ?? ''} ➔ ${widget.booking.arrivalCityName ?? ''}',
-      );
+      await Share.shareXFiles([XFile(file.path)], text: 'Mon ticket GuinéeTransport #$shortId');
     } catch (e) {
+      debugPrint('Capture/Share Error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erreur: ${e.toString()}'),
+          backgroundColor: Colors.redAccent,
+        ));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -80,6 +113,22 @@ class _PassengerTicketState extends State<PassengerTicket> {
     final b = widget.booking;
     final bool isPending = b.status == 'pending';
     final Color statusColor = isPending ? const Color(0xFFF59E0B) : const Color(0xFF10B981);
+
+    // Préparation des données complètes pour le QR Code
+    final Map<String, dynamic> qrDataMap = {
+      'id': b.id,
+      'p_name': b.passengerName,
+      'p_phone': b.passengerPhone,
+      'd_name': b.driverName,
+      'v_model': b.vehicleModel,
+      'v_plate': b.vehiclePlate,
+      'route': '${b.departureCityName} -> ${b.arrivalCityName}',
+      'date': b.departureTime?.toIso8601String(),
+      'price': b.totalPrice,
+      'seats': b.seats,
+      'res_time': b.createdAt.toIso8601String(),
+    };
+    final String qrData = jsonEncode(qrDataMap);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -140,8 +189,8 @@ class _PassengerTicketState extends State<PassengerTicket> {
             const SizedBox(height: 24),
 
             // ── Ticket Card (captured as image) ──────────────────────────────
-            RepaintBoundary(
-              key: _ticketKey,
+            Screenshot(
+              controller: _screenshotController,
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -234,6 +283,59 @@ class _PassengerTicketState extends State<PassengerTicket> {
                       padding: const EdgeInsets.all(20),
                       child: Column(
                         children: [
+                          // Section Passager
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 26,
+                                backgroundColor: AppColors.primary.withOpacity(0.1),
+                                backgroundImage: (b.passengerAvatarUrl != null &&
+                                        b.passengerAvatarUrl!.isNotEmpty)
+                                    ? NetworkImage(b.passengerAvatarUrl!)
+                                    : null,
+                                child: (b.passengerAvatarUrl == null || b.passengerAvatarUrl!.isEmpty)
+                                    ? const Icon(Icons.person_rounded,
+                                        color: AppColors.primary, size: 26)
+                                    : null,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'PASSAGER',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 9,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      b.passengerName ?? 'Passager',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    Text(
+                                      b.passengerPhone ?? '',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          const _DividerRow(),
+                          const SizedBox(height: 16),
                           Row(
                             children: [
                               _buildInfo(
@@ -284,8 +386,31 @@ class _PassengerTicketState extends State<PassengerTicket> {
                           const SizedBox(height: 16),
                           const _DividerRow(),
                           const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildInfo(
+                                  Icons.payments_rounded,
+                                  'MODE DE PAIEMENT',
+                                  (b.paymentMethod ?? '').toLowerCase().contains('orange') ? 'Orange Money' : 
+                                  (b.paymentMethod ?? '').toLowerCase().contains('momo') ? 'MTN MoMo' : 'À PAYER À LA GARE',
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildInfo(
+                                  Icons.history_toggle_off_rounded,
+                                  'RÉSERVÉ LE',
+                                  DateFormat('dd/MM HH:mm').format(b.createdAt),
+                                  alignEnd: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          const _DividerRow(),
+                          const SizedBox(height: 16),
 
-                          // ── Section Chauffeur ─────────────────────────────
+                          // ── Section Chauffeur & Voiture ─────────────────────────────
                           Row(
                             children: [
                               // Photo du chauffeur
@@ -307,7 +432,7 @@ class _PassengerTicketState extends State<PassengerTicket> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'CHAUFFEUR',
+                                      'CHAUFFEUR & VÉHICULE',
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 9,
                                         color: AppColors.textSecondary,
@@ -319,19 +444,19 @@ class _PassengerTicketState extends State<PassengerTicket> {
                                     Text(
                                       b.driverName ?? 'En attente',
                                       style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 15,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.w800,
                                         color: AppColors.textPrimary,
                                       ),
                                     ),
-                                    if (b.driverPhone != null)
-                                      Text(
-                                        b.driverPhone!,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 12,
-                                          color: AppColors.textSecondary,
-                                        ),
+                                    Text(
+                                      '${b.vehicleModel ?? "Véhicule"} • ${b.vehiclePlate ?? "..."}',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
                                       ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -390,7 +515,7 @@ class _PassengerTicketState extends State<PassengerTicket> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: QrImageView(
-                              data: 'GT-${b.id}-${b.tripId}',
+                              data: qrData,
                               version: QrVersions.auto,
                               size: 140,
                               eyeStyle: const QrEyeStyle(
@@ -405,7 +530,7 @@ class _PassengerTicketState extends State<PassengerTicket> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'TICKET #${b.id.substring(0, 8).toUpperCase()}',
+                            'TICKET #${widget.booking.id.length >= 8 ? widget.booking.id.substring(0, 8).toUpperCase() : widget.booking.id.toUpperCase()}',
                             style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
@@ -415,7 +540,7 @@ class _PassengerTicketState extends State<PassengerTicket> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Présentez ce QR code à la gare',
+                            'Présentez ce QR code pour l\'embarquement',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               color: AppColors.textSecondary,
@@ -432,44 +557,66 @@ class _PassengerTicketState extends State<PassengerTicket> {
             const SizedBox(height: 28),
 
             // ── Boutons d'action ────────────────────────────────────────────
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isSaving ? null : _downloadTicket,
-                    icon: _isSaving
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.download_rounded),
-                    label: Text(
-                      _isSaving ? 'PRÉPARATION...' : 'SAUVEGARDER',
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _isSaving ? null : _downloadTicket,
+                        icon: _isSaving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Icon(Icons.image_rounded),
+                        label: Text(
+                          _isSaving ? 'PRÉPARATION...' : 'IMAGE',
+                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _isSaving ? null : _downloadPdf,
+                        icon: const Icon(Icons.picture_as_pdf_rounded),
+                        label: Text(
+                          'PDF',
+                          style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(height: 12),
                 Container(
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: IconButton(
-                    padding: const EdgeInsets.all(14),
-                    icon: const Icon(Icons.share_rounded, color: AppColors.primary),
+                  child: TextButton.icon(
                     onPressed: _isSaving ? null : _downloadTicket,
-                    tooltip: 'Partager le ticket',
+                    icon: const Icon(Icons.share_rounded, color: AppColors.primary),
+                    label: Text('PARTAGER LE TICKET', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: AppColors.primary)),
                   ),
                 ),
               ],

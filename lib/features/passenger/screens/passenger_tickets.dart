@@ -6,6 +6,7 @@ import '../../../core/constants/app_assets.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../core/models/booking.dart';
 import 'package:intl/intl.dart';
+import 'passenger_ticket_view.dart';
 
 class PassengerTickets extends StatefulWidget {
   const PassengerTickets({super.key});
@@ -473,77 +474,14 @@ class TicketCard extends StatelessWidget {
           height: 52,
           child: ElevatedButton.icon(
             onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-                builder: (context) => Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(32)),
+              if (booking != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PassengerTicket(booking: booking!),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                            color: AppColors.border,
-                            borderRadius: BorderRadius.circular(2)),
-                      ),
-                      const SizedBox(height: 24),
-                      Text('Votre Billet Électronique',
-                          style: GoogleFonts.plusJakartaSans(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary)),
-                      const SizedBox(height: 24),
-                      Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(Icons.qr_code_2,
-                            size: 160, color: Colors.black87),
-                      ),
-                      const SizedBox(height: 16),
-                      Text('Présentez ce QR Code au contrôleur',
-                          style: GoogleFonts.plusJakartaSans(
-                              color: AppColors.textSecondary)),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Billet téléchargé (simulation) !')));
-                          },
-                          icon: const Icon(Icons.file_download,
-                              color: Colors.white),
-                          label: Text('Télécharger en PDF',
-                              style: GoogleFonts.plusJakartaSans(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+                );
+              }
             },
             icon: const Icon(Icons.qr_code_scanner),
             label: const Text('Afficher le Billet'),
@@ -572,8 +510,14 @@ class TicketCard extends StatelessWidget {
       height: 52,
       child: ElevatedButton(
         onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Détails complets générés (Simulation).')));
+          if (booking != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PassengerTicket(booking: booking!),
+              ),
+            );
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFE8F9E8),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/services/booking_service.dart';
@@ -33,6 +34,20 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
         _trip = response.data;
         _isLoadingTrip = false;
       });
+    }
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    }
+  }
+
+  Future<void> _sendSMS(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'sms', path: phoneNumber);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
     }
   }
 
@@ -153,7 +168,8 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                         padding: const EdgeInsets.only(top: 24),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ouverture SMS...')));
+                            final phones = bookings.map((b) => (b['profiles']?['phone'] ?? '').toString()).where((p) => p.isNotEmpty).join(',');
+                            if (phones.isNotEmpty) launchUrl(Uri(scheme: 'sms', path: phones));
                           },
                           icon: const Icon(Icons.chat_bubble_rounded, size: 18),
                           label: const Text('Contacter tous les passagers'),
@@ -170,12 +186,13 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
 
                     final booking = bookings[index];
                     final profile = booking['profiles'];
+                    final phone = profile != null ? profile['phone'] ?? '' : '';
 
                     return _buildPassengerCard(
                       name: profile != null ? profile['full_name'] : 'Passager Inconnu',
                       seat: '${booking['seats']} Place(s)',
-                      phone: profile != null ? profile['phone'] ?? 'Non renseigné' : '',
-                      imgUrl: 'https://ui-avatars.com/api/?name=${profile != null ? profile['full_name'] : 'P'}&background=random',
+                      phone: phone,
+                      imgUrl: profile != null && profile['avatar_url'] != null ? profile['avatar_url'] : 'https://ui-avatars.com/api/?name=${profile != null ? profile['full_name'] : 'P'}&background=random',
                       isConfirmed: booking['status'] == 'confirmed' || booking['status'] == 'used',
                       onConfirm: () async {
                         final res = await BookingService.confirmPassengerPresence(booking['id']);
@@ -183,7 +200,9 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                           setState(() {}); 
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Présence confirmée !')));
                         }
-                      }
+                      },
+                      onCall: phone.isNotEmpty ? () => _makePhoneCall(phone) : null,
+                      onMessage: phone.isNotEmpty ? () => _sendSMS(phone) : null,
                     );
                   },
                 );
@@ -210,6 +229,8 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
     required String imgUrl,
     required bool isConfirmed,
     VoidCallback? onConfirm,
+    VoidCallback? onCall,
+    VoidCallback? onMessage,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -269,7 +290,7 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                       children: [
                         const Icon(Icons.phone_rounded, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 6),
-                        Text(phone, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                        Text(phone.isEmpty ? 'Non renseigné' : phone, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                       ],
                     ),
                   ],
@@ -312,22 +333,31 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                     ),
               ),
               const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.textSecondary, size: 20),
-                ),
-              ),
+              if (onCall != null) 
+                _buildContactButton(Icons.phone_rounded, Colors.blue, onCall),
+              const SizedBox(width: 8),
+              if (onMessage != null)
+                _buildContactButton(Icons.chat_bubble_outline_rounded, AppColors.primary, onMessage),
             ],
           ),
         ],
       ),
     );
   }
+
+  Widget _buildContactButton(IconData icon, Color color, VoidCallback onTap) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: IconButton(
+        onPressed: onTap,
+        icon: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
 }
+
 
 const double FullRadius = 99;

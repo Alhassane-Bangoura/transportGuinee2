@@ -82,7 +82,7 @@ class _StationAdminRelayScreenState extends State<StationAdminRelayScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.shield_rounded, size: 80, color: Colors.green.withValues(alpha: 0.1)),
+            Icon(Icons.shield_rounded, size: 80, color: Colors.green.withOpacity(0.1)),
             const SizedBox(height: 16),
             Text(
               'Tout est sous contrôle',
@@ -113,7 +113,7 @@ class _StationAdminRelayScreenState extends State<StationAdminRelayScreen> {
       children: [
         Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.orange.withValues(alpha: 0.1),
+          color: Colors.orange.withOpacity(0.1),
           child: Row(
             children: [
               const Icon(Icons.warning_amber_rounded, color: Colors.orange),
@@ -153,7 +153,7 @@ class _StationAdminRelayScreenState extends State<StationAdminRelayScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -172,7 +172,7 @@ class _StationAdminRelayScreenState extends State<StationAdminRelayScreen> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
+            color: Colors.red.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: const Icon(Icons.business, color: Colors.red, size: 20),

@@ -7,6 +7,7 @@ import '../../../core/services/station_service.dart';
 import '../../../core/services/trip_service.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/models/trip.dart';
+import '../../../core/constants/app_assets.dart';
 import 'station_admin_unassigned_drivers.dart';
 import 'station_admin_relay.dart';
 import 'station_admin_departure_management.dart';
@@ -99,9 +100,26 @@ class _StationAdminHomeState extends State<StationAdminHome> {
                     const SizedBox(height: 48),
                     _buildSectionHeader('PROCHAINS DÉPARTS'),
                     const SizedBox(height: 16),
-                    ...(_upcomingTrips.isEmpty 
-                      ? [_buildEmptyState('Aucun départ prévu')] 
-                      : _upcomingTrips.map((trip) => _buildDepartureCard(trip))),
+                    StreamBuilder<List<Map<String, dynamic>>>(
+                      stream: StationService.getStationTripsStream(_profile!.stationId!),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                        }
+                        
+                        final tripsData = snapshot.data ?? [];
+                        if (tripsData.isEmpty) {
+                          return _buildEmptyState('Aucun départ prévu');
+                        }
+
+                        return Column(
+                          children: tripsData.map((data) {
+                            // Transformation simple du Map en objet Trip ou affichage direct
+                            return _buildDepartureCardFromMap(data);
+                          }).toList(),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 48),
                     _buildSectionHeader('ACTIONS RAPIDES'),
                     const SizedBox(height: 16),
@@ -181,7 +199,23 @@ class _StationAdminHomeState extends State<StationAdminHome> {
                       children: [
                         _buildHeaderButton(Icons.notifications_outlined, hasBadge: true),
                         const SizedBox(width: 12),
-                        _buildHeaderButton(Icons.account_circle_outlined),
+                        GestureDetector(
+                          onTap: () {
+                            // Navigation vers le profil (page 4 dans le dashboard)
+                          },
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.border),
+                              image: DecorationImage(
+                                image: _profile?.profileImage ?? NetworkImage(AppAssets.stationPreview),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -434,6 +468,71 @@ class _StationAdminHomeState extends State<StationAdminHome> {
               ),
               const SizedBox(height: 6),
               _buildStatusBadge(trip.status),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDepartureCardFromMap(Map<String, dynamic> data) {
+    final arrivalCity = data['routes']?['arrival_city']?['name'] ?? 'Inconnu';
+    final driverName = data['driver']?['full_name'] ?? 'Non assigné';
+    final departureTime = DateTime.parse(data['departure_time']);
+    final status = data['status'] ?? 'scheduled';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.location_on, color: AppColors.primary),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(arrivalCity,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 17,
+                    color: Colors.white,
+                  ),
+                ),
+                Text('Chauffeur: $driverName',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text('${departureTime.hour}:${departureTime.minute.toString().padLeft(2, '0')}',
+                style: GoogleFonts.plusJakartaSans(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 6),
+              _buildStatusBadge(status),
             ],
           ),
         ],

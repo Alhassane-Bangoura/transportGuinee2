@@ -19,7 +19,7 @@ class _SyndicateVehicleFillingState extends State<SyndicateVehicleFilling> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+        backgroundColor: AppColors.surface.withOpacity(0.9),
         elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.all(8.0),
@@ -133,7 +133,7 @@ class _SyndicateVehicleFillingState extends State<SyndicateVehicleFilling> {
       children: [
         if (!isEnd) Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
           child: Icon(icon, color: AppColors.primary, size: 18),
         ),
         const SizedBox(width: 12),
@@ -147,7 +147,7 @@ class _SyndicateVehicleFillingState extends State<SyndicateVehicleFilling> {
         if (isEnd) const SizedBox(width: 12),
         if (isEnd) Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
           child: Icon(icon, color: AppColors.primary, size: 18),
         ),
       ],
@@ -194,7 +194,7 @@ class _SyndicateVehicleFillingState extends State<SyndicateVehicleFilling> {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
                     child: Text(time, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary)),
                   ),
                   const SizedBox(height: 4),

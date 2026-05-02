@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'passenger_tickets.dart';
 import 'passenger_trips.dart';
@@ -6,8 +8,14 @@ import 'passenger_profile.dart';
 import 'passenger_search_results.dart';
 import 'passenger_ai_assistant.dart';
 import 'passenger_reservation.dart';
+import 'passenger_booking.dart';
 import '../../../core/models/user_profile.dart';
+import '../../../core/models/trip.dart';
+import '../../../core/models/notification_model.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../core/services/trip_service.dart';
+import 'package:guineetransport/core/services/wallet_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/premium_bottom_nav_bar.dart';
@@ -26,6 +34,7 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
   late int _selectedIndex;
   UserProfile? _profile;
   bool _isLoadingProfile = true;
+  StreamSubscription<NotificationModel>? _notificationSubscription;
 
   @override
   void initState() {
@@ -34,9 +43,55 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
     if (widget.profile != null) {
       _profile = widget.profile;
       _isLoadingProfile = false;
+      _initNotifications();
     } else {
       _loadProfile();
     }
+  }
+
+  void _initNotifications() {
+    NotificationService().initialize();
+    _notificationSubscription = NotificationService().onNotification.listen((notification) {
+      if (mounted) {
+        _handleIncomingNotification(notification);
+      }
+    });
+  }
+
+  void _handleIncomingNotification(NotificationModel notification) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.notifications_active, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(notification.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(notification.message, style: const TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'VOIR',
+          textColor: Colors.white,
+          onPressed: () {
+            setState(() {
+              _selectedIndex = 1; // Naviguer vers les trajets
+            });
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _loadProfile() async {
@@ -46,7 +101,14 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
         _profile = response.data;
         _isLoadingProfile = false;
       });
+      _initNotifications();
     }
+  }
+
+  @override
+  void dispose() {
+    _notificationSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -72,13 +134,20 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
       PassengerProfile(profile: _profile, onRefresh: _loadProfile),
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: pages,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      extendBody: true, // Important for glassmorphism
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          bottom: false,
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: pages,
+          ),
+        ),
+        extendBody: true, // Important for glassmorphism
       bottomNavigationBar: PremiumBottomNavBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -122,8 +191,8 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
                   style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
               accountEmail: Text(_profile?.role ?? 'passenger',
                   style: GoogleFonts.plusJakartaSans(color: Colors.white70, fontSize: 14)),
-              currentAccountPicture: const CircleAvatar(
-                backgroundImage: NetworkImage(AppAssets.stationPreview),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: _profile?.profileImage,
               ),
             ),
             ListTile(
@@ -137,6 +206,27 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.confirmation_number, color: AppColors.primary),
+              title: const Text('Mes Billets', style: TextStyle(color: AppColors.textPrimary)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  _selectedIndex = 2;
+                });
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history, color: AppColors.primary),
+              title: const Text('Mes Trajets', style: TextStyle(color: AppColors.textPrimary)),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() {
+                  _selectedIndex = 1;
+                });
+              },
+            ),
+            const Divider(),
+            ListTile(
               leading: const Icon(Icons.logout, color: AppColors.error),
               title: const Text('Déconnexion', style: TextStyle(color: AppColors.error)),
               onTap: () async {
@@ -147,11 +237,12 @@ class _PassengerDashboardState extends State<PassengerDashboard> {
           ],
         ),
       ),
+      ),
     );
   }
 }
 
-class PassengerHomeContent extends StatelessWidget {
+class PassengerHomeContent extends StatefulWidget {
   final UserProfile? profile;
   final VoidCallback? onNavigateToTrips;
   final VoidCallback? onNavigateToTickets;
@@ -166,16 +257,132 @@ class PassengerHomeContent extends StatelessWidget {
   });
 
   @override
+  State<PassengerHomeContent> createState() => _PassengerHomeContentState();
+}
+
+class _PassengerHomeContentState extends State<PassengerHomeContent> {
+  String _fromCity = "Conakry";
+  String _toCity = "";
+  DateTime _selectedDate = DateTime.now();
+  int _passengers = 1;
+
+  List<Trip> _upcomingTrips = [];
+  bool _isLoadingTrips = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialisation immédiate du Wallet pour garantir la persistence du solde
+    WalletService().init();
+    
+    _fetchUpcomingTrips();
+  }
+
+  Future<void> _fetchUpcomingTrips() async {
+    final response = await TripService.getUpcomingTrips(limit: 5);
+    if (mounted) {
+      setState(() {
+        _upcomingTrips = response.data ?? [];
+        _isLoadingTrips = false;
+      });
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+      locale: const Locale('fr', 'FR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  void _showPassengerPicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Nombre de passager', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildPassengerBtn(Icons.remove, () {
+                  if (_passengers > 1) setState(() => _passengers--);
+                  Navigator.pop(context);
+                  _showPassengerPicker();
+                }),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text('$_passengers', style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.bold)),
+                ),
+                _buildPassengerBtn(Icons.add, () {
+                  if (_passengers < 10) setState(() => _passengers++);
+                  Navigator.pop(context);
+                  _showPassengerPicker();
+                }),
+              ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                child: const Text('VALIDER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPassengerBtn(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(border: Border.all(color: AppColors.border), shape: BoxShape.circle),
+        child: Icon(icon, color: AppColors.primary),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.only(top: 10),
+          padding: EdgeInsets.zero,
           decoration: BoxDecoration(
-            color: AppColors.surface.withValues(alpha: 0.95),
+            color: AppColors.surface.withOpacity(0.95),
             border: Border(
                 bottom:
-                    BorderSide(color: AppColors.border.withValues(alpha: 0.5))),
+                    BorderSide(color: AppColors.border.withOpacity(0.5))),
           ),
           child: AppBar(
             backgroundColor: Colors.transparent,
@@ -201,7 +408,7 @@ class PassengerHomeContent extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: GestureDetector(
-                  onTap: onNavigateToProfile,
+                  onTap: widget.onNavigateToProfile,
                   child: Container(
                     width: 40,
                     height: 40,
@@ -216,12 +423,10 @@ class PassengerHomeContent extends StatelessWidget {
                         )
                       ],
                     ),
-                    child: const CircleAvatar(
+                    child: CircleAvatar(
                       radius: 18,
                       backgroundColor: Colors.white,
-                      backgroundImage: NetworkImage(
-                        AppAssets.stationPreview,
-                      ),
+                      backgroundImage: widget.profile?.profileImage,
                     ),
                   ),
                 ),
@@ -230,21 +435,25 @@ class PassengerHomeContent extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome
+          child: RefreshIndicator(
+            onRefresh: _fetchUpcomingTrips,
+            color: AppColors.primary,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome
+                  Text(
+                    'Bonjour,',
+                    style: GoogleFonts.plusJakartaSans(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500),
+                  ),
                 Text(
-                  'Bonjour,',
-                  style: GoogleFonts.plusJakartaSans(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  profile?.fullName ?? 'Alpha Diallo',
+                  widget.profile?.cleanFullName ?? 'Utilisateur',
                   style: GoogleFonts.plusJakartaSans(
                       color: AppColors.primary,
                       fontSize: 34,
@@ -275,17 +484,30 @@ class PassengerHomeContent extends StatelessWidget {
                         children: [
                           Column(
                             children: [
-                              _buildSearchField(
-                                'DE',
-                                'Conakry, GN',
-                                Icons.trip_origin,
+                              GestureDetector(
+                                onTap: () async {
+                                  String? res = await _showSimpleInputDialog('Ville de départ', 'D\'où partez-vous ?');
+                                  if (res != null) setState(() => _fromCity = res);
+                                },
+                                child: _buildSearchField(
+                                  'DE',
+                                  _fromCity,
+                                  Icons.trip_origin,
+                                ),
                               ),
                               const SizedBox(height: 8),
-                              _buildSearchField(
-                                'À',
-                                'Où souhaitez-vous aller ?',
-                                Icons.location_on,
-                                isHint: true,
+                              InkWell(
+                                onTap: () async {
+                                  // Simple input dialog for mockup
+                                  String? res = await _showSimpleInputDialog('Destination', 'Où souhaitez-vous aller ?');
+                                  if (res != null) setState(() => _toCity = res);
+                                },
+                                child: _buildSearchField(
+                                  'À',
+                                  _toCity.isEmpty ? 'Où souhaitez-vous aller ?' : _toCity,
+                                  Icons.location_on,
+                                  isHint: _toCity.isEmpty,
+                                ),
                               ),
                             ],
                           ),
@@ -312,7 +534,11 @@ class PassengerHomeContent extends StatelessWidget {
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(20),
                                   onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bientôt disponible')));
+                                    setState(() {
+                                      final temp = _fromCity;
+                                      _fromCity = _toCity;
+                                      _toCity = temp;
+                                    });
                                   },
                                   child: const Icon(Icons.swap_vert,
                                       color: AppColors.primary, size: 20),
@@ -326,18 +552,24 @@ class PassengerHomeContent extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildSearchField(
-                              'DATE',
-                              'Aujourd\'hui',
-                              Icons.calendar_today,
+                            child: InkWell(
+                              onTap: _selectDate,
+                              child: _buildSearchField(
+                                'DATE',
+                                "${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}",
+                                Icons.calendar_today,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildSearchField(
-                              'PASSAGERS',
-                              '1 Passager',
-                              Icons.group,
+                            child: InkWell(
+                              onTap: _showPassengerPicker,
+                              child: _buildSearchField(
+                                'PASSAGERS',
+                                '$_passengers Passager${_passengers > 1 ? 's' : ''}',
+                                Icons.group,
+                              ),
                             ),
                           ),
                         ],
@@ -348,17 +580,21 @@ class PassengerHomeContent extends StatelessWidget {
                         height: 56,
                         child: ElevatedButton.icon(
                           onPressed: () {
+                            if (_toCity.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez choisir une destination')));
+                              return;
+                            }
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => PassengerSearchResults(
-                                  from: 'Conakry',
-                                  to: 'Labé',
-                                  date: DateTime.now(),
-                                  passengers: 1,
+                                  from: _fromCity,
+                                  to: _toCity,
+                                  date: _selectedDate,
+                                  passengers: _passengers,
                                 ),
                               ),
-                            );
+                             );
                           },
                           icon: const Icon(Icons.search,
                               color: AppColors.onPrimary),
@@ -383,7 +619,6 @@ class PassengerHomeContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // AI Suggestion Bubble
                 // AI Assistant Suggestion Bubble
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,7 +690,12 @@ class PassengerHomeContent extends StatelessWidget {
                                   child: _buildAIActionButton('OUI, MERCI', AppColors.primary, true),
                                 ),
                                 const SizedBox(width: 8),
-                                _buildAIActionButton('PLUS TARD', AppColors.textSecondary, false),
+                                GestureDetector(
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Compris, à plus tard !')));
+                                  },
+                                  child: _buildAIActionButton('PLUS TARD', AppColors.textSecondary, false),
+                                ),
                               ],
                             )
                           ],
@@ -479,9 +719,7 @@ class PassengerHomeContent extends StatelessWidget {
                           fontWeight: FontWeight.w800),
                     ),
                     TextButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bientôt disponible')));
-                      },
+                      onPressed: widget.onNavigateToTrips,
                       child: Text(
                         'VOIR TOUT',
                         style: AppTextStyles.label.copyWith(
@@ -520,6 +758,33 @@ class PassengerHomeContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
 
+                // Upcoming Trips Section - Real Data
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Prochains Trajets',
+                      style: GoogleFonts.plusJakartaSans(
+                          color: AppColors.textPrimary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.refresh, size: 20, color: AppColors.primary),
+                      onPressed: _fetchUpcomingTrips,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (_isLoadingTrips)
+                  const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                else if (_upcomingTrips.isEmpty)
+                  Text('Aucun trajet prévu pour le moment.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary))
+                else
+                  ..._upcomingTrips.map((trip) => _buildTripListItem(trip)),
+
+                const SizedBox(height: 32),
+
                 // Travel Modules Grid
                 GridView.count(
                   shrinkWrap: true,
@@ -532,18 +797,39 @@ class PassengerHomeContent extends StatelessWidget {
                     _buildBentoItem(
                       Icons.confirmation_number_outlined,
                       'Mes Billets',
-                      '2 Voyages à venir',
+                      'Voir mes tickets',
                       AppColors.primary,
                       AppColors.primary.withOpacity(0.1),
-                      onTap: onNavigateToTickets,
+                      onTap: widget.onNavigateToTickets,
                     ),
                     _buildBentoItem(
                       Icons.history,
                       'Historique',
-                      '14 Voyages terminés',
+                      'Tous mes trajets',
                       AppColors.primary,
                       AppColors.surface,
-                      onTap: onNavigateToTrips,
+                      onTap: widget.onNavigateToTrips,
+                    ),
+                    _buildBentoItem(
+                      Icons.person_outline,
+                      'Mon Profil',
+                      'Gérer mon compte',
+                      AppColors.primary,
+                      AppColors.primary.withOpacity(0.1),
+                      onTap: widget.onNavigateToProfile,
+                    ),
+                    _buildBentoItem(
+                      Icons.smart_toy_outlined,
+                      'Assistant AI',
+                      'M\'aider à choisir',
+                      AppColors.primary,
+                      AppColors.surface,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const PassengerAIAssistant()),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -552,7 +838,69 @@ class PassengerHomeContent extends StatelessWidget {
             ),
           ),
         ),
-      ],
+      ),
+    ],
+  );
+}
+
+  Future<String?> _showSimpleInputDialog(String title, String hint) async {
+    String value = "";
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          onChanged: (v) => value = v,
+          decoration: InputDecoration(hintText: hint),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(context, value), child: const Text('OK')),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTripListItem(Trip trip) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            child: const Icon(Icons.directions_bus, color: AppColors.primary),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${trip.departureCityName} → ${trip.arrivalCityName}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text('${trip.departureTime.day}/${trip.departureTime.month} à ${trip.departureTime.hour}:${trip.departureTime.minute.toString().padLeft(2, '0')}', 
+                   style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 12)),
+              ],
+            ),
+          ),
+          Text(trip.formattedPrice, style: GoogleFonts.plusJakartaSans(color: AppColors.primary, fontWeight: FontWeight.bold)),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textSecondary),
+            onPressed: () {
+               Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PassengerBooking(trip: trip)),
+              );
+            },
+          )
+        ],
+      ),
     );
   }
 
@@ -667,7 +1015,7 @@ class PassengerHomeContent extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.border.withOpacity(0.5)),
+                    border: Border.all(color: AppColors.border.withOpacity(0.3)),
                   ),
                   child: Text(
                     tag,
@@ -726,19 +1074,19 @@ class PassengerHomeContent extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PassengerReservation(),
+                          builder: (context) => PassengerTrips(),
                         ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
                       foregroundColor: AppColors.primary,
                       elevation: 0,
-                      side: BorderSide(color: AppColors.primary.withValues(alpha: 0.2)),
+                      side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
-                      'RÉSERVER MAINTENANT',
+                      'VOIR LES TRAJETS',
                       style: GoogleFonts.plusJakartaSans(
                           fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                     ),

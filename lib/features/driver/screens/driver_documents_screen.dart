@@ -111,8 +111,8 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
       
       if (image != null) {
         // Dans une vraie app, on uploaderait ici vers Supabase Storage
-        // Ici, on simule l'envoi réussi pour mettre à jour le statut
-        await _updateDocumentStatus(statusKey, 'VALIDE');
+        // Ici, on simule l'envoi et on bascule en "EN ATTENTE DE VALIDATION"
+        await _updateDocumentStatus(statusKey, 'EN ATTENTE');
       }
     } catch (e) {
       if (mounted) {
@@ -210,7 +210,8 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
                 const SizedBox(height: 32),
                 _buildDocumentCard(
                   title: 'Permis de conduire',
-                  status: _currentMetadata['license_status'] ?? 'VALIDE',
+                  status: _currentMetadata['license_status'] ?? 'À IMPORTER',
+                  imageUrl: _currentMetadata['license_image'],
                   statusKey: 'license_status',
                   icon: Icons.assignment_ind_rounded,
                   expiry: _currentMetadata['expiry_date'] ?? '06/04/2027',
@@ -219,6 +220,7 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
                 _buildDocumentCard(
                   title: 'Assurance véhicule',
                   status: _currentMetadata['insurance_status'] ?? 'À RENOUVELER',
+                  imageUrl: _currentMetadata['insurance_image'],
                   statusKey: 'insurance_status',
                   icon: Icons.verified_user_rounded,
                   expiry: '12/05/2026',
@@ -226,7 +228,8 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
                 const SizedBox(height: 16),
                 _buildDocumentCard(
                   title: 'Carte grise',
-                  status: _currentMetadata['registration_status'] ?? 'VALIDE',
+                  status: _currentMetadata['registration_status'] ?? 'À IMPORTER',
+                  imageUrl: _currentMetadata['registration_image'],
                   statusKey: 'registration_status',
                   icon: Icons.description_rounded,
                   expiry: 'Permanent',
@@ -271,7 +274,7 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
                 ),
                 Text(
                   'Gardez vos documents à jour pour continuer à rouler sur la plateforme.',
-                  style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
+                  style: GoogleFonts.inter(color: Colors.white.withOpacity(0.8), fontSize: 12),
                 ),
               ],
             ),
@@ -284,6 +287,7 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
   Widget _buildDocumentCard({
     required String title,
     required String status,
+    String? imageUrl,
     required String statusKey,
     required IconData icon,
     required String expiry,
@@ -298,19 +302,25 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
     } catch (_) {}
 
     String statusLabel = status.toUpperCase();
-    if (statusLabel.isEmpty || statusLabel == 'NULL') {
-      statusLabel = 'PAS DE DOCUMENT';
-    } else if (isExpired) {
+    
+    // Règle stricte : si pas d'image, ce n'est pas VALIDE
+    if (imageUrl == null || imageUrl.isEmpty) {
+      if (statusLabel == 'VALIDE' || statusLabel == 'À IMPORTER' || statusLabel == 'NULL') {
+        statusLabel = 'MANQUANT';
+      }
+    }
+
+    if (isExpired) {
       statusLabel = 'À RENOUVELER';
     }
 
     final isValide = statusLabel == 'VALIDE';
-    final isPending = statusLabel == 'EN ATTENTE';
-    final isError = statusLabel == 'À RENOUVELER' || statusLabel == 'PAS DE DOCUMENT';
+    final isPending = statusLabel == 'EN ATTENTE' || statusLabel == 'EN ATTENTE DE VALIDATION';
+    final isError = statusLabel == 'À RENOUVELER' || statusLabel == 'MANQUANT' || statusLabel == 'À IMPORTER';
     
     final statusColor = isValide 
         ? AppColors.success 
-        : (isPending ? Colors.blue : (isError ? Colors.red : Colors.orange));
+        : (isPending ? Colors.orange : (isError ? Colors.red : Colors.orange));
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -326,7 +336,7 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(icon, color: AppColors.primary, size: 24),
@@ -344,7 +354,7 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.1),
+                  color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -390,7 +400,7 @@ class _DriverDocumentsScreenState extends State<DriverDocumentsScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: AppColors.primary.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),

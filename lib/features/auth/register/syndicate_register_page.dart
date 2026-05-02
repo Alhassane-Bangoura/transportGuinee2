@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/models/city.dart';
@@ -35,6 +37,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
   City? _selectedCity;
   Station? _selectedStation;
   final List<String> _selectedRouteIds = [];
+  File? _profileImage;
 
   @override
   void initState() {
@@ -95,6 +98,52 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
     super.dispose();
   }
 
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              title: const Text('Prendre une photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: AppColors.primary),
+              title: const Text('Choisir depuis la galerie'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source, imageQuality: 70);
+      if (pickedFile != null) {
+        setState(() {
+          _profileImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      debugPrint("Erreur image picker: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -130,6 +179,40 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.textSecondary,
                   height: 1.5,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+              
+              // Image Picker Avatar
+              Center(
+                child: GestureDetector(
+                  onTap: _showImageSourceDialog,
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
+                        child: _profileImage == null
+                            ? const Icon(Icons.person, size: 50, color: AppColors.primary)
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: const Icon(Icons.camera_alt, color: AppColors.primary, size: 20),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -390,12 +473,12 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface, // Correction ici
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border, width: 1.5),
+            border: Border.all(color: AppColors.border.withOpacity(0.8), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
+                color: Colors.black.withOpacity(0.02),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -409,8 +492,8 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.textHint,
-                fontWeight: FontWeight.w400,
+                color: AppColors.textHint.withOpacity(0.8),
+                fontWeight: FontWeight.w500,
               ),
               prefixIcon: Icon(icon, color: AppColors.primary, size: 22),
               suffixIcon: isPassword
@@ -542,7 +625,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: enabled ? AppColors.surface : AppColors.border.withValues(alpha: 0.1),
+            color: enabled ? AppColors.surface : AppColors.border.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border, width: 1.5),
           ),
@@ -624,6 +707,7 @@ class _SyndicateRegisterPageState extends State<SyndicateRegisterPage> {
           'registration_number': _registrationController.text.trim(),
           'office_address': _addressController.text.trim(),
           'manager_name': _managerNameController.text.trim(),
+          if (_profileImage != null) 'local_profile_image_path': _profileImage!.path,
         },
       );
 

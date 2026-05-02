@@ -19,7 +19,7 @@ class _StationAdminReportState extends State<StationAdminReport> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.8),
+        backgroundColor: AppColors.surface.withOpacity(0.8),
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -135,7 +135,7 @@ class _StationAdminReportState extends State<StationAdminReport> {
               Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(100)),
+                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(100)),
                 child: Text(change, style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w900, color: color)),
               ),
             ],
@@ -230,7 +230,7 @@ class _StationAdminReportState extends State<StationAdminReport> {
           width: 24,
           height: 100 * height,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : AppColors.primary.withValues(alpha: 0.2),
+            color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.2),
             borderRadius: BorderRadius.circular(4),
           ),
         ),
@@ -325,7 +325,7 @@ class _StationAdminReportState extends State<StationAdminReport> {
           )),
           Expanded(flex: 2, child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
+            decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
             child: Text(status, style: TextStyle(fontSize: 7, fontWeight: FontWeight.w900, color: statusColor), textAlign: TextAlign.center),
           )),
           Expanded(flex: 2, child: Text('$revenue GNF', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white), textAlign: TextAlign.right)),

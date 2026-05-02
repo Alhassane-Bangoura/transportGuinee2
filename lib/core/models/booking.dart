@@ -25,6 +25,15 @@ class Ticket {
   }
 
   bool get isActive => status == 'valid';
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'booking_id': bookingId,
+      'qr_code': qrCode,
+      'status': status,
+    };
+  }
 }
 
 class Booking {
@@ -42,6 +51,8 @@ class Booking {
   final String? departureStationName;
   final String? arrivalStationName;
   final DateTime? departureTime;
+  final String? driverName;
+  final String? driverPhone;
 
   // Billet associé (join)
   final Ticket? ticket;
@@ -59,6 +70,8 @@ class Booking {
     this.departureStationName,
     this.arrivalStationName,
     this.departureTime,
+    this.driverName,
+    this.driverPhone,
     this.ticket,
   });
 
@@ -83,6 +96,8 @@ class Booking {
       departureTime: tripData?['departure_time'] != null
           ? DateTime.parse(tripData!['departure_time'] as String)
           : null,
+      driverName: tripData?['driver']?['full_name'] as String?,
+      driverPhone: tripData?['driver']?['phone'] as String?,
       ticket: ticketList != null && ticketList.isNotEmpty
           ? Ticket.fromJson(ticketList.first as Map<String, dynamic>)
           : null,
@@ -92,4 +107,27 @@ class Booking {
   bool get isActive => ['pending', 'confirmed'].contains(status);
   String get formattedPrice =>
       totalPrice != null ? '${totalPrice!.toStringAsFixed(0)} GNF' : '-';
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'trip_id': tripId,
+      'user_id': userId,
+      'seats': seats,
+      'total_price': totalPrice,
+      'status': status,
+      'created_at': createdAt.toIso8601String(),
+      if (departureCityName != null || arrivalCityName != null || departureStationName != null || arrivalStationName != null)
+        'trips': {
+          if (departureTime != null) 'departure_time': departureTime!.toIso8601String(),
+          'routes': {
+            if (departureCityName != null) 'departure_city': {'name': departureCityName},
+            if (arrivalCityName != null) 'arrival_city': {'name': arrivalCityName},
+            if (departureStationName != null) 'departure_station': {'name': departureStationName},
+            if (arrivalStationName != null) 'arrival_station': {'name': arrivalStationName},
+          }
+        },
+      if (ticket != null) 'tickets': [ticket!.toJson()],
+    };
+  }
 }

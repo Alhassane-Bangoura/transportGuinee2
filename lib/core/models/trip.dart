@@ -13,6 +13,7 @@ class Trip {
   final String status;
   final String? syndicateName;
   final String? vehicleImage;
+  final DateTime createdAt;
 
   // Champs de la vue trips_with_details
   final String departureCityName;
@@ -49,6 +50,7 @@ class Trip {
     this.quayNumber,
     this.syndicateName,
     this.vehicleImage,
+    required this.createdAt,
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) {
@@ -74,6 +76,7 @@ class Trip {
       quayNumber: json['quay_number'] as String?,
       syndicateName: json['syndicate_name'] as String?,
       vehicleImage: json['vehicle_image'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String? ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -86,5 +89,32 @@ class Trip {
     if (h == 0) return '${m}min';
     if (m == 0) return '${h}h';
     return '${h}h${m.toString().padLeft(2, '0')}';
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'route_id': routeId,
+      'vehicle_id': vehicleId,
+      'driver_id': driverId,
+      'departure_time': departureTime.toIso8601String(),
+      'available_seats': availableSeats,
+      'price': price,
+      'status': status,
+      'departure_city_name': departureCityName,
+      'arrival_city_name': arrivalCityName,
+      'departure_station_name': departureStationName,
+      'arrival_station_name': arrivalStationName,
+      'vehicle_type': vehicleType,
+      'amenities': amenities,
+      'total_seats': totalSeats,
+      'license_plate': licensePlate,
+      'distance': distance,
+      'estimated_duration': estimatedDuration,
+      'quay_number': quayNumber,
+      'syndicate_name': syndicateName,
+      'vehicle_image': vehicleImage,
+      'created_at': createdAt.toIso8601String(),
+    };
   }
 }

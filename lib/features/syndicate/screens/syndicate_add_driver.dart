@@ -96,7 +96,7 @@ class _SyndicateAddDriverPageState extends State<SyndicateAddDriverPage> {
               backgroundColor: Colors.white,
               foregroundColor: AppColors.textPrimary,
               elevation: 2,
-              shadowColor: Colors.black.withValues(alpha: 0.1),
+              shadowColor: Colors.black.withOpacity(0.1),
             ),
           ),
         ),
@@ -119,7 +119,7 @@ class _SyndicateAddDriverPageState extends State<SyndicateAddDriverPage> {
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: AppColors.border),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10)),
                 ],
               ),
               child: Column(
@@ -139,7 +139,7 @@ class _SyndicateAddDriverPageState extends State<SyndicateAddDriverPage> {
                             hintText: 'Téléphone ou Email',
                             prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
                             filled: true,
-                            fillColor: AppColors.surfaceVariant.withValues(alpha: 0.3),
+                            fillColor: AppColors.surfaceVariant.withOpacity(0.3),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                           ),
                           onSubmitted: (_) => _search(),
@@ -174,9 +174,9 @@ class _SyndicateAddDriverPageState extends State<SyndicateAddDriverPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.2)),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10)),
+                    BoxShadow(color: AppColors.primary.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
                   ],
                 ),
                 child: Column(
@@ -214,7 +214,7 @@ class _SyndicateAddDriverPageState extends State<SyndicateAddDriverPage> {
                   padding: const EdgeInsets.symmetric(vertical: 40),
                   child: Column(
                     children: [
-                      Icon(Icons.person_search_rounded, size: 64, color: AppColors.textHint.withValues(alpha: 0.5)),
+                      Icon(Icons.person_search_rounded, size: 64, color: AppColors.textHint.withOpacity(0.5)),
                       const SizedBox(height: 16),
                       Text(
                         'Entrez les coordonnées du chauffeur\npour l\'ajouter à votre syndicat.',
@@ -254,7 +254,7 @@ class _SyndicateAddDriverPageState extends State<SyndicateAddDriverPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: ( _isLoading ? AppColors.textHint : AppColors.primary).withValues(alpha: 0.3),
+            color: ( _isLoading ? AppColors.textHint : AppColors.primary).withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),

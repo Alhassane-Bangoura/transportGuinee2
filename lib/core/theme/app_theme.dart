@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
@@ -32,6 +33,7 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 18,
           fontWeight: FontWeight.bold,

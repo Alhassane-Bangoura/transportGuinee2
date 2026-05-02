@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:guineetransport/core/theme/app_colors.dart';
 import 'package:guineetransport/core/services/auth_service.dart';
 import 'package:guineetransport/core/widgets/success_dialog.dart'; // Ajouté ici
@@ -24,6 +26,8 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
   final _confirmPasswordController = TextEditingController();
   final _emergencyNameController = TextEditingController();
   final _emergencyPhoneController = TextEditingController();
+  
+  File? _profileImage;
 
   // New Theme Colors based on user's screenshot
   // Utiliser les vraies couleurs de AppColors
@@ -45,17 +49,66 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
     super.dispose();
   }
 
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: cardColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.camera_alt, color: primaryMint),
+              title: const Text('Prendre une photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_library, color: primaryMint),
+              title: const Text('Choisir depuis la galerie'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: source, imageQuality: 70);
+      if (pickedFile != null) {
+        setState(() {
+          _profileImage = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      debugPrint("Erreur image picker: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 450),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
               
               // Bus Icon
               Icon(Icons.directions_bus, size: 56, color: primaryMint),
@@ -89,7 +142,7 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
                 decoration: BoxDecoration(
                   color: cardColor,
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: inputBorder.withValues(alpha: 0.5), width: 1),
+                  border: Border.all(color: inputBorder.withOpacity(0.5), width: 1),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -102,6 +155,39 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
                         letterSpacing: 2,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Image Picker Avatar
+                    Center(
+                      child: GestureDetector(
+                        onTap: _showImageSourceDialog,
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor: primaryMint.withOpacity(0.1),
+                              backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
+                              child: _profileImage == null
+                                  ? Icon(Icons.person, size: 50, color: primaryMint)
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: cardColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: inputBorder),
+                                ),
+                                child: Icon(Icons.camera_alt, color: primaryMint, size: 20),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -264,8 +350,10 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 
   Widget _buildInputField({
     required String label,
@@ -281,52 +369,70 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: mutedText,
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
+        Padding(
+          padding: const EdgeInsets.only(left: 12, bottom: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: mutedText.withOpacity(0.6),
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          style: TextStyle(color: (iconData != null || iconText != null) ? primaryMint : Colors.white, fontSize: 16),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: inputBorder, fontSize: 16),
-            prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: iconText != null
-                  ? Text(
-                      iconText,
-                      style: TextStyle(color: mutedText, fontSize: 20),
-                      textAlign: TextAlign.center,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: inputBorder.withOpacity(0.8), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: primaryMint.withOpacity(0.04),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: TextField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            cursorColor: primaryMint,
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w600),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: AppColors.textHint.withOpacity(0.8), fontSize: 15, fontWeight: FontWeight.w500),
+              prefixIcon: Container(
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primaryMint.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: iconText != null
+                    ? Text(
+                        iconText,
+                        style: TextStyle(color: primaryMint, fontSize: 16, fontWeight: FontWeight.w900),
+                        textAlign: TextAlign.center,
+                      )
+                    : Icon(iconData, color: primaryMint, size: 18),
+              ),
+              suffixIcon: isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: mutedText.withOpacity(0.4),
+                        size: 20,
+                      ),
+                      onPressed: onToggleVisibility,
                     )
-                  : Icon(iconData, color: mutedText, size: 20),
+                  : null,
+              border: InputBorder.none,
+              isDense: false,
+              contentPadding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      obscureText ? Icons.visibility_off_outlined : Icons.remove_red_eye_outlined,
-                      color: mutedText,
-                    ),
-                    onPressed: onToggleVisibility,
-                  )
-                : null,
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: inputBorder, width: 1.5),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: primaryMint, width: 2),
-            ),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ],
@@ -388,6 +494,7 @@ class _PassengerRegisterPageState extends State<PassengerRegisterPage> {
         metadata: {
           'emergency_name': _emergencyNameController.text.trim(),
           'emergency_phone': _emergencyPhoneController.text.trim(),
+          if (_profileImage != null) 'local_profile_image_path': _profileImage!.path,
         },
       );
 

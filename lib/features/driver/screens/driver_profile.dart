@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import 'driver_edit_profile.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/services/biometric_service.dart';
 import '../../../core/services/auth_service.dart';
@@ -93,7 +93,19 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
         ),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () async {
+              if (widget.profile != null) {
+                final updated = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DriverEditProfileScreen(profile: widget.profile!),
+                  ),
+                );
+                if (updated == true && widget.onRefresh != null) {
+                  widget.onRefresh!();
+                }
+              }
+            },
             child: Text(
               'ÉDITER',
               style: GoogleFonts.plusJakartaSans(
@@ -151,11 +163,11 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
+                border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 2),
               ),
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage(widget.profile?.metadata?['avatar_url'] ?? 'https://ui-avatars.com/api/?name=${widget.profile?.fullName ?? "Driver"}&background=1A3D75&color=fff&size=128'),
+                backgroundImage: widget.profile?.profileImage,
                 backgroundColor: AppColors.primary,
               ),
             ),
@@ -202,7 +214,7 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
           border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Colors.black.withOpacity(0.03),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -261,7 +273,7 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
             child: Icon(icon, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 16),
@@ -302,7 +314,7 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
                 child: const Icon(Icons.map_rounded, color: AppColors.primary, size: 24),
               ),
               const SizedBox(width: 16),
@@ -369,7 +381,7 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
                   child: Text(
                     widget.profile?.metadata?['vehicle_plate'] ?? 'SANS PLAQUE', 
                     style: GoogleFonts.robotoMono(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1)
@@ -397,28 +409,44 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
             Icons.assignment_ind_rounded, 
             'Permis de conduire', 
             meta?['license_status'] ?? 'VALIDE', 
-            (meta?['license_status']?.toString().toUpperCase() == 'À RENOUVELER') ? Colors.orange : AppColors.success,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta))),
+            _getStatusColor(meta?['license_status']),
+            onTap: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta)));
+              if (widget.onRefresh != null) widget.onRefresh!();
+            },
           ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
           _buildDocItem(
             Icons.verified_user_rounded, 
             'Assurance véhicule', 
             meta?['insurance_status'] ?? 'À RENOUVELER', 
-            (meta?['insurance_status']?.toString().toUpperCase() == 'VALIDE') ? AppColors.success : Colors.orange,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta))),
+            _getStatusColor(meta?['insurance_status'] ?? 'À RENOUVELER'),
+            onTap: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta)));
+              if (widget.onRefresh != null) widget.onRefresh!();
+            },
           ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
           _buildDocItem(
             Icons.description_rounded, 
             'Carte grise', 
             meta?['registration_status'] ?? 'VALIDE', 
-            (meta?['registration_status']?.toString().toUpperCase() == 'À RENOUVELER') ? Colors.orange : AppColors.success,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta))),
+            _getStatusColor(meta?['registration_status']),
+            onTap: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => DriverDocumentsScreen(metadata: meta)));
+              if (widget.onRefresh != null) widget.onRefresh!();
+            },
           ),
         ],
       ),
     );
+  }
+
+  Color _getStatusColor(String? status) {
+    status = status?.toUpperCase() ?? 'VALIDE';
+    if (status == 'À RENOUVELER' || status == 'PAS DE DOCUMENT') return Colors.red;
+    if (status == 'EN ATTENTE') return Colors.orange;
+    return AppColors.success;
   }
 
   Widget _buildDocItem(IconData icon, String title, String status, Color statusColor, {VoidCallback? onTap}) {
@@ -429,12 +457,12 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.textSecondary.withValues(alpha: 0.5), size: 24),
+            Icon(icon, color: AppColors.textSecondary.withOpacity(0.5), size: 24),
             const SizedBox(width: 16),
             Expanded(child: Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
               child: Text(status.toUpperCase(), style: GoogleFonts.plusJakartaSans(color: statusColor, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
             ),
             const SizedBox(width: 8),
@@ -457,7 +485,10 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
           _buildSettingsItem(
             Icons.lock_rounded, 
             'Sécurité du compte',
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverSecurityScreen())),
+            onTap: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverSecurityScreen()));
+              if (widget.onRefresh != null) widget.onRefresh!();
+            },
           ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
           if (_isBiometricAvailable) ...[
@@ -507,17 +538,19 @@ class _DriverProfilePageState extends State<DriverProfilePage> {
       width: double.infinity,
       height: 56,
       decoration: BoxDecoration(
-        color: AppColors.error.withValues(alpha: 0.05),
+        color: AppColors.error.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.error.withOpacity(0.2)),
       ),
       child: TextButton(
         onPressed: () async {
-          await AuthService.signOut();
-          if (mounted && context.mounted) {
-            // Use popUntil to go back to the first screen (SplashScreen/Login)
-            // This avoids direct import of LoginPage and breaks the circle
-            Navigator.of(context).popUntil((route) => route.isFirst);
+          try {
+            await AuthService.signOut();
+            if (mounted) {
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+            }
+          } catch (e) {
+            debugPrint('Logout error: $e');
           }
         },
         child: Row(

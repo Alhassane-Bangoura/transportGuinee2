@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/models/trip.dart';
 import 'passenger_payment.dart';
@@ -14,8 +15,8 @@ class PassengerBooking extends StatefulWidget {
 
 class _PassengerBookingState extends State<PassengerBooking> {
   int _selectedSeat = -1;
-  final List<int> _reservedSeats = [3, 7, 8, 18]; // Matching HTML disabled seats
-  final int _recommendedSeat = 12;
+  final List<int> _reservedSeats = []; // Vidé pour l'MVP : Tous les sièges sont libres
+  final int _recommendedSeat = 2; // Siège recommandé par défaut
 
   @override
   Widget build(BuildContext context) {
@@ -80,11 +81,16 @@ class _PassengerBookingState extends State<PassengerBooking> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('TRAJET', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: AppColors.textSecondary)),
+                Text('TRAJET • ${widget.trip.departureStationName.toUpperCase()}', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: AppColors.textSecondary)),
                 const SizedBox(height: 4),
                 Text('${widget.trip.departureCityName} → ${widget.trip.arrivalCityName}', 
                   style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary),
                   maxLines: 1, overflow: TextOverflow.ellipsis),
+                if (widget.trip.syndicateName != null) 
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text('Chauffeur/Syndicat : ${widget.trip.syndicateName}', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textSecondary)),
+                  ),
               ],
             ),
           ),
@@ -94,8 +100,8 @@ class _PassengerBookingState extends State<PassengerBooking> {
             children: [
               Text('DATE & HEURE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: AppColors.textSecondary)),
               const SizedBox(height: 4),
-              Text('24 Oct, 08:30', // Or integrate dynamic widget.trip.departureTime here
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
+              Text(DateFormat('dd MMM, HH:mm').format(widget.trip.departureTime), 
+                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
             ],
           )
         ],
@@ -177,34 +183,7 @@ class _PassengerBookingState extends State<PassengerBooking> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Column(
-              children: [
-                _buildSeatRow([1, 2], [3]),
-                const SizedBox(height: 16),
-                _buildSeatRow([4, 5], [6]),
-                const SizedBox(height: 16),
-                _buildSeatRow([7, 8], [9]),
-                const SizedBox(height: 16),
-                _buildSeatRow([10, 11], [12]),
-                const SizedBox(height: 24),
-                // Exit Row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Center(
-                        child: Text('SORTIE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.primary)),
-                      ),
-                    ),
-                    const Expanded(flex: 1, child: SizedBox()), // Aisle
-                    const Expanded(flex: 1, child: SizedBox()), // Placeholder for remaining alignment
-                  ],
-                ),
-                const SizedBox(height: 24),
-                _buildSeatRow([13, 14], [15]),
-                const SizedBox(height: 16),
-                _buildSeatRow([16, 17], [18]),
-              ],
+              children: _generateDynamicSeats(),
             ),
           ),
           const SizedBox(height: 32),
@@ -220,6 +199,39 @@ class _PassengerBookingState extends State<PassengerBooking> {
         ],
       ),
     );
+  }
+
+  List<Widget> _generateDynamicSeats() {
+    int totalSeats = widget.trip.totalSeats ?? widget.trip.availableSeats;
+    if (totalSeats <= 0) totalSeats = 15; // Fallback MVP
+    
+    List<Widget> rows = [];
+    for (int i = 1; i <= totalSeats; i += 3) {
+      int s1 = i;
+      int s2 = i + 1 <= totalSeats ? i + 1 : -1;
+      int s3 = i + 2 <= totalSeats ? i + 2 : -1;
+      
+      List<int> leftSeats = [s1];
+      if (s2 != -1) leftSeats.add(s2);
+      
+      List<int> rightSeats = [];
+      if (s3 != -1) rightSeats.add(s3);
+      
+      rows.add(_buildSeatRow(leftSeats, rightSeats));
+      rows.add(const SizedBox(height: 16));
+      
+      // Ajouter une rangée Sortie logique vers le milieu du bus
+      if (totalSeats > 10 && i == ((totalSeats ~/ 3 ~/ 2) * 3 + 1)) {
+        rows.add(Row(
+          children: [
+            Expanded(flex: 2, child: Center(child: Text('SORTIE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 2, color: AppColors.primary)))),
+            const Expanded(flex: 2, child: SizedBox()),
+          ],
+        ));
+        rows.add(const SizedBox(height: 16));
+      }
+    }
+    return rows;
   }
 
   Widget _buildSeatRow(List<int> leftSeats, List<int> rightSeats) {

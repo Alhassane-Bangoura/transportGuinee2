@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../core/services/storage_service.dart';
 import '../../../core/theme/app_colors.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -32,6 +35,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
         _metadataControllers[key] = TextEditingController(text: value);
       }
     });
+
+    // Récupérer une éventuelle image perdue lors du redémarrage de l'activité sur Android
+    _handleLostData();
+  }
+
+  Future<void> _handleLostData() async {
+    if (!Platform.isAndroid) return;
+    final LostDataResponse response = await _picker.retrieveLostData();
+    if (response.isEmpty) return;
+    if (response.file != null && mounted) {
+      setState(() => _selectedImage = File(response.file!.path));
+    }
   }
 
   @override
@@ -42,12 +57,41 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
+  File? _selectedImage;
+  final _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery, 
+        imageQuality: 70,
+        maxWidth: 1000,
+        maxHeight: 1000,
+      );
+      if (pickedFile != null && mounted) {
+        setState(() => _selectedImage = File(pickedFile.path));
+      }
+    } catch (e) {
+      debugPrint('[EditProfile] Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Impossible de charger l\'image : $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
 
     try {
+      String? avatarUrl = widget.profile.avatarUrl;
+      if (_selectedImage != null) {
+        avatarUrl = await StorageService.uploadProfileImage(_selectedImage!, widget.profile.id);
+      }
+
       final updatedMetadata = Map<String, dynamic>.from(widget.profile.metadata ?? {});
       _metadataControllers.forEach((key, controller) {
         updatedMetadata[key] = controller.text;
@@ -56,6 +100,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       await AuthService.updateProfile(
         fullName: _nameController.text,
         phone: _phoneController.text,
+        avatarUrl: avatarUrl,
         metadata: updatedMetadata,
       );
 
@@ -63,12 +108,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profil mis à jour avec succès')),
         );
-        Navigator.of(context).pop(true); // Return true to indicate update
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la mise à jour: $e')),
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Erreur de mise à jour'),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+            ],
+          ),
         );
       }
     } finally {
@@ -96,6 +148,39 @@ class _EditProfilePageState extends State<EditProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Center(
+                child: Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.primary.withOpacity(0.1), width: 4),
+                        image: DecorationImage(
+                          image: _selectedImage != null 
+                            ? FileImage(_selectedImage!) as ImageProvider
+                            : widget.profile.profileImage,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
               _buildSectionTitle('INFORMATIONS GÉNÉRALES'),
               const SizedBox(height: 16),
               _buildTextField(

@@ -29,36 +29,43 @@ class LocationService {
     return (data as List).map((json) => Station.fromJson(json)).toList();
   }
 
-  /// Récupère les trajets (routes) d'une gare de départ
-  static Future<List<RouteModel>> getRoutesByStation(String stationId) async {
+  /// Récupère les trajets (routes) d'une ville (ou gare)
+  /// Récupère les trajets (routes) d'une gare (avec fallback ville)
+  static Future<List<RouteModel>> getRoutesByStation(String stationId, {String? cityId}) async {
     try {
-      final data = await _supabase
+      // 1. Essayer par GARE d'abord (plus précis)
+      var data = await _supabase
           .from('routes')
           .select('''
             *,
-            departure_station:stations!departure_station_id(name),
-            arrival_station:stations!arrival_station_id(
-              name, 
-              city:cities!city_id(name)
-            )
+            departure_city:cities!departure_city_id(name),
+            arrival_city:cities!arrival_city_id(name)
           ''')
           .eq('departure_station_id', stationId);
 
-      debugPrint('[LocationService] Fetched ${data.length} routes for station $stationId');
+      // 2. Si vide et qu'on a un cityId, essayer par VILLE (moins précis)
+      if ((data as List).isEmpty && cityId != null) {
+        data = await _supabase
+            .from('routes')
+            .select('''
+              *,
+              departure_city:cities!departure_city_id(name),
+              arrival_city:cities!arrival_city_id(name)
+            ''')
+            .eq('departure_city_id', cityId);
+      }
+
+      debugPrint('[LocationService] Fetched ${data.length} routes for station $stationId (Fallback city: $cityId)');
 
       return (data as List).map((json) {
-        final arrivalStation = json['arrival_station'];
-        final arrivalCity = arrivalStation != null ? arrivalStation['city'] : null;
-        
         return RouteModel(
           id: json['id'] as String,
-          departureStationId: json['departure_station_id'] as String,
-          arrivalStationId: json['arrival_station_id'] as String,
-          departureStationName: json['departure_station']['name'] as String?,
-          arrivalStationName: arrivalStation?['name'] as String?,
-          arrivalCityName: arrivalCity?['name'] as String?,
+          departureStationId: json['departure_station_id'] as String? ?? '',
+          arrivalStationId: json['arrival_station_id'] as String? ?? '',
+          departureStationName: json['departure_city']?['name'] as String?,
+          arrivalStationName: json['arrival_city']?['name'] as String?,
+          arrivalCityName: json['arrival_city']?['name'] as String?,
           arrivalCityId: json['arrival_city_id'] as String?,
-          syndicateId: json['syndicate_id'] as String?,
         );
       }).toList();
     } catch (e) {

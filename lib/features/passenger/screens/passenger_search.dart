@@ -40,7 +40,7 @@ class _PassengerSearchState extends State<PassengerSearch> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+        backgroundColor: AppColors.surface.withOpacity(0.9),
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -144,7 +144,7 @@ class _PassengerSearchState extends State<PassengerSearch> {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                  color: AppColors.primary.withOpacity(0.3),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
@@ -244,14 +244,14 @@ class _PassengerSearchState extends State<PassengerSearch> {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+                  colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.2),
+                    color: AppColors.primary.withOpacity(0.2),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -267,7 +267,7 @@ class _PassengerSearchState extends State<PassengerSearch> {
                       Text(
                         'AI TIPS',
                         style: GoogleFonts.plusJakartaSans(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: Colors.white.withOpacity(0.7),
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 2,
@@ -288,7 +288,7 @@ class _PassengerSearchState extends State<PassengerSearch> {
                   Text(
                     'Le trajet Conakry → Labé est 20% moins fréquenté le mardi matin. Réservez maintenant pour plus de confort.',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 14,
                       height: 1.5,
                     ),
@@ -322,7 +322,7 @@ class _PassengerSearchState extends State<PassengerSearch> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
                 image: const DecorationImage(
-                  image: const NetworkImage(AppAssets.searchBackground),
+                  image: NetworkImage(AppAssets.searchBackground),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(Colors.black12, BlendMode.darken),
                 ),
@@ -372,7 +372,7 @@ class _PassengerSearchState extends State<PassengerSearch> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.background.withValues(alpha: 0.5),
+          color: AppColors.background.withOpacity(0.5),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
         ),
@@ -433,7 +433,7 @@ class _PassengerSearchState extends State<PassengerSearch> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

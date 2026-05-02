@@ -3,6 +3,9 @@
 // ============================================================================
 
 import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/notification_model.dart';
 
@@ -25,8 +28,8 @@ class NotificationService {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
 
-    // Arrêter l'ancien canal si existant
-    _channel?.unsubscribe();
+    // Éviter les initialisations multiples
+    if (_channel != null) return;
 
     // Création du canal Realtime
     _channel = _supabase
@@ -48,18 +51,39 @@ class NotificationService {
         .subscribe();
   }
 
+  List<NotificationModel> _cachedNotifications = [];
+
   /// Récupère l'historique des notifications
   Future<List<NotificationModel>> getNotifications() async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
-    final response = await _supabase
-        .from('notifications')
-        .select()
-        .eq('user_id', userId)
-        .order('created_at', ascending: false);
+    try {
+      final response = await _supabase
+          .from('notifications')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
 
-    return (response as List).map((json) => NotificationModel.fromJson(json)).toList();
+      _cachedNotifications = (response as List).map((json) => NotificationModel.fromJson(json)).toList();
+      
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cache_notifications', jsonEncode(_cachedNotifications.map((e) => e.toJson()).toList()));
+      
+      return _cachedNotifications;
+    } catch (e) {
+      if (_cachedNotifications.isEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        final cachedStr = prefs.getString('cache_notifications');
+        if (cachedStr != null) {
+          try {
+            final List<dynamic> decoded = jsonDecode(cachedStr);
+            _cachedNotifications = decoded.map((e) => NotificationModel.fromJson(e)).toList();
+          } catch (_) {}
+        }
+      }
+      return _cachedNotifications;
+    }
   }
 
   /// Marque une notification comme lue
@@ -70,40 +94,9 @@ class NotificationService {
         .eq('id', notificationId);
   }
 
-  /// Notifie tous les passagers de la publication d'un nouveau trajet
-  Future<void> notifyPassengersOfNewTrip({
-    required String tripId,
-    required String departureCity,
-    required String arrivalCity,
-    required String departureTime,
-  }) async {
-    try {
-      // 1. Récupérer tous les passagers
-      final passengersRes = await _supabase
-          .from('profiles')
-          .select('id')
-          .eq('role', 'PASSENGER');
 
-      final List<dynamic> passengers = passengersRes as List;
-      if (passengers.isEmpty) return;
 
-      // 2. Préparer les notifications par lot
-      final List<Map<String, dynamic>> notifications = passengers.map((p) => {
-        'user_id': p['id'],
-        'title': 'Nouveau Trajet ! 🚌',
-        'message': 'Un nouveau départ de $departureCity vers $arrivalCity est prévu à $departureTime.',
-        'type': 'new_trip',
-        'metadata': {'trip_id': tripId},
-        'is_read': false,
-        'created_at': DateTime.now().toIso8601String(),
-      }).toList();
 
-      // 3. Insertion par lot (batch insert)
-      await _supabase.from('notifications').insert(notifications);
-    } catch (e) {
-      print('Erreur lors de la notification des passagers: $e');
-    }
-  }
 
   /// Nettoyage
   void dispose() {

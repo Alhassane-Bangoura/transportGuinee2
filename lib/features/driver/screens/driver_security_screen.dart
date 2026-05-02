@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 
 class DriverSecurityScreen extends StatefulWidget {
@@ -10,8 +11,50 @@ class DriverSecurityScreen extends StatefulWidget {
 }
 
 class _DriverSecurityScreenState extends State<DriverSecurityScreen> {
+  final _supabase = Supabase.instance.client;
   bool _twoFactorEnabled = false;
-  bool _faceIdEnabled = true;
+  bool _faceIdEnabled = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSecuritySettings();
+  }
+
+  Future<void> _loadSecuritySettings() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user != null) {
+        final res = await _supabase.from('profiles').select('metadata').eq('id', user.id).single();
+        final meta = res['metadata'] as Map<String, dynamic>? ?? {};
+        if (mounted) {
+          setState(() {
+            _twoFactorEnabled = meta['2fa_enabled'] == true;
+            _faceIdEnabled = meta['biometric_enabled'] == true;
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _updateSetting(String key, bool value) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return;
+
+      final res = await _supabase.from('profiles').select('metadata').eq('id', user.id).single();
+      final meta = Map<String, dynamic>.from(res['metadata'] as Map<String, dynamic>? ?? {});
+      
+      meta[key] = value;
+      await _supabase.from('profiles').update({'metadata': meta}).eq('id', user.id);
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +76,16 @@ class _DriverSecurityScreenState extends State<DriverSecurityScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _buildSecurityList(),
-          ],
-        ),
-      ),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+        : SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                _buildSecurityList(),
+              ],
+            ),
+          ),
     );
   }
 
@@ -65,7 +110,10 @@ class _DriverSecurityScreenState extends State<DriverSecurityScreen> {
             title: 'Authentification à deux facteurs',
             subtitle: 'Protégez votre compte avec un code SMS',
             value: _twoFactorEnabled,
-            onChanged: (val) => setState(() => _twoFactorEnabled = val),
+            onChanged: (val) {
+              setState(() => _twoFactorEnabled = val);
+              _updateSetting('2fa_enabled', val);
+            },
           ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
           _buildSwitchItem(
@@ -73,7 +121,10 @@ class _DriverSecurityScreenState extends State<DriverSecurityScreen> {
             title: 'Biométrie (Face ID / Touche ID)',
             subtitle: 'Connexion rapide et sécurisée',
             value: _faceIdEnabled,
-            onChanged: (val) => setState(() => _faceIdEnabled = val),
+            onChanged: (val) {
+              setState(() => _faceIdEnabled = val);
+              _updateSetting('biometric_enabled', val);
+            },
           ),
           const Divider(height: 1, indent: 60, color: AppColors.border),
           _buildActionItem(
@@ -98,7 +149,7 @@ class _DriverSecurityScreenState extends State<DriverSecurityScreen> {
       contentPadding: const EdgeInsets.all(16),
       leading: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
         child: Icon(icon, color: AppColors.primary, size: 24),
       ),
       title: Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
@@ -120,7 +171,7 @@ class _DriverSecurityScreenState extends State<DriverSecurityScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
             child: Icon(icon, color: AppColors.primary, size: 24),
           ),
           const SizedBox(width: 16),

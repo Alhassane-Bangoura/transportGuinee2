@@ -19,7 +19,7 @@ class _SyndicateDriverManagementState extends State<SyndicateDriverManagement> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+        backgroundColor: AppColors.surface.withOpacity(0.9),
         elevation: 0,
         title: Row(
           children: [
@@ -72,7 +72,7 @@ class _SyndicateDriverManagementState extends State<SyndicateDriverManagement> {
                 decoration: InputDecoration(
                   icon: const Icon(Icons.search, color: AppColors.textSecondary),
                   hintText: 'Rechercher un chauffeur...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                  hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.5)),
                   border: InputBorder.none,
                 ),
               ),
@@ -157,7 +157,7 @@ class _SyndicateDriverManagementState extends State<SyndicateDriverManagement> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 16),
@@ -212,7 +212,7 @@ class _SyndicateDriverManagementState extends State<SyndicateDriverManagement> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(100)),
+                decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(100)),
                 child: Text(status.toUpperCase(), style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w900, color: statusColor, letterSpacing: 1)),
               ),
             ],
@@ -238,7 +238,7 @@ class _SyndicateDriverManagementState extends State<SyndicateDriverManagement> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Icon(isHistory ? Icons.history : Icons.route, color: isHistory ? AppColors.textSecondary.withValues(alpha: 0.5) : AppColors.primary, size: 16),
+              Icon(isHistory ? Icons.history : Icons.route, color: isHistory ? AppColors.textSecondary.withOpacity(0.5) : AppColors.primary, size: 16),
               const SizedBox(width: 12),
               Text(route, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: isHistory ? AppColors.textSecondary : Colors.white)),
             ],

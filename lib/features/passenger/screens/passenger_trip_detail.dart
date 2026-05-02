@@ -30,7 +30,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               onPressed: () => Navigator.of(context).pop(),
@@ -63,9 +63,9 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
                     boxShadow: [
-                      BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 5))
+                      BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))
                     ],
                   ),
                   child: Row(
@@ -128,7 +128,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.black.withValues(alpha: 0.4), Colors.transparent, AppColors.background],
+            colors: [Colors.black.withOpacity(0.4), Colors.transparent, AppColors.background],
           ),
         ),
         child: Padding(
@@ -139,9 +139,9 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.95),
+                  color: Colors.white.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20)],
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20)],
                 ),
                 child: Row(
                   children: [
@@ -321,7 +321,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
       decoration: BoxDecoration(
         color: const Color(0xFF0F172A),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -331,12 +331,12 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
             children: [
               Text('DISPONIBILITÉ', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.blueAccent)),
               Text('12 Places restantes', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
-              Text('Sièges XL avec inclinaison 140°', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: Colors.white.withValues(alpha: 0.5))),
+              Text('Sièges XL avec inclinaison 140°', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: Colors.white.withOpacity(0.5))),
             ],
           ),
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.blueAccent.withValues(alpha: 0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.1), shape: BoxShape.circle),
             child: const Icon(Icons.airline_seat_recline_extra, color: Colors.blueAccent, size: 28),
           ),
         ],
@@ -366,7 +366,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
                 children: [
                   Text(trip.price.toStringAsFixed(0), style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary)),
                   const SizedBox(width: 4),
-                  Text('GNF', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary.withValues(alpha: 0.7))),
+                  Text('GNF', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary.withOpacity(0.7))),
                 ],
               ),
             ],
@@ -384,7 +384,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 8,
-              shadowColor: AppColors.primary.withValues(alpha: 0.4),
+              shadowColor: AppColors.primary.withOpacity(0.4),
             ),
             child: Row(
               children: [

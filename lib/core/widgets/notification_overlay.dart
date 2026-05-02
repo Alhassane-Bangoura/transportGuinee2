@@ -22,15 +22,15 @@ class _NotificationOverlayState extends State<NotificationOverlay> {
   @override
   void initState() {
     super.initState();
-    // Initialisation du service et écoute
-    final service = NotificationService();
-    service.initialize();
-    _subscription = service.onNotification.listen(_showNotification);
+    // Désactivation temporaire pour debug ANR
+    // final service = NotificationService();
+    // service.initialize();
+    // _subscription = service.onNotification.listen(_showNotification);
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    // _subscription.cancel();
     _dismissTimer?.cancel();
     super.dispose();
   }

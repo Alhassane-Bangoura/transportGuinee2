@@ -57,7 +57,7 @@ class _OnboardingPage2State extends State<OnboardingPage2> {
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withOpacity(0.3),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
@@ -66,7 +66,7 @@ class _OnboardingPage2State extends State<OnboardingPage2> {
               child: TextButton(
                 onPressed: widget.onSkip,
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.black.withValues(alpha: 0.2),
+                  backgroundColor: Colors.black.withOpacity(0.2),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 child: Text(
@@ -154,7 +154,7 @@ class _OnboardingPage2State extends State<OnboardingPage2> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 4,
-                        shadowColor: AppColors.accent.withValues(alpha: 0.5),
+                        shadowColor: AppColors.accent.withOpacity(0.5),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

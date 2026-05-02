@@ -56,6 +56,7 @@ class MockData {
       vehicleType: 'Minibus',
       status: 'scheduled',
       amenities: ['Clim', 'WiFi'],
+      createdAt: DateTime.now(),
     ),
     Trip(
       id: 'trip-2',
@@ -70,6 +71,7 @@ class MockData {
       vehicleType: 'Car',
       status: 'boarding',
       amenities: ['Clim', 'TV'],
+      createdAt: DateTime.now(),
     ),
     Trip(
       id: 'trip-3',
@@ -83,6 +85,7 @@ class MockData {
       availableSeats: 22,
       vehicleType: 'Bus',
       status: 'scheduled',
+      createdAt: DateTime.now(),
     ),
   ];
 

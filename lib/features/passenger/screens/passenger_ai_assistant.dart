@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/constants/app_assets.dart';
-
-import 'package:intl/intl.dart';
 import '../../../core/models/trip.dart';
 import '../../../core/services/trip_service.dart';
+import '../../assistant/services/assistant_service.dart';
+import '../../assistant/models/assistant_message.dart';
 
 enum ChatMessageType { user, assistant, travelCard }
 
-class ChatMessage {
+class ChatMessageUI {
   final String text;
   final ChatMessageType type;
   final Trip? tripData;
   final DateTime timestamp;
 
-  ChatMessage({required this.text, required this.type, required this.timestamp, this.tripData});
+  ChatMessageUI({required this.text, required this.type, required this.timestamp, this.tripData});
 }
 
-/// Écran de l'Assistant IA pour le Passager
-/// Correspond à intelligent_assistant_passager.html
 class PassengerAIAssistant extends StatefulWidget {
   const PassengerAIAssistant({super.key});
 
@@ -31,17 +27,79 @@ class PassengerAIAssistant extends StatefulWidget {
 class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<ChatMessage> _messages = [];
-  bool _isLoading = false;
+  final _assistantService = AssistantService(fallbackRole: 'PASSAGER');
+  
+  List<Map<String, dynamic>> _conversations = [];
+  List<ChatMessageUI> _messages = [];
+  bool _isLoading = true;
+  String? _currentConversationId;
 
   @override
   void initState() {
     super.initState();
-    _messages.add(ChatMessage(
-      text: 'Stricly online for your journey',
-      type: ChatMessageType.assistant,
-      timestamp: DateTime.now(),
-    ));
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    try {
+      final conversations = await _assistantService.getConversations();
+      if (mounted) {
+        setState(() {
+          _conversations = conversations;
+          if (conversations.isNotEmpty) {
+            _switchToConversation(conversations.first['id']);
+          } else {
+            _isLoading = false;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _switchToConversation(String? id) async {
+    if (id == null) {
+      setState(() {
+        _currentConversationId = null;
+        _messages = [];
+        _isLoading = false;
+      });
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final history = await _assistantService.getHistory(conversationId: id);
+      if (mounted) {
+        setState(() {
+          _currentConversationId = id;
+          _messages = history.map((m) => ChatMessageUI(
+            text: m.content,
+            type: m.senderType == 'user' ? ChatMessageType.user : ChatMessageType.assistant,
+            timestamp: m.createdAt,
+          )).toList();
+          _isLoading = false;
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _createNewChat() async {
+    setState(() {
+      _currentConversationId = null;
+      _messages = [];
+      _messageController.clear();
+      _isLoading = false;
+    });
+    // Fermer le drawer seulement s'il est ouvert
+    if (mounted && Navigator.canPop(context)) {
+       // On ne pop que si on est dans un Drawer (vérification simple par le contexte)
+       try { Scaffold.of(context).closeEndDrawer(); } catch (e) {}
+    }
   }
 
   void _scrollToBottom() {
@@ -55,106 +113,83 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
   }
 
   Future<void> _handleSubmitted(String text) async {
-    if (text.trim().isEmpty) return;
+    final query = text.trim();
+    if (query.isEmpty || _isLoading) return;
 
-    final userText = text.trim();
     _messageController.clear();
-
     setState(() {
-      _messages.add(ChatMessage(
-        text: userText,
+      _messages.add(ChatMessageUI(
+        text: query,
         type: ChatMessageType.user,
         timestamp: DateTime.now(),
       ));
       _isLoading = true;
     });
 
-    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+    _scrollToBottom();
 
     try {
-      final msgLower = userText.toLowerCase();
-      String responseText = "Désolé, je suis uniquement formé pour vous aider à trouver des trajets ou gérer vos billets. Pouvez-vous préciser ?";
-      Trip? responseTrip;
+      // 1. Initialiser la conversation si besoin
+      if (_currentConversationId == null) {
+        _currentConversationId = await _assistantService.createConversation(
+          query.length > 30 ? '${query.substring(0, 30)}...' : query
+        );
+        // Rafraîchir la liste des conversations en arrière-plan
+        _assistantService.getConversations().then((convs) {
+          if (mounted) setState(() => _conversations = convs);
+        });
+      }
 
-      String? dest;
-      final cities = ['kankan', 'labé', 'labe', 'kindia', 'mamou', 'nzérékoré', 'nzerekore', 'siguiri', 'conakry'];
-      for (final c in cities) {
-        if (msgLower.contains(c)) {
-          dest = c == 'kankan' ? 'Kankan' 
-               : (c == 'labé' || c == 'labe') ? 'Labé' 
-               : c == 'kindia' ? 'Kindia'
-               : c == 'mamou' ? 'Mamou'
-               : (c == 'nzérékoré' || c == 'nzerekore') ? 'Nzérékoré'
-               : c == 'siguiri' ? 'Siguiri'
-               : c == 'conakry' ? 'Conakry'
-               : c;
-          break;
+      // 2. Appel au service avec historique
+      final historyForService = _messages
+          .where((m) => m.type != ChatMessageType.travelCard)
+          .map((m) => AssistantMessage(
+                id: '', userId: '', createdAt: m.timestamp,
+                role: 'PASSAGER', content: m.text,
+                senderType: m.type == ChatMessageType.user ? 'user' : 'ai'
+              ))
+          .toList();
+
+      final aiResponse = await _assistantService.sendMessage(
+        query, historyForService, conversationId: _currentConversationId
+      );
+
+      // 3. Logique locale pour afficher un TravelCard
+      Trip? specialTrip;
+      final msgLower = query.toLowerCase();
+      if (msgLower.contains('labé') || msgLower.contains('mamou') || msgLower.contains('conakry')) {
+        final res = await TripService.getUpcomingTrips(limit: 5);
+        if (res.data != null && res.data!.isNotEmpty) {
+           if (aiResponse.content.toLowerCase().contains('trouvé') || aiResponse.content.toLowerCase().contains('disponible')) {
+             specialTrip = res.data!.first;
+           }
         }
       }
 
-      bool isQueryingTrip = dest != null || 
-          msgLower.contains('trajet') || msgLower.contains('bus') || 
-          msgLower.contains('aller') || msgLower.contains('partir') ||
-          msgLower.contains('cherch') || msgLower.contains('trouv');
-
-      if (msgLower.contains('bonjour') || msgLower.contains('salut')) {
-        responseText = "Bonjour ! Comment puis-je vous aider avec vos déplacements aujourd'hui ?";
-      } else if (msgLower.contains('billet') || msgLower.contains('historique') || msgLower.contains('réservation')) {
-        responseText = "Pour consulter vos billets et réservations, veuillez vous rendre dans l'onglet 'Billets' ou 'Trajets' depuis le menu principal !";
-      } else if (isQueryingTrip) {
-        if (dest != null) {
-          setState(() {
-            _messages.add(ChatMessage(
-              text: "Recherche de trajets vers $dest en cours... 🔍",
-              type: ChatMessageType.assistant,
-              timestamp: DateTime.now(),
-            ));
-          });
-          
-          final res = await TripService.getUpcomingTrips(limit: 50);
-          final allTrips = res.data ?? [];
-          
-          // Vérification si la ville est destination
-          final matching = allTrips.where((t) => t.arrivalCityName.toLowerCase().contains(dest!.toLowerCase())).toList();
-
-          if (matching.isNotEmpty) {
-            responseText = "J'ai trouvé ${matching.length} trajet(s) vers $dest ! Voici le prochain départ :";
-            responseTrip = matching.first;
-          } else {
-            responseText = "Désolé, mais je ne vois aucun trajet prévu vers $dest en ce moment.";
-          }
-        } else {
-          responseText = "D'accord, pour quelle destination cherchez-vous ce trajet ? (Ex: Labé, Kankan, Kindia)";
-        }
-      }
-
-      setState(() {
-        _messages.add(ChatMessage(
-          text: responseText,
-          type: ChatMessageType.assistant,
-          timestamp: DateTime.now(),
-        ));
-        if (responseTrip != null) {
-          _messages.add(ChatMessage(
-            text: '',
-            type: ChatMessageType.travelCard,
+      if (mounted) {
+        setState(() {
+          _messages.add(ChatMessageUI(
+            text: aiResponse.content,
+            type: ChatMessageType.assistant,
             timestamp: DateTime.now(),
-            tripData: responseTrip,
           ));
-        }
-        _isLoading = false;
-      });
-      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
-
+          if (specialTrip != null) {
+            _messages.add(ChatMessageUI(
+              text: '',
+              type: ChatMessageType.travelCard,
+              timestamp: DateTime.now(),
+              tripData: specialTrip,
+            ));
+          }
+          _isLoading = false;
+        });
+        _scrollToBottom();
+      }
     } catch (e) {
-      setState(() {
-        _messages.add(ChatMessage(
-          text: "Une erreur de connexion est survenue. Veuillez réessayer.",
-          type: ChatMessageType.assistant,
-          timestamp: DateTime.now(),
-        ));
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur assistant : $e')));
+      }
     }
   }
 
@@ -162,222 +197,245 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      endDrawer: _buildDrawer(),
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+        backgroundColor: Colors.white,
         elevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: AppColors.primary),
-            onPressed: () => Scaffold.of(context).openDrawer(),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.primary, size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'GUINEETRANSPORT',
-          style: GoogleFonts.plusJakartaSans(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: -0.5),
+          'Assistant Voyage',
+          style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(12.0),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundImage: NetworkImage(AppAssets.aiAssistantAvatar),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_comment_outlined, color: AppColors.primary, size: 20),
+            onPressed: _createNewChat,
+          ),
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu_rounded, color: AppColors.primary, size: 24),
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
-      body: Stack(
+      body: Column(
         children: [
-          ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 180),
-            itemCount: _messages.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) return _buildWelcomeMessage();
-              final msg = _messages[index - 1];
-              
-              Widget content;
-              if (msg.type == ChatMessageType.user) {
-                content = _buildUserMessage(msg.text, msg.timestamp);
-              } else if (msg.type == ChatMessageType.travelCard) {
-                content = _buildTravelCard(msg.tripData!);
-              } else {
-                content = _buildAssistantMessage(msg.text);
-              }
-              return Padding(padding: const EdgeInsets.only(bottom: 24), child: content);
-            },
+          Expanded(
+            child: _isLoading && _messages.isEmpty
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(20),
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = _messages[index];
+                      if (msg.type == ChatMessageType.user) {
+                        return _buildUserMessage(msg.text, msg.timestamp);
+                      } else if (msg.type == ChatMessageType.travelCard) {
+                        return Padding(padding: const EdgeInsets.only(bottom: 24), child: _buildTravelCard(msg.tripData!));
+                      } else {
+                        return _buildAssistantMessage(msg.text);
+                      }
+                    },
+                  ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildQuickReplyChips(),
-                _buildChatInput(),
-              ],
+          if (_isLoading && _messages.isNotEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: LinearProgressIndicator(backgroundColor: Colors.transparent, valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary)),
             ),
-          ),
+          _buildQuickReplyChips(),
+          _buildChatInput(),
         ],
       ),
     );
   }
 
-  Widget _buildWelcomeMessage() {
-    return Column(
-      children: [
-        Container(
-          width: 64, height: 64,
-          decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-          child: const Icon(Icons.smart_toy, color: AppColors.primary, size: 32),
-        ),
-        const SizedBox(height: 16),
-        Text('AI Assistant', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.primary)),
-        Text('STRICTLY ONLINE FOR YOUR JOURNEY', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 1)),
-        const SizedBox(height: 32),
-      ],
+  Future<void> _deleteConversation(String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Supprimer la discussion ?', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+        content: const Text('Cette action est irréversible.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _assistantService.deleteConversation(id);
+        if (mounted) {
+          setState(() {
+            _conversations.removeWhere((c) => c['id'] == id);
+            if (_currentConversationId == id) {
+              _currentConversationId = null;
+              _messages = [];
+            }
+          });
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Discussion supprimée')));
+        }
+      } catch (e) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+      }
+    }
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: Column(
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(color: AppColors.primary),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.smart_toy_rounded, color: Colors.white, size: 40),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Mes Conversations',
+                    style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.add_rounded, color: AppColors.primary),
+            title: Text('Nouvelle discussion', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+            onTap: _createNewChat,
+          ),
+          const Divider(),
+          Expanded(
+            child: _conversations.isEmpty
+                ? Center(child: Text('Aucun historique', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary)))
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: _conversations.length,
+                    itemBuilder: (context, index) {
+                      final conv = _conversations[index];
+                      final isSelected = conv['id'] == _currentConversationId;
+                      return ListTile(
+                        selected: isSelected,
+                        selectedTileColor: AppColors.primary.withOpacity(0.1),
+                        leading: Icon(Icons.chat_bubble_outline_rounded, color: isSelected ? AppColors.primary : AppColors.textSecondary, size: 20),
+                        title: Text(
+                          conv['title'] ?? 'Discussion sans titre',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                          onPressed: () => _deleteConversation(conv['id']),
+                        ),
+                        onTap: () {
+                          _switchToConversation(conv['id']);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildUserMessage(String text, DateTime time) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 15, color: Colors.white, height: 1.4)),
-            const SizedBox(height: 4),
-            Text(DateFormat('HH:mm').format(time), style: GoogleFonts.plusJakartaSans(fontSize: 10, color: Colors.white.withValues(alpha: 0.7))),
-          ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+          ),
+          child: Text(text, style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 14)),
         ),
       ),
     );
   }
 
   Widget _buildAssistantMessage(String text) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(20), bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
-          border: Border.all(color: AppColors.border),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: const BorderRadius.only(topRight: Radius.circular(20), bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Text(text, style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontSize: 14, height: 1.4)),
         ),
-        child: Text(text, style: GoogleFonts.plusJakartaSans(fontSize: 15, color: AppColors.textPrimary, height: 1.4, fontWeight: FontWeight.w500)),
       ),
     );
   }
 
   Widget _buildTravelCard(Trip trip) {
     return Container(
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.border),
-        boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: const BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-            child: Row(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('SERVICE ${trip.syndicateName ?? ''}'.toUpperCase(), style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 1)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(100)),
-                  child: Text('${trip.availableSeats} PLACES', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green)),
-                ),
+                Text(trip.departureCityName, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                const Icon(Icons.arrow_forward, color: AppColors.primary, size: 16),
+                Text(trip.arrivalCityName, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStation(DateFormat('HH:mm').format(trip.departureTime), trip.departureCityName, trip.departureStationName),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(trip.formattedDuration, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle)),
-                              Expanded(child: Container(height: 2, color: AppColors.border)),
-                              const Icon(Icons.directions_bus, color: AppColors.primary, size: 16),
-                              Expanded(child: Container(height: 2, color: AppColors.border)),
-                              Container(width: 8, height: 8, decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.primary, width: 2), shape: BoxShape.circle)),
-                            ],
-                          ),
-                          Text('DIRECT', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w900, color: AppColors.primary)),
-                        ],
-                      ),
-                    ),
-                    _buildStation('...', trip.arrivalCityName, trip.arrivalStationName, isEnd: true),
-                  ],
-                ),
-                const Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider(color: AppColors.border)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('PRIX DU BILLET', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 1)),
-                        Text(trip.formattedPrice, style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)),
-                      ],
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Bientôt disponible')));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text('Réserver', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800)),
-                    ),
-                  ],
+                Text(trip.formattedPrice, style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, color: AppColors.primary, fontSize: 18)),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100))),
+                  child: const Text('Réserver'),
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildStation(String time, String city, String sub, {bool isEnd = false}) {
-    return Column(
-      crossAxisAlignment: isEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: [
-        Text(time, style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-        Text(city, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.textSecondary)),
-        Text(sub, style: GoogleFonts.plusJakartaSans(fontSize: 9, color: AppColors.textSecondary.withValues(alpha: 0.7))),
-      ],
     );
   }
 
   Widget _buildQuickReplyChips() {
-    final chips = ['Trajets demain', 'Prix pour Labé ?', 'Bus du matin', 'Mes billets'];
+    final chips = ['Trajets demain', 'Prix pour Labé ?', 'Mes billets'];
     return Container(
-      height: 50,
+      height: 40,
       margin: const EdgeInsets.only(bottom: 12),
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -385,12 +443,10 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
         itemCount: chips.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (_, i) => ActionChip(
-          label: Text(chips[i], style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700)),
+          label: Text(chips[i], style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold)),
           backgroundColor: AppColors.surface,
-          labelStyle: const TextStyle(color: AppColors.textPrimary),
-          side: const BorderSide(color: AppColors.border),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
           onPressed: () => _handleSubmitted(chips[i]),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         ),
       ),
     );
@@ -398,42 +454,18 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
 
   Widget _buildChatInput() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.background.withValues(alpha: 0), AppColors.background],
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       child: Row(
         children: [
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10)]),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      style: const TextStyle(color: AppColors.textPrimary),
-                      onSubmitted: _handleSubmitted,
-                      textInputAction: TextInputAction.send,
-                      decoration: InputDecoration(
-                        hintText: 'Rechercher un trajet, un prix...',
-                        hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      _messageController.clear();
-                    },
-                    icon: const Icon(Icons.clear, color: AppColors.textSecondary)
-                  ),
-                ],
+              decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(100), border: Border.all(color: AppColors.border)),
+              child: TextField(
+                controller: _messageController,
+                style: const TextStyle(fontSize: 14),
+                decoration: const InputDecoration(hintText: 'Posez votre question...', border: InputBorder.none),
+                onSubmitted: _handleSubmitted,
               ),
             ),
           ),
@@ -441,11 +473,9 @@ class _PassengerAIAssistantState extends State<PassengerAIAssistant> {
           GestureDetector(
             onTap: () => _handleSubmitted(_messageController.text),
             child: Container(
-              width: 56, height: 56,
-              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5))]),
-              child: _isLoading 
-                  ? const Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Icon(Icons.send, color: Colors.white),
+              width: 48, height: 48,
+              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+              child: _isLoading ? const Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.send, color: Colors.white, size: 20),
             ),
           ),
         ],

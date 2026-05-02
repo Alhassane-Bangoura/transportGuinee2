@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../core/services/syndicate_service.dart';
 
 class SyndicateDriversPage extends StatefulWidget {
   const SyndicateDriversPage({super.key});
@@ -24,41 +25,68 @@ class _SyndicateDriversPageState extends State<SyndicateDriversPage> {
         children: [
           _buildPremiumHeader(),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              children: [
-                _buildStatsGrid(primaryColor),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('LISTE DES CHAUFFEURS', style: GoogleFonts.plusJakartaSans(color: subColor, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1.5)),
-                    IconButton(onPressed: () {}, icon: Icon(Icons.filter_list_rounded, color: primaryColor, size: 20)),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _buildModernDriverCard(
-                  'Moussa Diallo',
-                  '+224 620 45 88 12',
-                  'Renault Kerax 440',
-                  'RC-7782-A',
-                  'Conakry → Mamou',
-                  'ACTIF',
-                  Colors.green,
-                  AppAssets.driverAvatar,
-                ),
-                const SizedBox(height: 16),
-                _buildModernDriverCard(
-                  'Abdoulaye Sow',
-                  '+224 621 12 33 00',
-                  'Mercedes Actros',
-                  'RC-0912-B',
-                  'Repos (Dernier: Labé)',
-                  'REPOS',
-                  Colors.amber,
-                  AppAssets.profilePlaceholder,
-                ),
-              ],
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: SyndicateService.getSyndicateDrivers(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                }
+                
+                final drivers = snapshot.data ?? [];
+                
+                if (drivers.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.group_off_rounded, size: 64, color: AppColors.textSecondary.withOpacity(0.2)),
+                        const SizedBox(height: 16),
+                        Text('Aucun chauffeur trouvé.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  itemCount: drivers.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Column(
+                        children: [
+                          _buildStatsGrid(primaryColor, drivers.length),
+                          const SizedBox(height: 32),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('LISTE DES CHAUFFEURS', style: GoogleFonts.plusJakartaSans(color: subColor, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1.5)),
+                              IconButton(onPressed: () {}, icon: Icon(Icons.filter_list_rounded, color: primaryColor, size: 20)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    }
+                    
+                    final driver = drivers[index - 1];
+                    final vehicle = driver['vehicle'];
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildModernDriverCard(
+                        driver['full_name'] ?? 'Inconnu',
+                        driver['phone'] ?? 'Pas de numéro',
+                        vehicle != null ? '${vehicle['type']} ${vehicle['license_plate']}' : 'Aucun véhicule',
+                        vehicle != null ? vehicle['license_plate'] : 'N/A',
+                        'Route assignée', // À dynamiser si besoin
+                        'ACTIF',
+                        Colors.green,
+                        driver['avatar_url'] ?? AppAssets.profilePlaceholder,
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -108,7 +136,7 @@ class _SyndicateDriversPageState extends State<SyndicateDriversPage> {
     );
   }
 
-  Widget _buildStatsGrid(Color primary) {
+  Widget _buildStatsGrid(Color primary, int totalDrivers) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -117,10 +145,10 @@ class _SyndicateDriversPageState extends State<SyndicateDriversPage> {
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
       children: [
-        _buildStatCard('TOTAL', '42', Icons.group_outlined, primary),
-        _buildStatCard('ACTIFS', '31', Icons.check_circle_outline_rounded, Colors.green),
-        _buildStatCard('REPOS', '09', Icons.nightlight_round, Colors.amber),
-        _buildStatCard('SUSPENDU', '02', Icons.warning_amber_rounded, Colors.red),
+        _buildStatCard('TOTAL', totalDrivers.toString(), Icons.group_outlined, primary),
+        _buildStatCard('ACTIFS', totalDrivers.toString(), Icons.check_circle_outline_rounded, Colors.green),
+        _buildStatCard('REPOS', '0', Icons.nightlight_round, Colors.amber),
+        _buildStatCard('SUSPENDU', '0', Icons.warning_amber_rounded, Colors.red),
       ],
     );
   }

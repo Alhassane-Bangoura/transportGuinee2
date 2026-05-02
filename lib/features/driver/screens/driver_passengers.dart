@@ -1,6 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/services/booking_service.dart';
+import '../../../core/services/trip_service.dart';
+import '../../../core/models/trip.dart';
+import '../../../core/utils/app_response.dart';
 
 class DriverPassengersPage extends StatefulWidget {
   const DriverPassengersPage({super.key});
@@ -10,57 +17,128 @@ class DriverPassengersPage extends StatefulWidget {
 }
 
 class _DriverPassengersPageState extends State<DriverPassengersPage> {
-  final List<Map<String, dynamic>> _passengers = [
-    {
-      'name': 'Mamadou Diallo',
-      'initials': 'MD',
-      'seat': 'A4',
-      'status': 'Confirmé',
-      'present': true,
-    },
-    {
-      'name': 'Aminata Camara',
-      'initials': 'AC',
-      'seat': 'B12',
-      'status': 'Confirmé',
-      'present': false,
-    },
-    {
-      'name': 'Ibrahima Barry',
-      'initials': 'IB',
-      'seat': 'C2',
-      'status': 'En attente',
-      'present': false,
-      'isWaiting': true,
-    },
-  ];
+  Trip? _selectedTrip;
+  List<Trip> _activeTrips = [];
+  List<Map<String, dynamic>> _passengers = [];
+  bool _isLoading = true;
+  final _supabase = Supabase.instance.client;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      setState(() => _isLoading = true);
+      
+      // 1. Charger tous les trajets du chauffeur qui ne sont pas complétés
+      // On utilise .not.in() pour exclure plusieurs états de fin de vie
+      final response = await _supabase
+          .from('trips_with_details')
+          .select()
+          .eq('driver_id', user.id)
+          .filter('status', 'not.ilike', 'completed')
+          .filter('status', 'not.ilike', 'cancelled')
+          .order('departure_time', ascending: true);
+          
+      final trips = (response as List).map((t) => Trip.fromJson(t)).toList();
+      
+      if (trips.isNotEmpty) {
+        setState(() {
+          _activeTrips = trips;
+          // On sélectionne par défaut le trajet le plus proche du départ
+          _selectedTrip = trips.first;
+        });
+        await _loadPassengers(_selectedTrip!.id);
+      } else {
+        setState(() {
+          _activeTrips = [];
+          _selectedTrip = null;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading initial passengers data: $e');
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleRefresh() async {
+    await _loadInitialData();
+  }
+
+  Future<void> _loadPassengers(String tripId) async {
+    final response = await BookingService.getTripPassengers(tripId);
+    if (mounted) {
+      setState(() {
+        _passengers = response.data ?? [];
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = AppColors.background;
-    final Color textColor = AppColors.textPrimary;
-    final Color subColor = AppColors.textSecondary;
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
+    if (_selectedTrip == null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.group_off_rounded, size: 64, color: AppColors.textHint.withOpacity(0.3)),
+              const SizedBox(height: 16),
+              Text('Aucun trajet actif trouvé.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+      );
+    }
+
     final Color primaryColor = AppColors.primary;
+    final confirmedCount = _passengers.where((p) => p['status'] == 'confirmed' || p['status'] == 'used').length;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
-      body: Column(
-        children: [
-          _buildPremiumHeader(),
-          _buildTripSummarySection(primaryColor, textColor),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              itemCount: _passengers.length,
-              itemBuilder: (context, index) {
-                final p = _passengers[index];
-                return _buildModernPassengerCard(p, primaryColor, textColor, subColor);
-              },
+      backgroundColor: AppColors.background,
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        color: AppColors.primary,
+        child: Column(
+          children: [
+            _buildPremiumHeader(),
+            _buildTripSelector(),
+            _buildTripSummarySection(primaryColor, confirmedCount),
+            Expanded(
+              child: _passengers.isEmpty 
+                ? ListView( // Utiliser ListView pour que RefreshIndicator fonctionne même si vide
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                      Center(child: Text('Aucun passager pour ce trajet.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary))),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    itemCount: _passengers.length,
+                    itemBuilder: (context, index) {
+                      final p = _passengers[index];
+                      return _buildModernPassengerCard(p, primaryColor);
+                    },
+                  ),
             ),
-          ),
-          _buildFloatingContactAll(primaryColor),
-        ],
+            _buildFloatingContactAll(primaryColor),
+          ],
+        ),
       ),
     );
   }
@@ -72,42 +150,79 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
         color: AppColors.surface,
         border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          ),
-          Column(
-            children: [
-              Text(
-                'GUINEE TRANSPORT',
-                style: GoogleFonts.plusJakartaSans(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  letterSpacing: 1,
-                ),
+      child: Center(
+        child: Column(
+          children: [
+            Text(
+              'GUINEE TRANSPORT',
+              style: GoogleFonts.plusJakartaSans(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w900,
+                fontSize: 16,
+                letterSpacing: 1,
               ),
-              Text(
-                'LISTE DES PASSAGERS',
-                style: GoogleFonts.plusJakartaSans(
-                  color: AppColors.textSecondary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2,
-                ),
+            ),
+            Text(
+              'LISTE DES PASSAGERS',
+              style: GoogleFonts.plusJakartaSans(
+                color: AppColors.textSecondary,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2,
               ),
-            ],
-          ),
-          const SizedBox(width: 48), // Spacer
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTripSummarySection(Color primary, Color textColor) {
+  Widget _buildTripSelector() {
+    return Container(
+      height: 60,
+      width: double.infinity,
+      color: AppColors.surface,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        itemCount: _activeTrips.length,
+        itemBuilder: (context, index) {
+          final trip = _activeTrips[index];
+          final isSelected = _selectedTrip?.id == trip.id;
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              showCheckmark: false,
+              label: Text('${trip.departureCityName} → ${trip.arrivalCityName}'),
+              selected: isSelected,
+              onSelected: (selected) {
+                 if (selected && !isSelected) {
+                   setState(() {
+                     _selectedTrip = trip;
+                     _isLoading = true;
+                   });
+                   _loadPassengers(trip.id);
+                 }
+              },
+              selectedColor: AppColors.primary.withOpacity(0.15),
+              labelStyle: GoogleFonts.plusJakartaSans(
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                fontSize: 12,
+              ),
+              backgroundColor: AppColors.background,
+              side: BorderSide(
+                color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.border,
+              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTripSummarySection(Color primary, int confirmedCount) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -123,14 +238,14 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('TRAJET', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
-                  Text('Conakry → Mamou', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)),
+                  Text('${_selectedTrip!.departureCityName} → ${_selectedTrip!.arrivalCityName}', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('DATE', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1)),
-                  Text('24 Oct. 2023', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)),
+                  Text(DateFormat('dd MMM. yyyy').format(_selectedTrip!.departureTime), style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16)),
                 ],
               ),
             ],
@@ -141,13 +256,13 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(20)),
-                child: Text('BUS G-204', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary, fontSize: 10, fontWeight: FontWeight.w900)),
+                child: Text('VEHICULE: ${_selectedTrip!.licensePlate ?? "N/A"}', style: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900)),
               ),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
-                child: Text('14/20 CONFIRMÉS', style: GoogleFonts.plusJakartaSans(color: Colors.green, fontSize: 10, fontWeight: FontWeight.w900)),
+                child: Text('$confirmedCount/${_passengers.length} CONFIRMÉS', style: GoogleFonts.plusJakartaSans(color: Colors.green, fontSize: 10, fontWeight: FontWeight.w900)),
               ),
             ],
           ),
@@ -156,21 +271,23 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
     );
   }
 
-  Widget _buildModernPassengerCard(Map<String, dynamic> p, Color primary, Color textColor, Color subColor) {
-    bool isPresent = p['present'];
-    String name = p['name'];
-    String seat = p['seat'];
+  Widget _buildModernPassengerCard(Map<String, dynamic> p, Color primary) {
+    final profile = p['profiles'] ?? {};
+    final bool isPresent = p['status'] == 'confirmed' || p['status'] == 'used';
+    final String name = profile['full_name'] ?? 'Passager';
+    final String phone = profile['phone'] ?? '+224 ...';
+    final String seat = '${p['seats']} Place(s)';
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isPresent ? AppColors.success.withValues(alpha: 0.05) : AppColors.surface,
+        color: isPresent ? Colors.green.withOpacity(0.05) : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: isPresent ? AppColors.success.withValues(alpha: 0.2) : AppColors.border),
+        border: Border.all(color: isPresent ? Colors.green.withOpacity(0.2) : AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -180,18 +297,10 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
         children: [
           Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: NetworkImage(isPresent ? 
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAT4LLefTVEgZQ3uKz9NJcyvmPo2QwlPPJKEoxtmpLV4HVTxpLqbE1KhWAG_8FIieuvPFYhcBXylyOZ57MxAUYCIwZ4DVu2IT354WQ_frjmABiD0pe2_O6Ahl4JHzkSykVml9-QQEJeQMgG3i1sUBMoyz3MGhMwK-38EAYEAoggZTSWQYXrhFngoLhAVea8Y68ZEfNewcTXw-ILq7mhoJRiyYncuoHmaXPqPRVh5GXNpkv2hyMEZ8eACRNMr-42blc_hlHCPH2vhXie' :
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAhB-Tt1AoI7CUWD6y3UZb8xHBcR15nMpyfwv84ZdoBSHIplOP4gNDZMvVy_lFsaCoVMsELl6jDLSdGtlHsqiYPSqdskp2VrUhzIw4CM2mlgbGEO_OvZBvkpoTa4yd0zbXJdEXguG80IkPujjxTMiJgQ91-uCvRGIESeGpaV9PoRwI4oUv8ts2hgQeYWJTX_na0cSWffSoJHuKu_IGAxxOFH3XghbAQqVORrQhEy51uNmGFobfzayQKPgFv7I_HPquVhBRBvdvgcMVg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: primary.withOpacity(0.1),
+                child: Text(name.isNotEmpty ? name[0] : 'P', style: TextStyle(color: primary, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -214,7 +323,7 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
                       children: [
                         const Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
-                        Text('+224 622 00 00 00', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+                        Text(phone, style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
                       ],
                     ),
                   ],
@@ -227,22 +336,27 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => setState(() => p['present'] = !isPresent),
+                  onTap: () async {
+                    if (!isPresent) {
+                      await BookingService.confirmPassengerPresence(p['id']);
+                      _loadPassengers(_selectedTrip!.id);
+                    }
+                  },
                   child: Container(
                     height: 52,
                     decoration: BoxDecoration(
-                      color: isPresent ? AppColors.success.withValues(alpha: 0.1) : AppColors.success,
+                      color: isPresent ? Colors.green.withOpacity(0.1) : Colors.green,
                       borderRadius: BorderRadius.circular(14),
-                      border: isPresent ? Border.all(color: AppColors.success.withValues(alpha: 0.3)) : null,
+                      border: isPresent ? Border.all(color: Colors.green.withOpacity(0.3)) : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(isPresent ? Icons.verified_rounded : Icons.check_circle_outline, color: isPresent ? AppColors.success : Colors.white, size: 20),
+                        Icon(isPresent ? Icons.verified_rounded : Icons.check_circle_outline, color: isPresent ? Colors.green : Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           isPresent ? 'DÉJÀ PRÉSENT' : 'CONFIRMER PRÉSENCE',
-                          style: GoogleFonts.plusJakartaSans(color: isPresent ? AppColors.success : Colors.white, fontWeight: FontWeight.w800, fontSize: 12),
+                          style: GoogleFonts.plusJakartaSans(color: isPresent ? Colors.green : Colors.white, fontWeight: FontWeight.w800, fontSize: 12),
                         ),
                       ],
                     ),
@@ -265,7 +379,7 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
 
   Widget _buildFloatingContactAll(Color primary) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(bottom: 110, left: 16, right: 16, top: 16),
       decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
@@ -275,7 +389,7 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
         decoration: BoxDecoration(
           color: AppColors.textPrimary,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppColors.textPrimary.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 5))],
+          boxShadow: [BoxShadow(color: AppColors.textPrimary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

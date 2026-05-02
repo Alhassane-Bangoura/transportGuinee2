@@ -21,7 +21,7 @@ class _StationAdminDepartureManagementState extends State<StationAdminDepartureM
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+        backgroundColor: AppColors.surface.withOpacity(0.9),
         elevation: 0,
         title: Row(
           children: [
@@ -149,7 +149,7 @@ class _StationAdminDepartureManagementState extends State<StationAdminDepartureM
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(color: badgeColor?.withValues(alpha: 0.1) ?? Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(100)),
+            decoration: BoxDecoration(color: badgeColor?.withOpacity(0.1) ?? Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(100)),
             child: Text(count, style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, color: badgeColor ?? text)),
           ),
         ],

@@ -112,9 +112,9 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    _buildSummaryBadge('BUS ${_trip?.licensePlate ?? "G-224"}', AppColors.primary.withValues(alpha: 0.1), AppColors.primary),
+                    _buildSummaryBadge('BUS ${_trip?.licensePlate ?? "G-224"}', AppColors.primary.withOpacity(0.1), AppColors.primary),
                     const SizedBox(width: 10),
-                    _buildSummaryBadge('${_trip?.totalSeats != null ? (_trip!.totalSeats! - (_trip!.availableSeats)) : 0}/${_trip?.totalSeats ?? "?"} RÉSERVÉS', AppColors.success.withValues(alpha: 0.1), AppColors.success),
+                    _buildSummaryBadge('${_trip?.totalSeats != null ? (_trip!.totalSeats! - (_trip!.availableSeats)) : 0}/${_trip?.totalSeats ?? "?"} RÉSERVÉS', AppColors.success.withOpacity(0.1), AppColors.success),
                   ],
                 ),
               ],
@@ -123,20 +123,20 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
 
           // Main Content: Passenger List
           Expanded(
-            child: FutureBuilder<AppResponse<List<Map<String, dynamic>>>>(
-              future: BookingService.getTripPassengers(widget.tripId),
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: BookingService.getTripPassengersStream(widget.tripId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator(color: AppColors.primary));
                 }
                 
-                final response = snapshot.data;
-                if (response == null || !response.isSuccess || response.data == null || response.data!.isEmpty) {
+                final bookings = snapshot.data;
+                if (bookings == null || bookings.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.group_off_rounded, size: 48, color: AppColors.textSecondary.withValues(alpha: 0.3)),
+                        Icon(Icons.group_off_rounded, size: 48, color: AppColors.textSecondary.withOpacity(0.3)),
                         const SizedBox(height: 16),
                         Text('Aucun passager pour le moment.',
                           style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
@@ -144,8 +144,6 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                     ),
                   );
                 }
-
-                final bookings = response.data!;
                 return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
                   itemCount: bookings.length + 1,
@@ -222,7 +220,7 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -235,7 +233,7 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 2),
                 ),
                 child: CircleAvatar(radius: 28, backgroundImage: NetworkImage(imgUrl), backgroundColor: AppColors.background),
               ),
@@ -258,9 +256,9 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
+                            color: AppColors.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+                            border: Border.all(color: AppColors.primary.withOpacity(0.1)),
                           ),
                           child: Text(seat, style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w900, color: AppColors.primary)),
                         ),
@@ -287,9 +285,9 @@ class _DriverPassengerListState extends State<DriverPassengerList> {
                   ? Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: AppColors.success.withValues(alpha: 0.1),
+                        color: AppColors.success.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
+                        border: Border.all(color: AppColors.success.withOpacity(0.2)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

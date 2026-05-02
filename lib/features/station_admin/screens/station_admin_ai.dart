@@ -140,7 +140,7 @@ class _StationAdminAIState extends State<StationAdminAI> {
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(100), border: Border.all(color: AppColors.primary.withValues(alpha: 0.1))),
+                    decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(100), border: Border.all(color: AppColors.primary.withOpacity(0.1))),
                     child: Row(
                       children: [
                         const Icon(Icons.add_circle_outline, color: AppColors.textSecondary),
@@ -151,7 +151,7 @@ class _StationAdminAIState extends State<StationAdminAI> {
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               hintText: 'Posez une question...',
-                              hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                              hintStyle: TextStyle(color: AppColors.textSecondary.withOpacity(0.5)),
                               border: InputBorder.none,
                             ),
                           ),
@@ -182,9 +182,9 @@ class _StationAdminAIState extends State<StationAdminAI> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
       ),
       child: Row(
         children: [

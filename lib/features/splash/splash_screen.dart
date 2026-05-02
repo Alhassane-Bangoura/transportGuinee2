@@ -161,7 +161,7 @@ class _SplashScreenState extends State<SplashScreen>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.2),
+            color: AppColors.primary.withOpacity(0.2),
             blurRadius: 24,
             spreadRadius: 4,
             offset: const Offset(0, 8),
@@ -259,7 +259,7 @@ class _DotsLoaderState extends State<DotsLoader> with SingleTickerProviderStateM
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: color.withValues(alpha: 0.3),
+                        color: color.withOpacity(0.3),
                         blurRadius: 4,
                         spreadRadius: 1,
                       )

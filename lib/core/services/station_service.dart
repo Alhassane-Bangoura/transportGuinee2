@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/app_response.dart';
 
@@ -191,6 +193,70 @@ class StationService {
     } catch (e) {
       debugPrint('Error getting unassigned drivers: $e');
       return AppResponse.failure('Impossible de charger la liste des chauffeurs en attente.');
+    }
+  }
+
+  static List<Map<String, dynamic>> _cachedStationTrips = [];
+
+  /// 1. STREAM TEMPS RÉEL : Trajets de la gare (Dashboard)
+  static Stream<List<Map<String, dynamic>>> getStationTripsStream(String stationId) {
+    return _supabase
+        .from('trips')
+        .stream(primaryKey: ['id'])
+        .asyncMap((_) async {
+          try {
+            final response = await _supabase
+                .from('trips')
+                .select('*, routes!inner(departure_station_id, arrival_city:arrival_city_id(name)), driver:profiles!driver_id(full_name), vehicle:vehicles!vehicle_id(license_plate)')
+                .eq('routes.departure_station_id', stationId)
+                .order('departure_time', ascending: true);
+            
+            _cachedStationTrips = List<Map<String, dynamic>>.from(response);
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('cache_station_trips_$stationId', jsonEncode(_cachedStationTrips));
+            
+            return _cachedStationTrips;
+          } catch (e) {
+            if (_cachedStationTrips.isEmpty) {
+              final prefs = await SharedPreferences.getInstance();
+              final cachedStr = prefs.getString('cache_station_trips_$stationId');
+              if (cachedStr != null) {
+                try {
+                  final List<dynamic> decoded = jsonDecode(cachedStr);
+                  _cachedStationTrips = List<Map<String, dynamic>>.from(decoded);
+                } catch (_) {}
+              }
+            }
+            return _cachedStationTrips;
+          }
+        });
+  }
+
+  /// 2. STREAM TEMPS RÉEL : Notifications Admin
+  static Stream<List<Map<String, dynamic>>> getAdminNotificationsStream() {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return Stream.value([]);
+
+    return _supabase
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', userId)
+        .order('created_at', ascending: false);
+  }
+
+  /// 3. Récupère les stats consolidées de la gare (via la vue sécurisée)
+  static Future<AppResponse<Map<String, dynamic>>> getStationStats(String stationId) async {
+    try {
+      final response = await _supabase
+          .from('vw_station_admin_dashboard')
+          .select('*')
+          .eq('station_id', stationId)
+          .single();
+      
+      return AppResponse.success(response);
+    } catch (e) {
+      debugPrint('Error getting station stats: $e');
+      return AppResponse.failure('Erreur lors de la récupération des statistiques.');
     }
   }
 }

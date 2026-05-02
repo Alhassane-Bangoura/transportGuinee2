@@ -44,10 +44,10 @@ class PremiumBottomNavBar extends StatelessWidget {
             right: 16,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surface.withValues(alpha: 0.9),
+            color: AppColors.surface.withOpacity(0.9),
             border: Border(
               top: BorderSide(
-                color: AppColors.border.withValues(alpha: 0.5),
+                color: AppColors.border.withOpacity(0.5),
                 width: 0.5,
               ),
             ),
@@ -108,27 +108,44 @@ class PremiumBottomNavBar extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AnimatedScale(
-                scale: isSelected ? 1.15 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  item.icon,
-                  color: color,
-                  size: 26,
-                  // Since Material Symbols aren't a package here, 
-                  // we use regular Icons but could simulate fill if needed
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOutBack,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: AnimatedScale(
+                  scale: isSelected ? 1.2 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Icon(
+                    item.icon,
+                    color: color,
+                    size: 24,
+                  ),
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 item.label.toUpperCase(),
                 style: AppTextStyles.label.copyWith(
-                  fontSize: 10,
+                  fontSize: 9,
                   color: color,
                   fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                  letterSpacing: 0.8,
+                  letterSpacing: 1.0,
                 ),
               ),
+              if (isSelected)
+                Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
             ],
           ),
         ),

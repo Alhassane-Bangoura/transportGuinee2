@@ -117,7 +117,7 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
             onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
             style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              backgroundColor: Colors.white.withOpacity(0.2),
             ),
           ),
         ),
@@ -134,7 +134,7 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -142,8 +142,8 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    AppAssets.syndicateProfileAvatar,
+                  child: Image(
+                    image: widget.profile?.profileImage ?? NetworkImage(AppAssets.syndicateProfileAvatar),
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
@@ -217,7 +217,7 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.2),
+                color: AppColors.primary.withOpacity(0.2),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -320,7 +320,7 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+            color: AppColors.surfaceVariant.withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: AppColors.primary, size: 20),
@@ -420,7 +420,7 @@ class _SyndicateProfilePageState extends State<SyndicateProfilePage> {
         boxShadow: !isOutlined && bgColor == AppColors.primary
             ? [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: AppColors.primary.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 )

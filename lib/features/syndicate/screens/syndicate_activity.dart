@@ -19,7 +19,7 @@ class _SyndicateActivityState extends State<SyndicateActivity> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+        backgroundColor: AppColors.surface.withOpacity(0.9),
         elevation: 0,
         leading: const Padding(
           padding: EdgeInsets.all(8.0),
@@ -52,9 +52,9 @@ class _SyndicateActivityState extends State<SyndicateActivity> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.05),
+                color: AppColors.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+                border: Border.all(color: AppColors.primary.withOpacity(0.1)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +91,7 @@ class _SyndicateActivityState extends State<SyndicateActivity> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('SUIVI DES DÉPARTS', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.primary.withValues(alpha: 0.6), letterSpacing: 1.5)),
+                    Text('SUIVI DES DÉPARTS', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.primary.withOpacity(0.6), letterSpacing: 1.5)),
                     const SizedBox(height: 4),
                     Text('Activité du Trajet', style: AppTextStyles.headingLarge.copyWith(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
                   ],
@@ -317,7 +317,7 @@ class _SyndicateActivityState extends State<SyndicateActivity> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
             child: const Icon(Icons.local_shipping, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 16),
@@ -335,7 +335,7 @@ class _SyndicateActivityState extends State<SyndicateActivity> {
               Text(time, style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w800, color: Colors.white)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
+                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
                 child: Text('VALIDÉ', style: GoogleFonts.plusJakartaSans(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.primary)),
               ),
             ],

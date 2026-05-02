@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/services/trip_service.dart';
 import '../../../core/models/trip.dart';
+import 'driver_passenger_list.dart';
 
 class DriverTripsPage extends StatefulWidget {
   const DriverTripsPage({super.key});
@@ -100,20 +101,36 @@ class _DriverTripsPageState extends State<DriverTripsPage>
       filtered = trips.where((t) {
         final d = t.departureTime;
         final tripDate = DateTime(d.year, d.month, d.day);
-        return tripDate.isAtSameMomentAs(today) && t.status != 'completed';
+        final status = t.status.toLowerCase();
+        return tripDate.isAtSameMomentAs(today) && 
+               status != 'completed' && 
+               status != 'cancelled';
       }).toList();
       emptyMessage = "Aucun trajet prévu pour aujourd'hui.";
     } else if (type == 'upcoming') {
       filtered = trips.where((t) {
         final d = t.departureTime;
         final tripDate = DateTime(d.year, d.month, d.day);
-        return tripDate.isAfter(today) && t.status != 'completed';
+        final status = t.status.toLowerCase();
+        return tripDate.isAfter(today) && 
+               status != 'completed' && 
+               status != 'cancelled';
       }).toList();
       emptyMessage = "Aucun trajet futur programmé.";
     } else {
-      filtered = trips.where((t) => t.status == 'completed' || t.departureTime.isBefore(now)).toList();
+      filtered = trips.where((t) {
+        final d = t.departureTime;
+        final tripDate = DateTime(d.year, d.month, d.day);
+        final status = t.status.toLowerCase();
+        return status == 'completed' || 
+               status == 'cancelled' || 
+               tripDate.isBefore(today);
+      }).toList();
       emptyMessage = "Votre historique est vide.";
     }
+
+    // Le trajet venant d'être publié récemment doit apparaître en haut
+    filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     if (filtered.isEmpty) {
       return Center(
@@ -337,9 +354,50 @@ class _DriverTripsPageState extends State<DriverTripsPage>
                   const SizedBox(height: 16),
                   Row(
                     children: [
+                      if (!isCompleted && status != 'EN COURS' && status != 'IN_PROGRESS')
+                        IconButton(
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                title: Text('Supprimer ce trajet ?', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900)),
+                                content: Text(
+                                  'Attention : Vous ne pouvez supprimer un trajet que s\'il n\'a aucun passager réservé.\n\nSouhaitez-vous continuer ?',
+                                  style: GoogleFonts.inter(),
+                                ),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(context, false), child: Text('ANNULER', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontWeight: FontWeight.bold))),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true), 
+                                    child: Text('OUI, SUPPRIMER', style: GoogleFonts.plusJakartaSans(color: Colors.red, fontWeight: FontWeight.w900)),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirm == true) {
+                              final res = await TripService.deleteTrip(trip.id);
+                              if (mounted) {
+                                if (res.isSuccess) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trajet supprimé avec succès')));
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message), backgroundColor: Colors.red));
+                                }
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 24),
+                        ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => DriverPassengerList(tripId: trip.id)),
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isCompleted ? AppColors.primary.withOpacity(0.15) : AppColors.primary,
                             foregroundColor: isCompleted ? AppColors.primary : Colors.white,
@@ -383,13 +441,20 @@ class _DriverTripsPageState extends State<DriverTripsPage>
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+              IconButton(
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.menu, color: AppColors.primary, size: 24),
                 ),
-                child: const Icon(Icons.menu, color: AppColors.primary, size: 24),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
               const SizedBox(width: 12),
               Column(
@@ -422,7 +487,11 @@ class _DriverTripsPageState extends State<DriverTripsPage>
               Container(
                 decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle, border: Border.all(color: AppColors.border)),
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Notifications bientôt disponibles'))
+                    );
+                  },
                   icon: const Icon(Icons.notifications_outlined, color: AppColors.textSecondary, size: 24),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(10),

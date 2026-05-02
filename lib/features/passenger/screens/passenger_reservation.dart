@@ -23,7 +23,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.8),
+        backgroundColor: AppColors.surface.withOpacity(0.8),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.primary),
@@ -38,7 +38,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
             padding: EdgeInsets.all(12.0),
             child: CircleAvatar(
               radius: 16,
-              backgroundImage: const NetworkImage(AppAssets.reservationHeader),
+              backgroundImage: NetworkImage(AppAssets.reservationHeader),
             ),
           ),
         ],
@@ -114,6 +114,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
                   arrivalCityName: 'Kamsar',
                   departureStationName: 'Gare Routière',
                   arrivalStationName: 'Gare d\'arrivée',
+                  createdAt: DateTime.now(),
                 );
                 Navigator.push(
                   context,
@@ -131,7 +132,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
                 minimumSize: const Size(double.infinity, 60),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 elevation: 8,
-                shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                shadowColor: AppColors.primary.withOpacity(0.3),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -230,8 +231,8 @@ class _PassengerReservationState extends State<PassengerReservation> {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : (isOccupied ? AppColors.border : AppColors.surface),
           borderRadius: BorderRadius.circular(12),
-          border: isPremium ? Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 2, style: BorderStyle.none) : Border.all(color: AppColors.border),
-          boxShadow: isSelected ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))] : null,
+          border: isPremium ? Border.all(color: AppColors.primary.withOpacity(0.5), width: 2, style: BorderStyle.none) : Border.all(color: AppColors.border),
+          boxShadow: isSelected ? [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))] : null,
         ),
         child: Center(
           child: isPremium 
@@ -254,14 +255,14 @@ class _PassengerReservationState extends State<PassengerReservation> {
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(32),
-        boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.2), blurRadius: 20, offset: const Offset(0, 8))],
+        boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 8))],
       ),
       child: Stack(
         children: [
           Positioned(
             right: -20,
             top: -20,
-            child: Icon(Icons.smart_toy, color: Colors.white.withValues(alpha: 0.1), size: 120),
+            child: Icon(Icons.smart_toy, color: Colors.white.withOpacity(0.1), size: 120),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +281,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
               const SizedBox(height: 16),
               RichText(
                 text: TextSpan(
-                  style: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.white.withValues(alpha: 0.9), height: 1.5),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 14, color: Colors.white.withOpacity(0.9), height: 1.5),
                   children: const [
                     TextSpan(text: '"Le '),
                     TextSpan(text: 'siège 12', style: TextStyle(fontWeight: FontWeight.w900, decoration: TextDecoration.underline)),
@@ -293,7 +294,7 @@ class _PassengerReservationState extends State<PassengerReservation> {
                 width: double.infinity,
                 child: TextButton(
                   onPressed: () => setState(() => selectedSeat = 12),
-                  style: TextButton.styleFrom(backgroundColor: Colors.white.withValues(alpha: 0.2), padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: TextButton.styleFrom(backgroundColor: Colors.white.withOpacity(0.2), padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                   child: Text('CHOISIR LE SIÈGE 12', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1)),
                 ),
               ),

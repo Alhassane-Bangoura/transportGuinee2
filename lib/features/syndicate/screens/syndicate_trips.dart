@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../core/services/syndicate_service.dart';
 
 class SyndicateTripsPage extends StatefulWidget {
   const SyndicateTripsPage({super.key});
@@ -19,88 +20,107 @@ class _SyndicateTripsPageState extends State<SyndicateTripsPage> {
         children: [
           _buildPremiumHeader(),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              children: [
-                _buildAITips(),
-                const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: SyndicateService.getSyndicateTripsStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                }
+
+                final trips = snapshot.data ?? [];
+
+                if (trips.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('SUIVI DES DÉPARTS', 
-                          style: GoogleFonts.plusJakartaSans(
-                            color: AppColors.primary, 
-                            fontSize: 10, 
-                            fontWeight: FontWeight.w800, 
-                            letterSpacing: 1.5
-                          )
-                        ),
-                        Text('Activité du Trajet', 
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white, 
-                            fontSize: 24, 
-                            fontWeight: FontWeight.w900, 
-                            letterSpacing: -0.5
-                          )
-                        ),
+                        Icon(Icons.route_rounded, size: 64, color: AppColors.textSecondary.withOpacity(0.2)),
+                        const SizedBox(height: 16),
+                        Text('Aucun trajet en cours.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary)),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface, 
-                        borderRadius: BorderRadius.circular(12), 
-                        border: Border.all(color: AppColors.border)
-                      ),
-                      child: const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 20),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildDepartureReadyCard(
-                  'Sprinter - Mercedes Benz',
-                  'RC-9021-B',
-                  'Moussa Camara',
-                  12, 15,
-                  AppAssets.vehicleInterior1,
-                  AppAssets.driverActivityAvatar,
-                ),
-                const SizedBox(height: 24),
-                _buildDepartureReadyCard(
-                  'Toyota Hiace',
-                  'RC-4412-A',
-                  'Ibrahima Diallo',
-                  8, 18,
-                  AppAssets.vehicleInterior2,
-                  AppAssets.driverAvatar3,
-                  isWaiting: true,
-                ),
-                const SizedBox(height: 48),
-                Text('RÉCAPITULATIF DU JOUR', 
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AppColors.textSecondary, 
-                    fontSize: 12, 
-                    fontWeight: FontWeight.w800, 
-                    letterSpacing: 1.5
-                  )
-                ),
-                const SizedBox(height: 16),
-                _buildSummaryGrid(),
-                const SizedBox(height: 48),
-                Text('DERNIERS DÉPARTS VALIDÉS', 
-                  style: GoogleFonts.plusJakartaSans(
-                    color: AppColors.textSecondary, 
-                    fontSize: 12, 
-                    fontWeight: FontWeight.w800, 
-                    letterSpacing: 1.5
-                  )
-                ),
-                const SizedBox(height: 16),
-                _buildRecentDepartures(),
-              ],
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    setState(() {}); // Force rebuild of StreamBuilder
+                  },
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.surface,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: trips.length + 2, // Tips + Title + Trips
+                    itemBuilder: (context, index) {
+                      if (index == 0) return Padding(padding: const EdgeInsets.only(bottom: 32), child: _buildAITips());
+                      if (index == 1) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('SUIVI DES DÉPARTS', 
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: AppColors.primary, 
+                                      fontSize: 10, 
+                                      fontWeight: FontWeight.w800, 
+                                      letterSpacing: 1.5
+                                    )
+                                  ),
+                                  Text('Activité du Trajet', 
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.white, 
+                                      fontSize: 24, 
+                                      fontWeight: FontWeight.w900, 
+                                      letterSpacing: -0.5
+                                    )
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface, 
+                                  borderRadius: BorderRadius.circular(12), 
+                                  border: Border.all(color: AppColors.border)
+                                ),
+                                child: const Icon(Icons.filter_list_rounded, color: AppColors.primary, size: 20),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final trip = trips[index - 2];
+                      final driver = trip['profiles'];
+                      final vehicle = trip['vehicles'];
+                      final route = trip['routes'];
+                      final totalSeats = vehicle != null ? vehicle['total_seats'] ?? 15 : 15;
+                      final currentSeats = totalSeats - (trip['available_seats'] ?? 0);
+                      final isWaiting = currentSeats < totalSeats;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        child: _buildDepartureReadyCard(
+                          trip['id'],
+                          '${vehicle?['type'] ?? 'Véhicule'} - ${route?['arrival_city']?['name'] ?? 'Dest.'}',
+                          vehicle?['license_plate'] ?? 'N/A',
+                          driver?['full_name'] ?? 'Chauffeur inconnu',
+                          currentSeats,
+                          totalSeats,
+                          AppAssets.vehicleInterior1, // Idéalement dynamique via vehicle_url
+                          driver?['avatar_url'] ?? AppAssets.driverActivityAvatar,
+                          isWaiting: isWaiting,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -197,7 +217,7 @@ class _SyndicateTripsPageState extends State<SyndicateTripsPage> {
     );
   }
 
-  Widget _buildDepartureReadyCard(String model, String plate, String driver, int current, int total, String vehicleImg, String driverImg, {bool isWaiting = false}) {
+  Widget _buildDepartureReadyCard(String tripId, String model, String plate, String driver, int current, int total, String vehicleImg, String driverImg, {bool isWaiting = false}) {
     double progress = current / total;
     Color statusColor = isWaiting ? Colors.amber : Colors.green;
     String statusText = isWaiting ? 'EN ATTENTE' : 'PRÊT À PARTIR';
@@ -344,7 +364,17 @@ class _SyndicateTripsPageState extends State<SyndicateTripsPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: isWaiting ? null : () {},
+                    onPressed: isWaiting ? null : () async {
+                      final success = await SyndicateService.validateDeparture(tripId);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(success ? 'Départ validé avec succès !' : 'Erreur lors de la validation.'),
+                            backgroundColor: success ? Colors.green : Colors.red,
+                          ),
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: statusColor,
                       disabledBackgroundColor: AppColors.background,

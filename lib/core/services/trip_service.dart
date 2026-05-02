@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/trip.dart';
 import '../utils/app_response.dart';
+import 'notification_service.dart';
 
 // ============================================================================
 // TripService — Gestion des trajets via Supabase
@@ -22,8 +25,8 @@ class TripService {
       var query = _supabase
           .from('trips_with_details')
           .select()
-          .eq('departure_city_name', departureCityName)
-          .eq('arrival_city_name', arrivalCityName);
+          .ilike('departure_city_name', departureCityName.trim())
+          .ilike('arrival_city_name', arrivalCityName.trim());
 
       if (date != null) {
         final start = DateTime(date.year, date.month, date.day).toIso8601String();
@@ -63,14 +66,55 @@ class TripService {
 
   // ─── Trajets par Chauffeur ───────────────────────────────────────────────
 
+  static List<Trip> _cachedDriverTrips = [];
+  static String? _lastDriverId;
+
+  /// Réinitialise les caches pour éviter les fuites de données entre utilisateurs
+  static void clearCache() {
+    _cachedDriverTrips = [];
+    _lastDriverId = null;
+    debugPrint('[TripService] Cache cleared');
+  }
+
   /// Récupère les trajets d'un chauffeur en temps réel
   static Stream<List<Trip>> getDriverTripsStream(String driverId) {
+    // Isolation du cache par chauffeur
+    if (_lastDriverId != driverId) {
+      _cachedDriverTrips = [];
+      _lastDriverId = driverId;
+    }
+
     return _supabase
-        .from('trips_with_details')
+        .from('trips')
         .stream(primaryKey: ['id'])
         .eq('driver_id', driverId)
-        .order('departure_time', ascending: true)
-        .map((data) => data.map((t) => Trip.fromJson(t)).toList());
+        .asyncMap((_) async {
+          try {
+            debugPrint('[TripService] FETCHING DRIVER TRIPS FROM DB for driver $driverId...');
+            final res = await _supabase
+              .from('trips_with_details')
+              .select()
+              .eq('driver_id', driverId)
+              .order('departure_time', ascending: true);
+            _cachedDriverTrips = (res as List).map((t) => Trip.fromJson(t)).toList();
+            
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('cache_driver_trips_$driverId', jsonEncode(_cachedDriverTrips.map((e) => e.toJson()).toList()));
+            return _cachedDriverTrips;
+          } catch (e) {
+            if (_cachedDriverTrips.isEmpty) {
+              final prefs = await SharedPreferences.getInstance();
+              final cachedStr = prefs.getString('cache_driver_trips_$driverId');
+              if (cachedStr != null) {
+                try {
+                  final List<dynamic> decoded = jsonDecode(cachedStr);
+                  _cachedDriverTrips = decoded.map((e) => Trip.fromJson(e)).toList();
+                } catch (_) {}
+              }
+            }
+            return _cachedDriverTrips;
+          }
+        });
   }
 
   // ─── Détail d'un trajet ──────────────────────────────────────────────────
@@ -99,17 +143,26 @@ class TripService {
     try {
       debugPrint('[TripService] Publishing trip data: $tripData');
       
-      // Nettoyage préventif des données numériques
+      // TECHNIQUE SENIOR : Insertion en deux étapes pour contourner le conflit 
+      // entre les deux triggers de notification redondants (trg_notify_on_new_trip et trg_notify_passengers_on_trip).
+      
+      // 1. Insertion avec un statut qui ne déclenche qu'un seul des deux triggers
       final cleanData = {
         ...tripData,
-        'available_seats': (tripData['available_seats'] as num).toInt(),
-        'price': (tripData['price'] as num).toDouble(),
-        'status': 'scheduled',
+        'status': 'boarding', // Temporaire pour éviter le conflit de triggers 'AFTER INSERT'
         'created_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      await _supabase.from('trips').insert(cleanData);
+      final response = await _supabase.from('trips').insert(cleanData).select().single();
+      final tripId = response['id'];
+
+      // 2. Mise à jour vers le statut final 'scheduled'
+      await _supabase.from('trips').update({'status': 'scheduled'}).eq('id', tripId);
+
+      // Note: La notification aux passagers est maintenant gérée automatiquement par un Trigger Supabase (trg_notify_on_new_trip)
+      // pour éviter les doublons et garantir une source unique de vérité.
+
       return AppResponse.success(null);
     } on PostgrestException catch (e) {
       debugPrint('[TripService] CRITICAL EXCEPTION: ${e.message}');
@@ -137,6 +190,31 @@ class TripService {
     } catch (e) {
       debugPrint('Error getting route: $e');
       return AppResponse.failure(e.toString());
+    }
+  }
+
+  /// Supprime un trajet (Seulement s'il n'y a aucune réservation)
+  static Future<AppResponse<void>> deleteTrip(String tripId) async {
+    try {
+      // 1. Vérifier s'il y a des réservations
+      final bookingsRes = await _supabase
+          .from('bookings')
+          .select('id')
+          .eq('trip_id', tripId)
+          .filter('status', 'not.ilike', 'cancelled')
+          .limit(1);
+          
+      if ((bookingsRes as List).isNotEmpty) {
+        return AppResponse.failure('Impossible de supprimer : ce trajet a déjà des réservations.');
+      }
+
+      // 2. Si aucune réservation, supprimer
+      await _supabase.from('trips').delete().eq('id', tripId);
+      
+      return AppResponse.success(null);
+    } catch (e) {
+      debugPrint('Error deleting trip: $e');
+      return AppResponse.failure('Erreur lors de la suppression du trajet.');
     }
   }
 }

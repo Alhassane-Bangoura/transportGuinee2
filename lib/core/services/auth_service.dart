@@ -1,7 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_profile.dart';
 import '../utils/app_response.dart';
+import 'booking_service.dart';
+import 'trip_service.dart';
+import 'wallet_service.dart';
 
 // ============================================================================
 // AuthService — Gestion de l'authentification via Supabase
@@ -29,27 +34,39 @@ class AuthService {
     debugPrint('[AuthService] Fetching profile for user ID: ${user.id}');
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedProfile = prefs.getString('cached_profile_${user.id}');
+      
+      // On tente de récupérer depuis la DB
+      debugPrint('[AuthService] FETCHING PROFILE FROM DB for user ${user.id}...');
       final data = await _supabase
           .from('profiles')
           .select()
           .eq('id', user.id)
-          .maybeSingle(); // Utiliser maybeSingle pour éviter l'exception si vide
+          .maybeSingle();
       
       if (data == null) {
-        debugPrint('[AuthService] No profile found for user ${user.id}');
-        return const AppResponse.failure('Profil utilisateur introuvable. Veuillez contacter le support.');
+        // Si pas en DB, on regarde si on a un cache (fallback)
+        if (cachedProfile != null) {
+          debugPrint('[AuthService] No profile in DB, using cached profile');
+          return AppResponse.success(UserProfile.fromJson(jsonDecode(cachedProfile)));
+        }
+        return const AppResponse.failure('Profil utilisateur introuvable.');
       }
 
-      debugPrint('[AuthService] Profile fetched successfully');
+      // Mise à jour du cache local
+      await prefs.setString('cached_profile_${user.id}', jsonEncode(data));
+      
+      debugPrint('[AuthService] Profile fetched successfully from DB');
       return AppResponse.success(UserProfile.fromJson(data));
-    } on PostgrestException catch (e) {
-      debugPrint('[AuthService] Supabase Error (${e.code}): ${e.message}');
-      if (e.code == 'PGRST301') {
-        return const AppResponse.failure('Erreur de permission (RLS).');
-      }
-      return AppResponse.failure('Erreur base de données : ${e.message}');
     } catch (e) {
-      debugPrint('[AuthService] Unknown error fetching profile: $e');
+      // Fallback cache en cas d'erreur réseau
+      final prefs = await SharedPreferences.getInstance();
+      final cachedProfile = prefs.getString('cached_profile_${user.id}');
+      if (cachedProfile != null) {
+        debugPrint('[AuthService] Network error, using cached profile');
+        return AppResponse.success(UserProfile.fromJson(jsonDecode(cachedProfile)));
+      }
       return AppResponse.failure('Erreur de récupération du profil : $e');
     }
   }
@@ -96,7 +113,7 @@ class AuthService {
       }[roleKey] ?? '';
 
       final Map<String, dynamic> userMetadata = {
-        'full_name': '$rolePrefix$fullName',
+        'full_name': roleKey == 'passenger' ? fullName : '$rolePrefix$fullName',
         'phone': phone,
         'role_key': roleKey,
         if (stationId != null) 'station_id': stationId,
@@ -155,7 +172,14 @@ class AuthService {
   // ─── Déconnexion ─────────────────────────────────────────────────────────
 
   static Future<void> signOut() async {
+    debugPrint('[AuthService] SIGN OUT - Clearing all caches...');
+    // Nettoyage complet des caches lors de la déconnexion
+    BookingService.clearCache();
+    TripService.clearCache();
+    WalletService().reset();
+    
     await _supabase.auth.signOut();
+    debugPrint('[AuthService] Sign out complete');
   }
 
   // ─── Mise à jour du profil ───────────────────────────────────────────────
@@ -179,9 +203,45 @@ class AuthService {
       };
 
       await _supabase.from('profiles').update(updates).eq('id', user.id);
+
+      // Invalider le cache local pour forcer un re-fetch frais au prochain getCurrentProfile
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('cached_profile_${user.id}');
+
       return const AppResponse.success(null);
     } catch (e) {
       return AppResponse.failure(e.toString());
+    }
+  }
+
+  /// Change le mot de passe de l'utilisateur après vérification de l'ancien
+  static Future<AppResponse<void>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final user = currentUser;
+    if (user == null || user.email == null) return const AppResponse.failure('Utilisateur non connecté');
+
+    try {
+      // 1. Vérifier l'ancien mot de passe en tentant une connexion
+      await _supabase.auth.signInWithPassword(
+        email: user.email!,
+        password: oldPassword,
+      );
+
+      // 2. Si la connexion réussit, mettre à jour le mot de passe
+      await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+      
+      return const AppResponse.success(null);
+    } catch (e) {
+      debugPrint('[AuthService] ChangePassword Error: $e');
+      String msg = e.toString();
+      if (msg.contains('Invalid login credentials')) {
+        msg = 'L\'ancien mot de passe est incorrect.';
+      } else if (msg.contains('Password should be')) {
+        msg = 'Le nouveau mot de passe est trop court.';
+      }
+      return AppResponse.failure(msg);
     }
   }
 }

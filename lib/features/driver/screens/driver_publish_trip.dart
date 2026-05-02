@@ -192,14 +192,14 @@ class _DriverPublishTripScreenState extends State<DriverPublishTripScreen> {
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+                          colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
+                            color: AppColors.primary.withOpacity(0.3),
                             blurRadius: 15,
                             offset: const Offset(0, 8),
                           ),
@@ -225,7 +225,7 @@ class _DriverPublishTripScreenState extends State<DriverPublishTripScreen> {
                             style: GoogleFonts.plusJakartaSans(
                               color: (widget.profile.routeId == null || _routeDetails == null) 
                                 ? Colors.orangeAccent 
-                                : Colors.white.withValues(alpha: 0.7),
+                                : Colors.white.withOpacity(0.7),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.5,
@@ -254,7 +254,7 @@ class _DriverPublishTripScreenState extends State<DriverPublishTripScreen> {
                           child: _buildSelectorCard(
                             icon: Icons.calendar_today_rounded,
                             label: 'Date',
-                            value: DateFormat('dd MMM yyyy').format(_selectedDate),
+                            value: DateFormat('dd MMMM yyyy', 'fr_FR').format(_selectedDate),
                             onTap: _selectDate,
                           ),
                         ),

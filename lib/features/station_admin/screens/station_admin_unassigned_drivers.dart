@@ -82,7 +82,7 @@ class _StationAdminUnassignedDriversState extends State<StationAdminUnassignedDr
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.check_circle_outline, size: 80, color: Colors.green.withValues(alpha: 0.2)),
+          Icon(Icons.check_circle_outline, size: 80, color: Colors.green.withOpacity(0.2)),
           const SizedBox(height: 16),
           Text(
             'Tous les chauffeurs sont assignés !',
@@ -114,7 +114,7 @@ class _StationAdminUnassignedDriversState extends State<StationAdminUnassignedDr
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -125,7 +125,7 @@ class _StationAdminUnassignedDriversState extends State<StationAdminUnassignedDr
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.1),
+              color: Colors.orange.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.person, color: Colors.orange),
@@ -163,7 +163,7 @@ class _StationAdminUnassignedDriversState extends State<StationAdminUnassignedDr
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.1),
+              color: Colors.orange.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(

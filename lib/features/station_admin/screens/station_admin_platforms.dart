@@ -119,14 +119,14 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: primary.withValues(alpha: 0.1))),
+        border: Border(bottom: BorderSide(color: primary.withOpacity(0.1))),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: primary.withValues(alpha: 0.1),
+              color: primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(Icons.menu, color: primary, size: 24),
@@ -150,7 +150,7 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: primary.withValues(alpha: 0.2),
+                  color: primary.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -169,9 +169,9 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: primary.withValues(alpha: 0.05),
+          color: primary.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: primary.withValues(alpha: 0.1)),
+          border: Border.all(color: primary.withOpacity(0.1)),
         ),
         child: Row(
           children: [
@@ -197,7 +197,7 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -220,7 +220,7 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: primary.withValues(alpha: 0.1),
+                    color: primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -279,10 +279,10 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF64748B).withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFF64748B).withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -299,12 +299,12 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: isOccupied ? primary.withValues(alpha: 0.1) : const Color(0xFF64748B).withValues(alpha: 0.05),
+                      color: isOccupied ? primary.withOpacity(0.1) : const Color(0xFF64748B).withOpacity(0.05),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       isOccupied ? Icons.train : Icons.meeting_room,
-                      color: isOccupied ? primary : const Color(0xFF64748B).withValues(alpha: 0.4),
+                      color: isOccupied ? primary : const Color(0xFF64748B).withOpacity(0.4),
                       size: 28,
                     ),
                   ),
@@ -326,7 +326,7 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: textColor.withValues(alpha: 0.1),
+                              color: textColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -356,7 +356,7 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF64748B).withValues(alpha: 0.05),
+                      color: const Color(0xFF64748B).withOpacity(0.05),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.edit, color: Color(0xFF64748B), size: 18),
@@ -365,7 +365,7 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.05),
+                      color: Colors.red.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
@@ -385,7 +385,7 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
                   image: NetworkImage(image),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
-                    Colors.black.withValues(alpha: 0.2),
+                    Colors.black.withOpacity(0.2),
                     BlendMode.darken,
                   ),
                 ),
@@ -418,18 +418,18 @@ class _StationAdminPlatformsState extends State<StationAdminPlatforms> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: primary.withValues(alpha: 0.05),
+        color: primary.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.2), width: 2), // Should be dashed if possible
+        border: Border.all(color: primary.withOpacity(0.2), width: 2), // Should be dashed if possible
       ),
       child: Column(
         children: [
-          Icon(Icons.add_circle, color: primary.withValues(alpha: 0.6), size: 32),
+          Icon(Icons.add_circle, color: primary.withOpacity(0.6), size: 32),
           const SizedBox(height: 8),
           Text(
             'Ajouter un nouveau quai',
             style: GoogleFonts.plusJakartaSans(
-              color: primary.withValues(alpha: 0.6),
+              color: primary.withOpacity(0.6),
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),

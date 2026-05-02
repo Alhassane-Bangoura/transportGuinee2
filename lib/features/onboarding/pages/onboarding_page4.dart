@@ -61,7 +61,7 @@ class OnboardingPage4 extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: Colors.black.withOpacity(0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -105,7 +105,7 @@ class OnboardingPage4 extends StatelessWidget {
             child: TextButton(
               onPressed: onSkip,
               style: TextButton.styleFrom(
-                backgroundColor: Colors.black.withValues(alpha: 0.2),
+                backgroundColor: Colors.black.withOpacity(0.2),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               ),
               child: Text(
@@ -192,7 +192,7 @@ class OnboardingPage4 extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 4,
-                        shadowColor: AppColors.accent.withValues(alpha: 0.5),
+                        shadowColor: AppColors.accent.withOpacity(0.5),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -237,7 +237,7 @@ class OnboardingPage4 extends StatelessWidget {
               Text(
                 label,
                 style: AppTextStyles.label.copyWith(
-                  color: AppColors.textSecondary.withValues(alpha: 0.6),
+                  color: AppColors.textSecondary.withOpacity(0.6),
                   fontSize: 10,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,

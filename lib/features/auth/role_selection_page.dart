@@ -23,7 +23,7 @@ class RoleSelectionPage extends StatelessWidget {
         title: Text(
           'GUINÉE TRANSPORT',
           style: AppTextStyles.label.copyWith(
-            color: AppColors.primary.withValues(alpha: 0.5),
+            color: AppColors.primary.withOpacity(0.5),
             fontWeight: FontWeight.w800,
             letterSpacing: 1.2,
           ),
@@ -136,7 +136,7 @@ class RoleSelectionPage extends StatelessWidget {
           border: Border.all(color: AppColors.border, width: 1.5), // Correction ici
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2), // Correction ici
+              color: Colors.black.withOpacity(0.2), // Correction ici
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -148,7 +148,7 @@ class RoleSelectionPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: AppColors.primary, size: 28),

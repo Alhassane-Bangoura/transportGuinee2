@@ -102,7 +102,7 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: primary.withValues(alpha: 0.1))),
+        border: Border(bottom: BorderSide(color: primary.withOpacity(0.1))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,9 +130,9 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
           height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: primary.withValues(alpha: 0.2), width: 4),
-            image: const DecorationImage(
-              image: const NetworkImage(AppAssets.stationAdminProfileBackground),
+            border: Border.all(color: primary.withOpacity(0.2), width: 4),
+            image: DecorationImage(
+              image: _profile?.profileImage ?? NetworkImage(AppAssets.stationAdminProfileBackground),
               fit: BoxFit.cover,
             ),
           ),
@@ -190,9 +190,9 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: primary.withValues(alpha: 0.1),
+          color: primary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: primary.withValues(alpha: 0.2)),
+          border: Border.all(color: primary.withOpacity(0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +226,7 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.1),
+                  color: primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -265,10 +265,10 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF64748B).withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFF64748B).withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -285,7 +285,7 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -351,7 +351,7 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF64748B).withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFF64748B).withOpacity(0.1)),
       ),
       child: InkWell(
         onTap: onTap,
@@ -384,7 +384,7 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF64748B).withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFF64748B).withOpacity(0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -420,9 +420,9 @@ class _StationAdminProfileState extends State<StationAdminProfile> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.05),
+        color: Colors.red.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
+        border: Border.all(color: Colors.red.withOpacity(0.1)),
       ),
         child: InkWell(
           onTap: () async {

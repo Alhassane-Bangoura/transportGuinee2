@@ -14,9 +14,15 @@ import 'driver_profile.dart';
 import 'driver_passenger_list.dart';
 import 'driver_publish_trip.dart';
 import '../../../core/constants/app_assets.dart';
-import '../../assistant/screens/assistant_screen.dart';
+import 'dart:async';
+import '../../../core/models/notification_model.dart';
+import 'driver_ai_assistant.dart';
 import '../../../core/services/booking_service.dart';
 import '../../../core/widgets/premium_bottom_nav_bar.dart';
+import '../../../core/services/notification_service.dart';
+import 'driver_notifications.dart';
+import 'driver_help_support.dart';
+import 'driver_settings.dart';
 
 class DriverDashboard extends StatefulWidget {
   final UserProfile? profile;
@@ -32,6 +38,9 @@ class _DriverDashboardState extends State<DriverDashboard>
   bool _isLoadingProfile = true;
   late AnimationController _pulseController;
   int _currentIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _unreadCount = 0;
+  late StreamSubscription<NotificationModel> _notificationSubscription;
 
   @override
   void initState() {
@@ -44,14 +53,66 @@ class _DriverDashboardState extends State<DriverDashboard>
     if (widget.profile != null) {
       _profile = widget.profile;
       _isLoadingProfile = false;
+      _initNotificationService();
     } else {
       _loadProfile();
     }
   }
 
+  void _initNotificationService() {
+    NotificationService().initialize();
+    _notificationSubscription = NotificationService().onNotification.listen((notification) {
+      _loadUnreadCount();
+      _showBookingNotificationFromModel(notification);
+    });
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final notifications = await NotificationService().getNotifications();
+    if (mounted) {
+      setState(() {
+        _unreadCount = notifications.where((n) => !n.isRead).length;
+      });
+    }
+  }
+
+  void _showBookingNotificationFromModel(NotificationModel notification) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.notifications_active, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '${notification.title}: ${notification.message}',
+                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'VOIR',
+          textColor: Colors.white,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const DriverNotificationsScreen()),
+          ).then((_) => _loadUnreadCount()),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _pulseController.dispose();
+    _notificationSubscription.cancel();
     super.dispose();
   }
 
@@ -62,6 +123,7 @@ class _DriverDashboardState extends State<DriverDashboard>
         _profile = response.data;
         _isLoadingProfile = false;
       });
+      _initNotificationService();
       _setupRealtimeNotifications();
     }
   }
@@ -124,7 +186,9 @@ class _DriverDashboardState extends State<DriverDashboard>
     }
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: AppColors.background,
+      drawer: _buildDrawer(),
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -154,11 +218,10 @@ class _DriverDashboardState extends State<DriverDashboard>
               padding: const EdgeInsets.only(bottom: 20),
               child: FloatingActionButton(
                 onPressed: () {
-                  final role = _profile?.role.toUpperCase() ?? 'CHAUFFEUR';
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AssistantScreen(userRole: role),
+                      builder: (context) => const DriverAIAssistant(),
                     ),
                   );
                 },
@@ -186,13 +249,18 @@ class _DriverDashboardState extends State<DriverDashboard>
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                    IconButton(
+                      onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                      icon: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.menu, color: Colors.white, size: 24),
                       ),
-                      child: const Icon(Icons.directions_bus, color: AppColors.primary, size: 24),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
                     const SizedBox(width: 12),
                     Column(
@@ -219,7 +287,15 @@ class _DriverDashboardState extends State<DriverDashboard>
                     ),
                   ],
                 ),
-                _buildNotificationBadge(),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DriverNotificationsScreen()),
+                    ).then((_) => _loadUnreadCount());
+                  },
+                  child: _buildNotificationBadge(),
+                ),
               ],
             ),
             const SizedBox(height: 32),
@@ -266,39 +342,72 @@ class _DriverDashboardState extends State<DriverDashboard>
                 final allTrips = snapshot.data ?? [];
                 final now = DateTime.now();
                 final todayStart = DateTime(now.year, now.month, now.day);
+                final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
                 
                 final todayTrips = allTrips.where((t) {
-                  final depDate = t.departureTime;
-                  return depDate.year == todayStart.year && 
-                         depDate.month == todayStart.month && 
-                         depDate.day == todayStart.day && 
-                         t.status != 'completed';
+                  return t.departureTime.isAfter(todayStart) && 
+                         t.departureTime.isBefore(todayEnd) && 
+                         t.status.toUpperCase() != 'COMPLETED';
                 }).toList();
                 
-                final remainingSeats = allTrips.where((t) => t.status != 'completed').fold<int>(0, (sum, t) => sum + t.availableSeats);
+                return StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: BookingService.getDriverBookingsStream(_profile!.id),
+                  builder: (context, bookingSnapshot) {
+                    final allBookings = bookingSnapshot.data ?? [];
+                    
+                    // Calcul des places restantes sur tous les trajets programmés (disponibles actuellement)
+                    int totalRemaining = 0;
+                    for (var t in allTrips) {
+                      if (t.status.toUpperCase() == 'SCHEDULED' || t.status.toUpperCase() == 'PROGRAMMÉE') {
+                        totalRemaining += t.availableSeats;
+                      }
+                    }
 
-                return Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        icon: Icons.route,
-                        title: "Trajets d'aujourd'hui",
-                        value: todayTrips.length.toString().padLeft(2, '0'),
-                        onTap: () => setState(() => _currentIndex = 1),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildStatCard(
-                        icon: Icons.event_seat,
-                        title: 'Places restantes',
-                        value: remainingSeats.toString().padLeft(2, '0'),
-                        iconColor: const Color(0xFF059669),
-                        iconBgColor: const Color(0xFFD1FAE5),
-                        onTap: () => setState(() => _currentIndex = 2),
-                      ),
-                    ),
-                  ],
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                icon: Icons.route,
+                                title: "Trajets d'aujourd'hui",
+                                value: todayTrips.isEmpty ? '00' : todayTrips.length.toString().padLeft(2, '0'),
+                                onTap: () => setState(() => _currentIndex = 1),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildStatCard(
+                                icon: Icons.event_seat,
+                                title: 'Places restantes',
+                                value: totalRemaining.toString().padLeft(2, '0'),
+                                iconColor: const Color(0xFF059669),
+                                iconBgColor: const Color(0xFFD1FAE5),
+                                onTap: () => setState(() => _currentIndex = 2),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('VOS TRAJETS DU JOUR', style: AppTextStyles.label),
+                            TextButton(
+                              onPressed: () => setState(() => _currentIndex = 1),
+                              child: Text('Voir tout', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        if (todayTrips.isEmpty)
+                          _buildEmptyTripListMini()
+                        else
+                          ...todayTrips.map((t) => _buildTodayTripMiniCard(t, allBookings)),
+                      ],
+                    );
+                  }
                 );
               }
             ),
@@ -408,7 +517,7 @@ class _DriverDashboardState extends State<DriverDashboard>
                     MaterialPageRoute(
                       builder: (context) => DriverPublishTripScreen(profile: _profile!),
                     ),
-                  );
+                  ).then((_) => setState(() {}));
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -451,19 +560,26 @@ class _DriverDashboardState extends State<DriverDashboard>
           ),
           child: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 22),
         ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEF4444),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
+        if (_unreadCount > 0)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEF4444),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: Center(
+                child: Text(
+                  _unreadCount > 9 ? '+' : _unreadCount.toString(),
+                  style: const TextStyle(color: Colors.white, fontSize: 6, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -472,7 +588,7 @@ class _DriverDashboardState extends State<DriverDashboard>
     return StreamBuilder<List<Trip>>(
       stream: _profile != null ? TripService.getDriverTripsStream(_profile!.id) : const Stream.empty(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return Container(
             height: 160,
             decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(24)),
@@ -482,127 +598,141 @@ class _DriverDashboardState extends State<DriverDashboard>
 
         final trips = snapshot.data ?? [];
         final now = DateTime.now();
-        // Filtrage pour trouver le prochain trajet (celui qui n'est pas fini et le plus proche dans le futur)
-        final nextTrips = trips.where((t) => t.status != 'completed' && t.departureTime.add(const Duration(hours: 4)).isAfter(now)).toList();
+        
+        // Trouver le trajet le plus proche (Tant qu'il n'est pas terminé)
+        final activeTrips = trips.where((t) => 
+          t.status.toUpperCase() != 'COMPLETED' && 
+          t.status.toUpperCase() != 'TERMINÉ' &&
+          t.departureTime.add(const Duration(hours: 4)).isAfter(now)
+        ).toList();
+        
+        // Trier par date de création (le plus récemment publié en premier)
+        activeTrips.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-        if (nextTrips.isEmpty) {
+        if (activeTrips.isEmpty) {
           return _buildEmptyTripState();
         }
 
-        final trip = nextTrips.first;
+        final trip = activeTrips.first;
         final formattedTime = DateFormat('HH:mm').format(trip.departureTime);
         final formattedDate = DateFormat('dd MMM').format(trip.departureTime);
 
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+        // Récupérer les réservations pour ce trajet spécifique en temps réel
+        return StreamBuilder<List<Map<String, dynamic>>>(
+          stream: BookingService.getDriverBookingsStream(_profile!.id),
+          builder: (context, bookingSnapshot) {
+            // On utilise directement availableSeats car le trigger de la base de données décrémente déjà cette valeur
+            final realAvailableSeats = trip.availableSeats;
+
+            return Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                child: Stack(
-                  children: [
-                    Container(
-                      height: 120,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(trip.vehicleImage ?? AppAssets.vehicleImage1),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 120,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 12,
-                      left: 16,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(FullRadius),
-                        ),
-                        child: Text(
-                          trip.status.toUpperCase() == 'SCHEDULED' ? 'À VENIR' : trip.status.toUpperCase(),
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1,
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 120,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(trip.vehicleImage ?? AppAssets.vehicleImage1),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text(trip.departureCityName, style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900)),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 20),
-                        const SizedBox(width: 8),
-                        Text(trip.arrivalCityName, style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900)),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        _buildCardInfo(Icons.calendar_today, formattedDate),
-                        const SizedBox(width: 20),
-                        _buildCardInfo(Icons.schedule, formattedTime),
-                        const SizedBox(width: 20),
-                        _buildCardInfo(Icons.event_seat, '${trip.availableSeats} places'),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => DriverPassengerList(tripId: trip.id)),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                            ),
+                          ),
                         ),
-                        child: Text('Gérer les passagers', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800)),
-                      ),
+                        Positioned(
+                          bottom: 12,
+                          left: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(FullRadius),
+                            ),
+                            child: Text(
+                              trip.status.toUpperCase() == 'SCHEDULED' ? 'À VENIR' : trip.status.toUpperCase(),
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(trip.departureCityName, style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900)),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 20),
+                            const SizedBox(width: 8),
+                            Text(trip.arrivalCityName, style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900)),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            _buildCardInfo(Icons.calendar_today, formattedDate),
+                            const SizedBox(width: 20),
+                            _buildCardInfo(Icons.schedule, formattedTime),
+                            const SizedBox(width: 20),
+                            _buildCardInfo(Icons.event_seat, '$realAvailableSeats places'),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() => _currentIndex = 2);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text('Gérer les passagers', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          }
         );
       },
     );
@@ -691,6 +821,173 @@ class _DriverDashboardState extends State<DriverDashboard>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDrawer() {
+    return Drawer(
+      backgroundColor: AppColors.background,
+      child: Column(
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(color: AppColors.surface, border: Border(bottom: BorderSide(color: AppColors.border))),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: _profile?.profileImage ?? NetworkImage(AppAssets.stationPreview),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _profile?.fullName ?? 'Chauffeur',
+                    style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.help_outline, color: AppColors.textPrimary),
+            title: Text('Aide & Support', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary)),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverHelpSupportScreen()));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined, color: AppColors.textPrimary),
+            title: Text('Paramètres', style: GoogleFonts.plusJakartaSans(color: AppColors.textPrimary)),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const DriverSettingsScreen()));
+            },
+          ),
+          const Spacer(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.redAccent),
+            title: Text('Déconnexion', style: GoogleFonts.plusJakartaSans(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            onTap: () async {
+              try {
+                // S'assurer que le drawer est fermé avant de naviguer
+                Navigator.pop(context);
+                await AuthService.signOut();
+                if (mounted) {
+                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                }
+              } catch (e) {
+                print('Logout error: $e');
+              }
+            },
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+  Widget _buildEmptyTripListMini() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: AppColors.border)),
+      child: Center(
+        child: Text('Aucun autre trajet prévu aujourd\'hui.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary, fontSize: 13)),
+      ),
+    );
+  }
+
+  Widget _buildTodayTripMiniCard(Trip t, List<Map<String, dynamic>> allBookings) {
+    final tripBookings = allBookings.where((b) => b['trip_id'] == t.id && b['status'] != 'cancelled').toList();
+    final bookedSeats = tripBookings.fold<int>(0, (sum, b) => sum + (b['seats'] as int));
+    // La capacité publiée d'origine est simplement les places restantes actuelles + les places déjà prises
+    final totalPublishedSeats = t.availableSeats + bookedSeats;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            child: Column(
+              children: [
+                Text(DateFormat('HH:mm').format(t.departureTime), style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w900, color: AppColors.primary, fontSize: 14)),
+                Text('Départ', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primary.withOpacity(0.6))),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${t.departureCityName} → ${t.arrivalCityName}', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 15)),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.people_outline, size: 14, color: AppColors.textSecondary),
+                    const SizedBox(width: 4),
+                    Text('$bookedSeats/$totalPublishedSeats réservés', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Supprimer le trajet ?', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+                  content: Text('Voulez-vous vraiment supprimer ce trajet ? Cette action est irréversible.'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('ANNULER')),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true), 
+                      child: const Text('SUPPRIMER', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                final res = await TripService.deleteTrip(t.id);
+                if (mounted) {
+                  if (res.isSuccess) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Trajet supprimé avec succès')));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.message), backgroundColor: Colors.red));
+                  }
+                }
+              }
+            },
+            icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DriverPassengerList(tripId: t.id)),
+              );
+            },
+            icon: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
+          ),
+        ],
       ),
     );
   }

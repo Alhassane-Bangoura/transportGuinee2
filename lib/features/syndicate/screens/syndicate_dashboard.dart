@@ -5,6 +5,7 @@ import '../../../core/models/user_profile.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/constants/app_assets.dart';
 import 'syndicate_drivers.dart';
 import 'syndicate_add_driver.dart';
 import 'syndicate_trips.dart';
@@ -273,7 +274,21 @@ class _SyndicateDashboardState extends State<SyndicateDashboard> {
                       children: [
                         _buildHeaderButton(Icons.notifications_outlined),
                         const SizedBox(width: 12),
-                        _buildHeaderButton(Icons.search_rounded),
+                        GestureDetector(
+                          onTap: () => setState(() => _currentIndex = 4),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.border),
+                              image: DecorationImage(
+                                image: _profile?.profileImage ?? NetworkImage(AppAssets.stationPreview),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],

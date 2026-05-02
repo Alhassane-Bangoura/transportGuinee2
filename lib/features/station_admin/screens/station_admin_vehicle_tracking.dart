@@ -100,7 +100,7 @@ class _StationAdminVehicleTrackingState extends State<StationAdminVehicleTrackin
       padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.border.withValues(alpha: 0.5))),
+        border: Border(bottom: BorderSide(color: AppColors.border.withOpacity(0.5))),
       ),
       child: Column(
         children: [
@@ -200,7 +200,7 @@ class _StationAdminVehicleTrackingState extends State<StationAdminVehicleTrackin
                         borderRadius: BorderRadius.circular(100),
                         boxShadow: isSelected ? [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
+                            color: AppColors.primary.withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           )
@@ -250,7 +250,7 @@ class _StationAdminVehicleTrackingState extends State<StationAdminVehicleTrackin
           border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
@@ -271,7 +271,7 @@ class _StationAdminVehicleTrackingState extends State<StationAdminVehicleTrackin
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
+                              color: AppColors.primary.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -297,9 +297,9 @@ class _StationAdminVehicleTrackingState extends State<StationAdminVehicleTrackin
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
+                          color: statusColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(100),
-                          border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                          border: Border.all(color: statusColor.withOpacity(0.2)),
                         ),
                         child: Text(
                           status.toUpperCase(),
@@ -355,7 +355,7 @@ class _StationAdminVehicleTrackingState extends State<StationAdminVehicleTrackin
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.background.withValues(alpha: 0.3),
+                color: AppColors.background.withOpacity(0.3),
                 border: const Border(top: BorderSide(color: AppColors.border)),
               ),
               child: Row(
@@ -467,7 +467,7 @@ class _StationAdminVehicleTrackingState extends State<StationAdminVehicleTrackin
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.4),
+              color: AppColors.primary.withOpacity(0.4),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )

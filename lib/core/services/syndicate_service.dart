@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SyndicateService {
@@ -51,5 +52,88 @@ class SyndicateService {
     }).toList();
 
     await _supabase.from('syndicate_routes').insert(data);
+  }
+
+  /// 1. & 2. & 3. Récupère les trajets gérés par le syndicat connecté EN TEMPS RÉEL
+  static Stream<List<Map<String, dynamic>>> getSyndicateTripsStream() {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return const Stream.empty();
+
+    return _supabase
+        .from('trips')
+        .stream(primaryKey: ['id'])
+        .neq('status', 'completed')
+        .asyncMap((_) async {
+          // Utilisation de auth.uid() via le client pour récupérer les routes autorisées
+          final routesRes = await _supabase
+              .from('syndicate_routes')
+              .select('route_id')
+              .eq('syndicate_id', userId);
+              
+          final routeIds = (routesRes as List).map((r) => r['route_id']).toList();
+
+          if (routeIds.isEmpty) return [];
+
+          final trips = await _supabase
+              .from('trips')
+              .select('*, profiles:driver_id(full_name, phone), vehicles:vehicle_id(license_plate, type), routes:route_id(departure_city:departure_city_id(name), arrival_city:arrival_city_id(name))')
+              .inFilter('route_id', routeIds)
+              .neq('status', 'completed')
+              .order('departure_time', ascending: true);
+
+          return List<Map<String, dynamic>>.from(trips);
+        });
+  }
+
+  /// 1. Récupère la liste unique des chauffeurs liés aux trajets du syndicat connecté
+  static Future<List<Map<String, dynamic>>> getSyndicateDrivers() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    final routesRes = await _supabase
+        .from('syndicate_routes')
+        .select('route_id')
+        .eq('syndicate_id', userId);
+        
+    final routeIds = (routesRes as List).map((r) => r['route_id']).toList();
+
+    if (routeIds.isEmpty) return [];
+
+    final trips = await _supabase
+        .from('trips')
+        .select('driver_id, profiles:driver_id(id, full_name, phone, avatar_url), vehicles:vehicle_id(license_plate, type)')
+        .inFilter('route_id', routeIds)
+        .not('driver_id', 'is', null);
+
+    final Map<String, Map<String, dynamic>> uniqueDrivers = {};
+    for (var trip in (trips as List)) {
+      final driver = trip['profiles'];
+      if (driver != null && !uniqueDrivers.containsKey(driver['id'])) {
+        uniqueDrivers[driver['id']] = {
+          ...driver,
+          'vehicle': trip['vehicles'],
+        };
+      }
+    }
+
+    return uniqueDrivers.values.toList();
+  }
+
+  /// 4. & 5. Valider le départ via une procédure stockée sécurisée (RPC)
+  /// Cette fonction gère l'autorisation, la mise à jour et la notification côté serveur.
+  static Future<bool> validateDeparture(String tripId) async {
+    try {
+      // Appel de la fonction RPC sécurisée
+      // p_trip_id est le paramètre attendu par la fonction validate_trip_departure
+      final response = await _supabase.rpc(
+        'validate_trip_departure',
+        params: {'p_trip_id': tripId},
+      );
+
+      return response as bool;
+    } catch (e) {
+      debugPrint('Error validating departure: $e');
+      return false;
+    }
   }
 }

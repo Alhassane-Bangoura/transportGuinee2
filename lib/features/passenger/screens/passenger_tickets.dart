@@ -31,7 +31,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
           Container(
             padding: const EdgeInsets.only(top: 60, bottom: 8),
             decoration: BoxDecoration(
-              color: backgroundColor.withValues(alpha: 0.8),
+              color: backgroundColor.withOpacity(0.8),
             ),
             child: Column(
               children: [
@@ -101,7 +101,8 @@ class _PassengerTicketsState extends State<PassengerTickets> {
                         time: time,
                         seat: booking.seats.toString(),
                         price: booking.formattedPrice,
-                        status: booking.status.toUpperCase(),
+                        status: booking.status == 'pending' ? 'À PAYER' : booking.status.toUpperCase(),
+                        statusColor: booking.status == 'pending' ? Colors.orange : primaryColor,
                         primaryColor: primaryColor,
                         isActif: booking.isActive,
                         booking: booking,
@@ -138,7 +139,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
         height: 44,
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: AppColors.border.withValues(alpha: 0.5),
+          color: AppColors.border.withOpacity(0.5),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -163,7 +164,7 @@ class _PassengerTicketsState extends State<PassengerTickets> {
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     )
@@ -190,13 +191,13 @@ class _PassengerTicketsState extends State<PassengerTickets> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.confirmation_number_outlined,
-              size: 64, color: textColor.withValues(alpha: 0.2)),
+              size: 64, color: textColor.withOpacity(0.2)),
           const SizedBox(height: 16),
           Text(
             'Aucun billet trouvé',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 16,
-              color: textColor.withValues(alpha: 0.5),
+              color: textColor.withOpacity(0.5),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -215,6 +216,7 @@ class TicketCard extends StatelessWidget {
   final String seat;
   final String price;
   final String status;
+  final Color statusColor;
   final Color primaryColor;
   final bool isActif;
   final Booking? booking;
@@ -229,6 +231,7 @@ class TicketCard extends StatelessWidget {
     required this.seat,
     required this.price,
     required this.status,
+    required this.statusColor,
     required this.primaryColor,
     required this.isActif,
     this.booking,
@@ -245,7 +248,7 @@ class TicketCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -279,7 +282,7 @@ class TicketCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: primaryColor.withValues(alpha: 0.1),
+                    color: primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child:
@@ -293,7 +296,7 @@ class TicketCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC).withValues(alpha: 0.5),
+              color: const Color(0xFFF8FAFC).withOpacity(0.5),
             ),
             child: Column(
               children: [
@@ -410,7 +413,7 @@ class TicketCard extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isActif ? primaryColor : AppColors.textSecondary,
+            color: statusColor,
           ),
         ),
       ],
@@ -453,12 +456,12 @@ class TicketCard extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: AppColors.border.withValues(alpha: 0.5)),
+                color: AppColors.border.withOpacity(0.5)),
           ),
           child: Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: const NetworkImage(AppAssets.ticketBus),
+                image: NetworkImage(AppAssets.ticketBus),
                 fit: BoxFit.cover,
                 opacity: 0.8,
               ),
@@ -548,7 +551,7 @@ class TicketCard extends StatelessWidget {
               backgroundColor: primary,
               foregroundColor: Colors.white,
               elevation: 4,
-              shadowColor: primary.withValues(alpha: 0.4),
+              shadowColor: primary.withOpacity(0.4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -578,7 +581,7 @@ class TicketCard extends StatelessWidget {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: primary.withValues(alpha: 0.1)),
+            side: BorderSide(color: primary.withOpacity(0.1)),
           ),
         ),
         child: Row(

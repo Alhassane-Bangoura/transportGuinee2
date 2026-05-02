@@ -59,7 +59,7 @@ class OnboardingPage5 extends StatelessWidget {
             child: TextButton(
               onPressed: onSkip,
               style: TextButton.styleFrom(
-                backgroundColor: Colors.black.withValues(alpha: 0.2),
+                backgroundColor: Colors.black.withOpacity(0.2),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               ),
               child: Text(
@@ -146,7 +146,7 @@ class OnboardingPage5 extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 4,
-                        shadowColor: AppColors.accent.withValues(alpha: 0.5),
+                        shadowColor: AppColors.accent.withOpacity(0.5),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

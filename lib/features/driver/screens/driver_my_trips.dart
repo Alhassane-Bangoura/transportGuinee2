@@ -144,7 +144,7 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.route_outlined, size: 64, color: AppColors.textHint.withValues(alpha: 0.3)),
+            Icon(Icons.route_outlined, size: 64, color: AppColors.textHint.withOpacity(0.3)),
             const SizedBox(height: 16),
             Text(
               'Aucun trajet dans $type',
@@ -262,7 +262,7 @@ class _DriverMyTripsState extends State<DriverMyTrips> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)],
+                      colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
                     ),
                   ),
                 ),

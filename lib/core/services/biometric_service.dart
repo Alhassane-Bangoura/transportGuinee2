@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -11,14 +13,30 @@ class BiometricService {
 
   /// Check if the device is capable of biometric authentication
   static Future<bool> isAvailable() async {
-    final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
-    final bool canAuthenticate = canAuthenticateWithBiometrics || await _auth.isDeviceSupported();
-    return canAuthenticate;
+    if (!kIsWeb && Platform.isLinux) {
+      debugPrint('[BiometricService] Biometrics disabled on Linux to avoid MissingPluginException');
+      return false;
+    }
+
+    try {
+      final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
+      final bool canAuthenticate = canAuthenticateWithBiometrics || await _auth.isDeviceSupported();
+      return canAuthenticate;
+    } catch (e) {
+      debugPrint('[BiometricService] Error checking availability: $e');
+      return false;
+    }
   }
 
   /// Get list of available biometrics (fingerprint, face, etc.)
   static Future<List<BiometricType>> getAvailableBiometrics() async {
-    return await _auth.getAvailableBiometrics();
+    try {
+      if (!kIsWeb && Platform.isLinux) return [];
+      return await _auth.getAvailableBiometrics();
+    } catch (e) {
+      debugPrint('[BiometricService] Error getting biometrics: $e');
+      return [];
+    }
   }
 
   /// Perform biometric authentication

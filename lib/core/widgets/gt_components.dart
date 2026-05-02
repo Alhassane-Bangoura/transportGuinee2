@@ -27,10 +27,10 @@ class GTCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? AppColors.surface,
         borderRadius: BorderRadius.circular(borderRadius ?? 16),
-        border: border ?? Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        border: border ?? Border.all(color: AppColors.border.withOpacity(0.5)),
         boxShadow: boxShadow ?? [
           BoxShadow(
-            color: AppColors.shadow.withValues(alpha: 0.05),
+            color: AppColors.shadow.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -129,9 +129,9 @@ class GTTexField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+        color: AppColors.surfaceVariant.withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
       child: Row(
         children: [

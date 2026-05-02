@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
+import 'passenger_ticket_view.dart';
 import '../../../core/models/trip.dart';
+import '../../../core/models/wallet_transaction.dart';
 import '../../../core/services/booking_service.dart';
+import '../../../core/services/wallet_service.dart';
 import '../../../core/constants/app_assets.dart';
+import 'package:uuid/uuid.dart';
 import 'passenger_dashboard.dart';
+import '../../../core/services/auth_service.dart';
 
 /// Écran de Paiement pour le Passager
 /// Correspond à paiement_passager.html
@@ -22,12 +28,20 @@ class _PassengerPaymentState extends State<PassengerPayment> {
   String selectedMethod = 'orange';
   bool _isProcessing = false;
 
+  final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface.withValues(alpha: 0.8),
+        backgroundColor: AppColors.surface.withOpacity(0.8),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
@@ -42,7 +56,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
             padding: EdgeInsets.all(12.0),
             child: CircleAvatar(
               radius: 16,
-              backgroundImage: const NetworkImage(AppAssets.profileAdmin),
+              backgroundImage: NetworkImage(AppAssets.profileAdmin),
             ),
           ),
         ],
@@ -69,8 +83,52 @@ class _PassengerPaymentState extends State<PassengerPayment> {
             const SizedBox(height: 12),
             _buildPaymentMethod('mtn', 'MTN MoMo', 'Sécurisé et rapide avec MTN Mobile', const Color(0xFFFFCC00), 'MTN', textColor: const Color(0xFF004F9E)),
             const SizedBox(height: 12),
+            _buildPaymentMethod('at_station', 'Paiement à la Gare', 'Réservez et payez au comptoir (Test)', AppColors.primary, 'GARE', icon: Icons.store_mall_directory),
+            const SizedBox(height: 12),
             _buildPaymentMethod('card', 'Carte Bancaire', 'Visa, Mastercard, Maestro', const Color(0xFF0F172A), null, icon: Icons.credit_card),
             
+            const SizedBox(height: 24),
+            
+            // Phone Number Input (Mandatory based on request)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.phone_android, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 8),
+                      Text('Numéro de téléphone', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'ex: 622 00 00 00',
+                      hintStyle: const TextStyle(color: AppColors.textHint),
+                      prefixText: '+224 ',
+                      prefixStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('Ce numéro sera utilisé pour confirmer la transaction.', 
+                    style: GoogleFonts.plusJakartaSans(fontSize: 11, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 32),
             // Trust Badges
             _buildTrustBadges(),
@@ -87,9 +145,9 @@ class _PassengerPaymentState extends State<PassengerPayment> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +188,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
               Text('Résumé du trajet', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(100), border: Border.all(color: Colors.green.withValues(alpha: 0.2))),
+                decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(100), border: Border.all(color: Colors.green.withOpacity(0.2))),
                 child: Text('CONFIRMÉ', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green)),
               ),
             ],
@@ -149,7 +207,8 @@ class _PassengerPaymentState extends State<PassengerPayment> {
                   children: [
                     const Icon(Icons.event_available, color: AppColors.textSecondary, size: 18),
                     const SizedBox(width: 8),
-                    Text('24 Oct 2023', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                    Text('${widget.trip.departureTime.day}/${widget.trip.departureTime.month}/${widget.trip.departureTime.year}', 
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                     const SizedBox(width: 16),
                     const Icon(Icons.person_outline, color: AppColors.textSecondary, size: 18),
                     const SizedBox(width: 4),
@@ -158,7 +217,27 @@ class _PassengerPaymentState extends State<PassengerPayment> {
                 ),
               ),
               Text('${widget.trip.price.toStringAsFixed(0)} GNF', 
-                style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Frais de service (AI)', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+              Text('2 500 GNF', style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(color: AppColors.border, thickness: 0.5),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Total à payer', style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              Text('${(widget.trip.price + 2500).toStringAsFixed(0)} GNF', 
+                style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.primary)),
             ],
           ),
         ],
@@ -169,11 +248,11 @@ class _PassengerPaymentState extends State<PassengerPayment> {
   Widget _buildTimeline() {
     return Column(
       children: [
-        _buildTimelineStep('08:30', 'Conakry, Gare Routière', true),
+        _buildTimelineStep('${widget.trip.departureTime.hour}:${widget.trip.departureTime.minute.toString().padLeft(2, '0')}', widget.trip.departureCityName, true),
         const SizedBox(height: 4),
         Align(alignment: Alignment.centerLeft, child: Container(margin: const EdgeInsets.only(left: 7), width: 1, height: 20, color: AppColors.border)),
         const SizedBox(height: 4),
-        _buildTimelineStep('14:45', 'Labe, Centre Ville', false),
+        _buildTimelineStep('--:--', widget.trip.arrivalCityName, false),
       ],
     );
   }
@@ -208,7 +287,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
+          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: isSelected ? AppColors.primary : AppColors.border, width: 2),
         ),
@@ -287,14 +366,16 @@ class _PassengerPaymentState extends State<PassengerPayment> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    minimumSize: const Size(200, 54), // Empêche le bug "largeur infinie" du thème global
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 8,
-                    shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                    shadowColor: AppColors.primary.withOpacity(0.4),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min, // Indispensable pour empêcher la ligne de s'étendre
                     children: [
-                      Text('PAYER MAINTENANT', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800)),
+                      Text('PAYER MAINTENANT', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 13)),
                       const SizedBox(width: 8),
                       const Icon(Icons.arrow_forward, size: 16),
                     ],
@@ -306,25 +387,59 @@ class _PassengerPaymentState extends State<PassengerPayment> {
   }
 
   Future<void> _handlePayment() async {
+    // Le numéro n'est pas strictement requis pour le paiement à la gare en mode TEST
+    if (selectedMethod != 'at_station' && _phoneController.text.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez entrer un numéro de téléphone valide.')),
+      );
+      return;
+    }
+
     setState(() => _isProcessing = true);
+    
+    // Génération de la clé d'idempotence UNIQUE pour cette tentative (persiste si on retry l'appel)
+    final String idempotencyKey = const Uuid().v4();
+
     try {
       final response = await BookingService.createBooking(
         tripId: widget.trip.id,
         seats: 1,
-        selectedSeats: [widget.seat],
         totalPrice: widget.trip.price + 2500,
         fromCity: widget.trip.departureCityName,
         toCity: widget.trip.arrivalCityName,
         departureDate: widget.trip.departureTime,
+        paymentMethod: selectedMethod,
+        idempotencyKey: idempotencyKey,
       );
 
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        if (response.isSuccess) {
-          _showSuccessDialog();
-        } else {
+      if (response.isSuccess && response.data != null) {
+        // Enregistrer la transaction dans le portefeuille
+        final transaction = WalletTransaction(
+          id: 'pay_${DateTime.now().millisecondsSinceEpoch}',
+          userId: Supabase.instance.client.auth.currentUser?.id ?? '',
+          amount: -widget.trip.price,
+          type: TransactionType.payment,
+          method: selectedMethod == 'orange' ? 'Orange Money' : 'MTN MoMo',
+          description: 'Paiement trajet ${widget.trip.departureCityName} - ${widget.trip.arrivalCityName}',
+          createdAt: DateTime.now(),
+          fromCity: widget.trip.departureCityName,
+          toCity: widget.trip.arrivalCityName,
+        );
+        await WalletService().addTransaction(transaction);
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PassengerTicket(booking: response.data!),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          setState(() => _isProcessing = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response.message)),
+            SnackBar(content: Text(response.message ?? 'Erreur lors de la réservation.')),
           );
         }
       }
@@ -332,7 +447,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
       if (mounted) {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Une erreur est survenue lors de la réservation.')),
+          SnackBar(content: Text('Erreur: ${e.toString()}')),
         );
       }
     }
@@ -353,7 +468,7 @@ class _PassengerPaymentState extends State<PassengerPayment> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
                   child: const Icon(Icons.check_circle, color: Colors.green, size: 64),
                 ),
                 const SizedBox(height: 24),

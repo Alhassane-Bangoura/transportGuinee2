@@ -330,7 +330,7 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('DISPONIBILITÉ', style: GoogleFonts.plusJakartaSans(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.blueAccent)),
-              Text('12 Places restantes', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+              Text('${trip.availableSeats} Places restantes', style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
               Text('Sièges XL avec inclinaison 140°', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: Colors.white.withOpacity(0.5))),
             ],
           ),
@@ -372,25 +372,27 @@ class _PassengerTripDetailState extends State<PassengerTripDetail> {
             ],
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: trip.availableSeats <= 0 ? null : () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => PassengerBooking(trip: trip)),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: trip.availableSeats <= 0 ? Colors.grey : AppColors.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              elevation: 8,
+              elevation: trip.availableSeats <= 0 ? 0 : 8,
               shadowColor: AppColors.primary.withOpacity(0.4),
             ),
             child: Row(
               children: [
-                Text('Réserver maintenant', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800)),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward, size: 16),
+                Text(trip.availableSeats <= 0 ? 'COMPLET' : 'Réserver maintenant', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800)),
+                if (trip.availableSeats > 0) ...[
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward, size: 16),
+                ],
               ],
             ),
           ),

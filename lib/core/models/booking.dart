@@ -53,6 +53,7 @@ class Booking {
   final DateTime? departureTime;
   final String? driverName;
   final String? driverPhone;
+  final String? driverAvatarUrl;
 
   // Billet associé (join)
   final Ticket? ticket;
@@ -72,6 +73,7 @@ class Booking {
     this.departureTime,
     this.driverName,
     this.driverPhone,
+    this.driverAvatarUrl,
     this.ticket,
   });
 
@@ -98,6 +100,7 @@ class Booking {
           : null,
       driverName: tripData?['driver']?['full_name'] as String?,
       driverPhone: tripData?['driver']?['phone'] as String?,
+      driverAvatarUrl: tripData?['driver']?['avatar_url'] as String?,
       ticket: ticketList != null && ticketList.isNotEmpty
           ? Ticket.fromJson(ticketList.first as Map<String, dynamic>)
           : null,

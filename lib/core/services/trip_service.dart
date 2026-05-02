@@ -142,26 +142,17 @@ class TripService {
   static Future<AppResponse<void>> publishTrip(Map<String, dynamic> tripData) async {
     try {
       debugPrint('[TripService] Publishing trip data: $tripData');
-      
-      // TECHNIQUE SENIOR : Insertion en deux étapes pour contourner le conflit 
-      // entre les deux triggers de notification redondants (trg_notify_on_new_trip et trg_notify_passengers_on_trip).
-      
-      // 1. Insertion avec un statut qui ne déclenche qu'un seul des deux triggers
+
+      // Insertion directe en 'scheduled' après correction du trigger ON CONFLICT DO NOTHING.
+      // Les notifications aux passagers sont gérées automatiquement par le trigger trg_notify_on_new_trip.
       final cleanData = {
         ...tripData,
-        'status': 'boarding', // Temporaire pour éviter le conflit de triggers 'AFTER INSERT'
+        'status': 'scheduled',
         'created_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      final response = await _supabase.from('trips').insert(cleanData).select().single();
-      final tripId = response['id'];
-
-      // 2. Mise à jour vers le statut final 'scheduled'
-      await _supabase.from('trips').update({'status': 'scheduled'}).eq('id', tripId);
-
-      // Note: La notification aux passagers est maintenant gérée automatiquement par un Trigger Supabase (trg_notify_on_new_trip)
-      // pour éviter les doublons et garantir une source unique de vérité.
+      await _supabase.from('trips').insert(cleanData);
 
       return AppResponse.success(null);
     } on PostgrestException catch (e) {

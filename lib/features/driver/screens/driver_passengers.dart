@@ -120,21 +120,29 @@ class _DriverPassengersPageState extends State<DriverPassengersPage> {
             _buildTripSelector(),
             _buildTripSummarySection(primaryColor, confirmedCount),
             Expanded(
-              child: _passengers.isEmpty 
-                ? ListView( // Utiliser ListView pour que RefreshIndicator fonctionne même si vide
-                    children: [
-                      SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                      Center(child: Text('Aucun passager pour ce trajet.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary))),
-                    ],
-                  )
-                : ListView.builder(
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: BookingService.getTripPassengersStream(_selectedTrip!.id),
+                builder: (context, snapshot) {
+                  final passengers = snapshot.data ?? _passengers;
+                  if (passengers.isEmpty) {
+                    return ListView(
+                      children: [
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                        Center(child: Text('Aucun passager pour ce trajet.', style: GoogleFonts.plusJakartaSans(color: AppColors.textSecondary))),
+                      ],
+                    );
+                  }
+                  
+                  return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                    itemCount: _passengers.length,
+                    itemCount: passengers.length,
                     itemBuilder: (context, index) {
-                      final p = _passengers[index];
+                      final p = passengers[index];
                       return _buildModernPassengerCard(p, primaryColor);
                     },
-                  ),
+                  );
+                },
+              ),
             ),
             _buildFloatingContactAll(primaryColor),
           ],

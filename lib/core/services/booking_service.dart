@@ -75,7 +75,7 @@ class BookingService {
       debugPrint('[BookingService] FETCHING BOOKINGS FROM DB for user ${userId}...');
       final data = await _supabase
           .from('bookings')
-          .select('*, trips:trip_id(*, driver:driver_id(full_name, phone), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
+          .select('*, trips:trip_id(*, driver:profiles!driver_id(full_name, phone, avatar_url), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
           .eq('user_id', userId)
           .order('created_at', ascending: false);
           
@@ -124,24 +124,15 @@ class BookingService {
 
       final bookingId = bookingResponse['id'];
 
-      try {
-        // 2. Génération du ticket initial
-        await _supabase.from('tickets').insert({
-          'booking_id': bookingId,
-          'qr_code': 'QR_$bookingId',
-          'status': paymentMethod == 'at_station' ? 'pending_payment' : 'valid'
-        });
-      } catch (ticketError) {
-        // CRITIQUE : Si le ticket échoue, on supprime la réservation pour libérer le siège
-        debugPrint('🚨 [BookingService] Ticket creation failed, rolling back booking $bookingId');
-        await _supabase.from('bookings').delete().eq('id', bookingId);
-        rethrow;
-      }
+      // 2. Le ticket est maintenant généré automatiquement par le trigger SQL 'trg_auto_create_ticket'
+      // Cela évite les erreurs de Row Level Security (RLS) côté client.
+      
+      // 3. Récupération des détails complets (incluant le ticket auto-généré)
 
       // 3. Récupération des détails complets
       final finalData = await _supabase
           .from('bookings')
-          .select('*, trips:trip_id(*, driver:profiles!driver_id(full_name, phone), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
+          .select('*, trips:trip_id(*, driver:profiles!driver_id(full_name, phone, avatar_url), routes:route_id(*, departure_city:departure_city_id(name), arrival_city:arrival_city_id(name), departure_station:departure_station_id(name), arrival_station:arrival_station_id(name))), tickets(*)')
           .eq('id', bookingId)
           .single();
 
@@ -156,15 +147,10 @@ class BookingService {
       FieldTestLogger.logError('CREATE_BOOKING_DB', e);
       debugPrint('🚨 [FIELD_TEST] Database Error: ${e.message} (Code: ${e.code})');
       
-      // GESTION SPAM NOTIFICATION (Constraint unique_notification_spam)
-      if (e.message.contains('unique_notification_spam')) {
-        return AppResponse.failure('Conflit de notification : Une notification similaire existe déjà. Veuillez patienter ou changer de trajet.');
+      if (e.message.contains('Not enough seats') || e.message.contains('Pas assez de sièges')) {
+        return AppResponse.failure('Désolé, il n\'y a plus assez de places disponibles pour ce trajet.');
       }
-
-      if (e.message.contains('Not enough seats')) {
-        return AppResponse.failure('Plus de places disponibles.');
-      }
-      return AppResponse.failure('Erreur base de données: ${e.message}');
+      return AppResponse.failure('Erreur technique : ${e.message}');
     } catch (e) {
       FieldTestLogger.logError('CREATE_BOOKING_UNKNOWN', e);
       debugPrint('🚨 [FIELD_TEST] Unexpected Error: $e');

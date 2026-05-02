@@ -606,8 +606,8 @@ class _DriverDashboardState extends State<DriverDashboard>
           t.departureTime.add(const Duration(hours: 4)).isAfter(now)
         ).toList();
         
-        // Trier par date de création (le plus récemment publié en premier)
-        activeTrips.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        // Trier par date de départ (le plus proche en premier)
+        activeTrips.sort((a, b) => a.departureTime.compareTo(b.departureTime));
 
         if (activeTrips.isEmpty) {
           return _buildEmptyTripState();
